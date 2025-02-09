@@ -8,4 +8,9 @@ using Microsoft.EntityFrameworkCore;
 public class BankingSystemDbContext : IdentityDbContext<User>
 {
     public BankingSystemDbContext(DbContextOptions<BankingSystemDbContext> options) : base(options) { }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+    }
 }
