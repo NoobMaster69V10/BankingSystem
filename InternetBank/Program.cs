@@ -9,7 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
-
+DotNetEnv.Env.Load();
+var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -17,7 +18,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<BankingSystemDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+    options.UseSqlServer(connectionString,
         b => b.MigrationsAssembly("InternetBank.UI")));
 
 
