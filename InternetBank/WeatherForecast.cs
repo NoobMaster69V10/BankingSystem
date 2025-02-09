@@ -1,4 +1,4 @@
-namespace BankingSystem
+namespace InternetBank
 {
     public class WeatherForecast
     {
