@@ -1,4 +1,4 @@
-namespace InternetBank
+namespace ATM.UI
 {
     public class WeatherForecast
     {
