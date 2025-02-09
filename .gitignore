@@ -370,7 +370,4 @@ FodyWeavers.xsd
 **/Properties/AssemblyInfo.cs
 /Assignments/Week09-Advanced/giorgi_ubilava/LibraryManagementAdvanced/UsedQueries.sql
 
-# Ignore appsettings.json
-appsettings.json
-appsettings.*.json
-!appsettings.Development.json  # Optional: Keep development settings in version control
+
