@@ -368,3 +368,6 @@ FodyWeavers.xsd
 #Ignore properties auto generated files
 **/Properties/AssemblyInfo.cs
 /Assignments/Week09-Advanced/giorgi_ubilava/LibraryManagementAdvanced/UsedQueries.sql
+
+appsettings.json
+**/appsettings.json
