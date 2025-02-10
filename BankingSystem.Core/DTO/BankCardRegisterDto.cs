@@ -6,6 +6,7 @@ public class BankCardRegisterDto
     public string Name { get; set; }
     public string Lastname { get; set; }
     public DateTime ExpirationDate { get; set; }
-    public int CVV { get; set; }
-    public int PinCode { get; set; }
+    public string CVV { get; set; }
+    public string PinCode { get; set; }
 }
+

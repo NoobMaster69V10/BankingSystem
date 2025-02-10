@@ -1,6 +1,7 @@
 ﻿using BankingSystem.Core.DTO;
 using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,21 +9,26 @@ namespace InternetBank.UI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController : ControllerBase
+public class OperatorController : ControllerBase
 {
     private readonly UserManager<User> _userManager;
     private readonly IAuthService _authService;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly IAccountService _accountService;
+    private readonly ICardService _cardService;
 
-    public AuthController(UserManager<User> userManager, IAuthService authService, RoleManager<IdentityRole> roleManager)
+
+    public OperatorController(UserManager<User> userManager, IAuthService authService, RoleManager<IdentityRole> roleManager, IAccountService accountService, ICardService cardService)
     {
         _userManager = userManager;
         _authService = authService;
         _roleManager = roleManager;
+        _accountService = accountService;
+        _cardService = cardService;
     }
 
-    [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] CustomerRegisterDto registerModel)
+    [HttpPost("register-user")]
+    public async Task<IActionResult> RegisterUser([FromBody] CustomerRegisterDto registerModel)
     {
         var user = new User
         {
@@ -61,5 +67,25 @@ public class AuthController : ControllerBase
         var token = _authService.GenerateJwtToken(user);
 
         return Ok(new { token.Result });
+    }
+
+    [Authorize]
+    [HttpPost("create-account")]
+    public async Task<IActionResult> CreateAccount(BankAccountRegisterDto bankAccountRegisterDto)
+    {
+        var userId = User.FindFirst("userId")!.Value;
+        await _accountService.CreateAccountAsync(bankAccountRegisterDto, userId);
+
+        return Ok(new { message = "Account created successfully" });
+    }
+
+    [Authorize]
+    [HttpPost("create-card")]
+    public async Task<IActionResult> CreateCard(BankCardRegisterDto cardRegisterDto)
+    {
+        var userId = User.FindFirst("userId")!.Value;
+
+        await _cardService.CreateCardAsync(cardRegisterDto, userId);
+        return Ok(new { message = "Card created successfully" });
     }
 }
