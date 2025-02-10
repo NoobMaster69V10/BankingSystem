@@ -11,12 +11,11 @@ using Microsoft.IdentityModel.Tokens;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
-
+var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DBCon");
 builder.Services.AddDbContext<BankingSystemDbContext>(options =>
     options.UseSqlServer(connectionString,
         b => b.MigrationsAssembly("InternetBank.UI")));
