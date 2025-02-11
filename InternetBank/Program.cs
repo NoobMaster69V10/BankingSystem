@@ -59,11 +59,11 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("Admin", policy => policy.RequireRole("admin"));
-    options.AddPolicy("User", policy => policy.RequireRole("user"));
-});
+//builder.Services.AddAuthorization(options =>
+//{
+//    options.AddPolicy("Admin", policy => policy.RequireRole("admin"));
+//    options.AddPolicy("User", policy => policy.RequireRole("user"));
+//});
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddSingleton(_ => new SqlConnection(connectionString));
@@ -78,6 +78,20 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roles = new[] { "Admin", "User", "Trainer" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+    }
+}
+
 
 app.UseAuthentication();
 app.UseAuthorization();
