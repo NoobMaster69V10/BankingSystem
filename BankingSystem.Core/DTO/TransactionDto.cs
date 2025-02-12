@@ -1,12 +1,12 @@
-﻿using BankingSystem.Core.Domain.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using BankingSystem.Domain.CustomValidationAttributes;
 
 namespace BankingSystem.Core.DTO;
 
 public class TransactionDto
 {
+    [NegativeNumberValidation]
     public decimal Amount { get; set; }
-    public string Currency { get; set; }
-    public DateTime TransactionDate { get; set; }
     public int FromAccountId { get; set; }
     public int ToAccountId { get; set; }
 }

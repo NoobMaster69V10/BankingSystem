@@ -5,12 +5,12 @@ using BankingSystem.Domain.RepositoryContracts;
 
 namespace BankingSystem.Infrastructure.Data.Repository;
 
-public class TransactionRepository : IAccountTransactionRepository
+public class BankCardRepository : IBankCardRepository
 {
     private readonly IDbConnection _connection;
     private IDbTransaction _transaction = null!;
 
-    public TransactionRepository(IDbConnection connection)
+    public BankCardRepository(IDbConnection connection)
     {
         _connection = connection;
     }
@@ -18,12 +18,11 @@ public class TransactionRepository : IAccountTransactionRepository
     {
         _transaction = transaction;
     }
-
-    public async Task AddAccountTransactionAsync(AccountTransaction transactionObj)
+    public async Task CreateCardAsync(BankCard card)
     {
         const string query =
-            "INSERT INTO AccountTransactions(Amount, Currency, TransactionDate, FromAccountId, ToAccountId) VALUES (@Amount, @Currency, @TransactionDate, @FromAccountId, @ToAccountId)";
+            "INSERT INTO Cards(Name, Lastname, CardNumber, ExpirationDate, CVV, PinCode, PersonId) VALUES (@Name, @Lastname, @CardNumber, @ExpirationDate, @CVV, @PinCode, @PersonId)";
 
-        await _connection.ExecuteAsync(query, transactionObj, _transaction);
+        await _connection.ExecuteAsync(query, card, _transaction);
     }
 }

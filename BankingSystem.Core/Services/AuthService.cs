@@ -1,18 +1,18 @@
-﻿using BankingSystem.Core.Identity;
-using BankingSystem.Core.ServiceContracts;
+﻿using BankingSystem.Core.ServiceContracts;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using BankingSystem.Core.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Identity;
 
 
 namespace BankingSystem.Core.Services;
 
-public class AuthService(IConfiguration configuration, UserManager<User> userManager) : IAuthService
+public class AuthService(IConfiguration configuration, UserManager<IdentityPerson> userManager) : IAuthService
 {
-    public async Task<string> GenerateJwtToken(User user)
+    public async Task<string> GenerateJwtToken(IdentityPerson user)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

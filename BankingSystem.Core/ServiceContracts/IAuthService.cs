@@ -4,5 +4,5 @@ namespace BankingSystem.Core.ServiceContracts;
 
 public interface IAuthService
 {
-    public Task<string> GenerateJwtToken(User user);
+    public Task<string> GenerateJwtToken(IdentityPerson user);
 }

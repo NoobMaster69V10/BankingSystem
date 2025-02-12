@@ -1,52 +1,31 @@
-﻿using Dapper;
-using Microsoft.Data.SqlClient;
-using BankingSystem.Core.Identity;
-using BankingSystem.Core.Domain.Entities;
-using BankingSystem.Core.Domain.RepositoryContracts;
+﻿using System.Data;
+using Dapper;
+using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.RepositoryContracts;
 
 namespace BankingSystem.Infrastructure.Data.Repository;
 
-public class UserRepository(SqlConnection conn) : IUserRepository
+public class UserRepository : IUserRepository
 {
-    public async Task<User?> GetUserByUsernameAsync(string username)
+
+    private readonly IDbConnection _connection;
+    private IDbTransaction _transaction = null!;
+
+    public UserRepository(IDbConnection connection)
     {
-        const string query = "SELECT * FROM AspNetUsers WHERE UserName = @Username";
-
-        var userDictionary = new Dictionary<string, User>();
-
-        var users = await conn.QueryAsync<User, BankAccount, User>(
-            query,
-            (user, bankAccount) =>
-            {
-                if (!userDictionary.TryGetValue(user.Id, out var currentUser))
-                {
-                    currentUser = user;
-                    currentUser.BankAccounts = new List<BankAccount>();
-                    userDictionary.Add(currentUser.Id, currentUser);
-                }
-                if (bankAccount != null!)
-                    currentUser.BankAccounts.Add(bankAccount);
-                return currentUser;
-            },
-            new { Username = username },
-            splitOn: "Id"
-        );
-
-        return users.FirstOrDefault();
+        _connection = connection;
     }
-
-    //public async Task<User?> GetUserByUsernameAsync(string username)
+    public void SetTransaction(IDbTransaction transaction)
+    {
+        _transaction = transaction;
+    }
+    //public async Task<Person?> GetUserByUsernameAsync(string username)
     //{
-    //    const string query = @"
-    //        SELECT u.Id, u.Firstname, u.LastName, u.Email, u.IdNumber, u.BirthDate 
-    //               b.Id, b.IBAN, b.Balance, b.Currency
-    //        FROM AspNetUsers u
-    //        LEFT JOIN BankAccounts b ON u.Id = b.UserId
-    //        WHERE u.UserName = @Username";
+    //    const string query = "SELECT * FROM AspNetUsers WHERE UserName = @Username";
 
-    //    var userDictionary = new Dictionary<string, User>();
+    //    var userDictionary = new Dictionary<string, Person>();
 
-    //    var users = await conn.QueryAsync<User, BankAccount, User>(
+    //    var users = await _connection.QueryAsync<Person, BankAccount, Person>(
     //        query,
     //        (user, bankAccount) =>
     //        {
@@ -61,9 +40,42 @@ public class UserRepository(SqlConnection conn) : IUserRepository
     //            return currentUser;
     //        },
     //        new { Username = username },
-    //        splitOn: "Id"
-    //    );
+    //        splitOn: "Id",
+    //    transaction: _transaction);
 
     //    return users.FirstOrDefault();
     //}
+
+    public async Task<Person?> GetUserByUsernameAsync(string username)
+    {
+        const string query = @"
+            SELECT u.Id, u.[Name], u.LastName, u.Email, u.IdNumber, u.BirthDate,
+                   b.Id, b.IBAN, b.Balance, b.Currency
+            FROM [BankingSystem].[dbo].[AspNetUsers] u
+            LEFT JOIN BankAccounts b ON u.Id = b.PersonId
+            WHERE u.UserName = @Username";
+
+        var userDictionary = new Dictionary<string, Person>();
+
+        var users = await _connection.QueryAsync<Person, BankAccount, Person>(
+            query,
+            (user, bankAccount) =>
+            {
+                if (!userDictionary.TryGetValue(user.Id, out var currentUser))
+                {
+                    currentUser = user;
+                    currentUser.BankAccounts = new List<BankAccount>();
+                    userDictionary.Add(currentUser.Id, currentUser);
+                }
+                if (bankAccount != null!)
+                    currentUser.BankAccounts!.Add(bankAccount);
+                return currentUser;
+            },
+            new { Username = username },
+            splitOn: "Id",
+            transaction: _transaction
+        );
+
+        return users.FirstOrDefault();
+    }
 }

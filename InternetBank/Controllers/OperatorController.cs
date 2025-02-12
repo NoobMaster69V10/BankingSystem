@@ -11,14 +11,14 @@ namespace InternetBank.UI.Controllers;
 [ApiController]
 public class OperatorController : ControllerBase
 {
-    private readonly UserManager<User> _userManager;
+    private readonly UserManager<IdentityPerson> _userManager;
     private readonly IAuthService _authService;
     private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly IAccountService _accountService;
-    private readonly ICardService _cardService;
+    private readonly IBankAccountService _accountService;
+    private readonly IBankCardService _cardService;
 
 
-    public OperatorController(UserManager<User> userManager, IAuthService authService, RoleManager<IdentityRole> roleManager, IAccountService accountService, ICardService cardService)
+    public OperatorController(UserManager<IdentityPerson> userManager, IAuthService authService, RoleManager<IdentityRole> roleManager, IBankAccountService accountService, IBankCardService cardService)
     {
         _userManager = userManager;
         _authService = authService;
@@ -27,10 +27,11 @@ public class OperatorController : ControllerBase
         _cardService = cardService;
     }
 
+    [Authorize(Roles = "Operator")]
     [HttpPost("register-user")]
-    public async Task<IActionResult> RegisterUser([FromBody] CustomerRegisterDto registerModel)
+    public async Task<IActionResult> RegisterUser([FromBody] PersonRegisterDto registerModel)
     {
-        var user = new User
+        var user = new IdentityPerson
         {
             UserName = registerModel.Email,
             Email = registerModel.Email,
@@ -58,10 +59,10 @@ public class OperatorController : ControllerBase
 
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] CustomerLoginDto model)
+    public async Task<IActionResult> Login([FromBody] PersonLoginDto loginModel)
     {
-        var user = await _userManager.FindByEmailAsync(model.Email);
-        if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
+        var user = await _userManager.FindByEmailAsync(loginModel.Email);
+        if (user == null || !await _userManager.CheckPasswordAsync(user, loginModel.Password))
             return Unauthorized(new { message = "Invalid email or password" });
 
         var token = _authService.GenerateJwtToken(user);
@@ -69,23 +70,21 @@ public class OperatorController : ControllerBase
         return Ok(new { token.Result });
     }
 
-    [Authorize]
-    [HttpPost("create-account")]
-    public async Task<IActionResult> CreateAccount(BankAccountRegisterDto bankAccountRegisterDto)
+    [Authorize(Roles = "Operator")]
+    [HttpPost("create-bank-account")]
+    public async Task<IActionResult> CreateBankAccount(BankAccountRegisterDto bankAccountRegisterDto)
     {
-        var userId = User.FindFirst("userId")!.Value;
-        await _accountService.CreateAccountAsync(bankAccountRegisterDto, userId);
+        await _accountService.CreateBankAccountAsync(bankAccountRegisterDto);
 
         return Ok(new { message = "Account created successfully" });
     }
 
-    [Authorize]
-    [HttpPost("create-card")]
-    public async Task<IActionResult> CreateCard(BankCardRegisterDto cardRegisterDto)
+    [Authorize(Roles = "Operator")]
+    [HttpPost("create-bank-card")]
+    public async Task<IActionResult> CreateBankCard(BankCardRegisterDto cardRegisterDto)
     {
-        var userId = User.FindFirst("userId")!.Value;
-
-        await _cardService.CreateCardAsync(cardRegisterDto, userId);
+        //var userId = User.FindFirst("userId")!.Value;
+        await _cardService.CreateBankCardAsync(cardRegisterDto);
         return Ok(new { message = "Card created successfully" });
     }
 }

@@ -1,30 +1,42 @@
-﻿using BankingSystem.Core.Domain.Entities;
-using BankingSystem.Core.Domain.RepositoryContracts;
-using Dapper;
-using Microsoft.Data.SqlClient;
+﻿using Dapper;
+using System.Data;
+using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.RepositoryContracts;
 
 namespace BankingSystem.Infrastructure.Data.Repository;
 
-public class AccountRepository(SqlConnection conn) : IAccountRepository
+public class AccountRepository : IAccountRepository
 {
+    private readonly IDbConnection _connection;
+    private IDbTransaction _transaction = null!;
+
+    public AccountRepository(IDbConnection connection)
+    {
+        _connection = connection;
+    }
+    public void SetTransaction(IDbTransaction transaction)
+    {
+        _transaction = transaction;
+    }
+
     public async Task CreateAccountAsync(BankAccount account)
     {
-        const string query = "INSERT INTO BankAccounts(IBAN, Balance, Currency, UserId) VALUES (@IBAN, @Balance, @Currency, @UserId)";
+        const string query = "INSERT INTO BankAccounts(IBAN, Balance, Currency, PersonId) VALUES (@IBAN, @Balance, @Currency, @PersonId)";
 
-        await conn.ExecuteAsync(query, new { IBAN = account.IBAN, Balance = account.Balance, Currency = account.Currency, UserId = account.UserId});
+        await _connection.ExecuteAsync(query, account, _transaction);
     }
 
-    public async Task UpdateAccountAsync(BankAccount account, SqlTransaction transaction)
+    public async Task UpdateAccountAsync(BankAccount account)
     {
-        const string query = "UPDATE BankAccounts SET IBAN = @IBAN, Balance = @Balance, Currency = @Currency, UserId = @UserId WHERE Id = @Id";
+        const string query = "UPDATE BankAccounts SET IBAN = @IBAN, Balance = @Balance, Currency = @Currency,  PersonId= @PersonId WHERE Id = @Id";
 
-        await conn.ExecuteAsync(query, account, transaction);
+        await _connection.ExecuteAsync(query, account, _transaction);
     }
 
-    public async Task<BankAccount> GetAccountByIdAsync(int id, SqlTransaction transaction)
+    public async Task<BankAccount> GetAccountByIdAsync(int id)
     {
         const string query = "SELECT * FROM BankAccounts WHERE Id = @Id";
 
-        return await conn.QueryFirstAsync<BankAccount>(query, new { Id = id }, transaction);
+        return await _connection.QueryFirstAsync<BankAccount>(query, new { Id = id }, _transaction);
     }
 }

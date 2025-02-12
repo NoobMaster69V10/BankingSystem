@@ -1,12 +1,17 @@
-﻿namespace BankingSystem.Core.DTO;
+﻿using BankingSystem.Domain.CustomValidationAttributes;
+
+namespace BankingSystem.Core.DTO;
 
 public class BankCardRegisterDto
 {
-    public string CardNumber { get; set; }
-    public string Name { get; set; }
-    public string Lastname { get; set; }
-    public DateTime ExpirationDate { get; set; }
-    public string CVV { get; set; }
-    public string PinCode { get; set; }
+    public required string Username { get; set; }
+    public required string CardNumber { get; set; }
+    public required string Firstname { get; set; }
+    public required string Lastname { get; set; }
+    public required DateTime ExpirationDate { get; set; }
+    [StringLengthFixedValidation(3)]
+    public required string Cvv { get; set; }
+    [StringLengthFixedValidation(4)]
+    public required string PinCode { get; set; }
 }
 
