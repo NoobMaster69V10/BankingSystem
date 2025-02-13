@@ -3,7 +3,7 @@
 namespace BankingSystem.Domain.UnitOfWorkContracts;
 public interface IUnitOfWork : IAsyncDisposable
 {
-    public IUserRepository UserRepository { get; }
+    public IPersonRepository PersonRepository { get; }
     public IAccountTransactionRepository TransactionRepository { get; }
     public IBankCardRepository BankCardRepository { get; }
     public IAccountRepository AccountRepository { get; }

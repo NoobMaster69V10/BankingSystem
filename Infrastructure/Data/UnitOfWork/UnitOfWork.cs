@@ -10,7 +10,7 @@ public class UnitOfWork : IUnitOfWork
     private IDbTransaction _transaction = null!;
     private bool _disposed;
 
-    public IUserRepository UserRepository { get; }
+    public IPersonRepository PersonRepository { get; }
 
     public IAccountTransactionRepository TransactionRepository { get; }
 
@@ -18,11 +18,11 @@ public class UnitOfWork : IUnitOfWork
 
     public IAccountRepository AccountRepository { get; }
 
-    public UnitOfWork(IDbConnection connection, IUserRepository userRepository, IAccountTransactionRepository transactionRepository, IBankCardRepository bankCardRepository, IAccountRepository accountRepository)
+    public UnitOfWork(IDbConnection connection, IPersonRepository userRepository, IAccountTransactionRepository transactionRepository, IBankCardRepository bankCardRepository, IAccountRepository accountRepository)
     {
         _connection = connection;
         _connection.Open();
-        UserRepository = userRepository;
+        PersonRepository = userRepository;
         TransactionRepository = transactionRepository;
         BankCardRepository = bankCardRepository;
         AccountRepository = accountRepository;
@@ -35,7 +35,7 @@ public class UnitOfWork : IUnitOfWork
         if (_transaction == null!)
         {
             _transaction = await Task.Run(() => _connection.BeginTransaction());
-            UserRepository.SetTransaction(_transaction);
+            PersonRepository.SetTransaction(_transaction);
             TransactionRepository.SetTransaction(_transaction);
             BankCardRepository.SetTransaction(_transaction);
             AccountRepository.SetTransaction(_transaction);

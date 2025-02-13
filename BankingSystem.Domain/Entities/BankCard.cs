@@ -2,7 +2,7 @@
 
 public class BankCard
 {
-    public int Id { get; set; }
+    public int BankCardId { get; set; }
     public required string Firstname { get; set; }
     public required string Lastname { get; set; }
     public required string CardNumber { get; set; }
@@ -11,5 +11,4 @@ public class BankCard
     public required string PinCode { get; set; }
 
     public required string PersonId { get; set; }
-    public Person? Person { get; set; }
 }

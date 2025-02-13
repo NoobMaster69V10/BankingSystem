@@ -1,7 +1,7 @@
 ﻿namespace BankingSystem.Domain.Entities;
 public class Person
 {
-    public required string Id { get; set; }
+    public required string PersonId { get; set; }
     public required string Name { get; set; }
     public required string Lastname { get; set; }
     public required string IdNumber { get; set; }
