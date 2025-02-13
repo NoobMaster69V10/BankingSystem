@@ -11,14 +11,13 @@ using BankingSystem.Infrastructure.Data.DatabaseContext;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DBCon");
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<BankingSystemDbContext>(options =>
-    options.UseSqlServer(connectionString,
-        b => b.MigrationsAssembly("InternetBank.UI")));
+    options.UseSqlServer(connectionString));
 
 
 builder.Services.AddApplicationServices();
