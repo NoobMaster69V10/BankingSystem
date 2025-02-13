@@ -9,7 +9,6 @@ using BankingSystem.Infrastructure.Data.ExternalApis;
 using BankingSystem.Infrastructure.Data.Repository;
 using BankingSystem.Infrastructure.Data.UnitOfWork;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.SqlClient;
 
 namespace InternetBank.UI.Extensions;
 

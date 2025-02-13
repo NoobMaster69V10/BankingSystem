@@ -17,7 +17,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<BankingSystemDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString,
+        b => b.MigrationsAssembly("InternetBank.UI")));
+
 
 builder.Services.AddApplicationServices();
 

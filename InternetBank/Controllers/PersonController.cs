@@ -1,6 +1,5 @@
 ﻿using BankingSystem.Core.DTO;
 using BankingSystem.Core.ServiceContracts;
-using BankingSystem.Domain.ExternalApiContracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InternetBank.UI.Controllers
