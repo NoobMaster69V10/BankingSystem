@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace InternetBank.UI.Migrations
+namespace BankingSystem.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class addedTables : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
