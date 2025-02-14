@@ -4,7 +4,9 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.Identity;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Identity;
 
@@ -13,15 +15,24 @@ namespace BankingSystem.Core.Services;
 
 public class PersonAuthService(IConfiguration configuration, UserManager<IdentityPerson> userManager, RoleManager<IdentityRole> roleManager) : IPersonAuthService
 {
-    public async Task<string?> AuthenticationPersonAsync(PersonLoginDto loginDto)
+    public async Task<AuthenticationResponse> AuthenticationPersonAsync(PersonLoginDto loginDto)
     {
         var user = await userManager.FindByEmailAsync(loginDto.Email);
         if (user == null || !await userManager.CheckPasswordAsync(user, loginDto.Password))
-            return null;
-
-        var token = GenerateJwtToken(user);
-        return token.Result;
+        {
+            return new AuthenticationResponse
+            {
+                Token = string.Empty,
+                Email = loginDto.Email,
+                UserId = string.Empty,
+                Expiration = DateTime.MinValue,
+                ErrorMessage = "Invalid email or password"
+            };
+        }
+        var tokenResponse = await GenerateJwtToken(user);
+        return tokenResponse;
     }
+
 
     public async Task<bool> RegisterPersonAsync(PersonRegisterDto registerDto)
     {
@@ -51,7 +62,7 @@ public class PersonAuthService(IConfiguration configuration, UserManager<Identit
         return true;
     }
 
-    public async Task<string> GenerateJwtToken(IdentityPerson user)
+    public async Task<AuthenticationResponse> GenerateJwtToken(IdentityPerson user)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -67,14 +78,24 @@ public class PersonAuthService(IConfiguration configuration, UserManager<Identit
         };
 
         claims.AddRange(roleClaims);
-
-        var token = new JwtSecurityToken(
-            issuer: configuration["Jwt:Issuer"],
-            audience: null,
-            claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
-            signingCredentials: credentials);
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var expiration = DateTime.UtcNow.AddHours(1);
+        
+        var tokenGenerator = new JwtSecurityToken(
+            configuration["Jwt:Issuer"],
+            configuration["Jwt:Audience"],
+            claims,
+            expires: expiration,
+            signingCredentials: credentials
+        );
+        JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+        string token = tokenHandler.WriteToken(tokenGenerator);
+        
+        return new AuthenticationResponse()
+        {
+            Token = token, 
+            Email = user.Email, 
+            UserId = user.Id, 
+            Expiration = expiration
+        };
     }
 }

@@ -38,10 +38,10 @@ public class OperatorController : ControllerBase
     {
         var result = await _authService.AuthenticationPersonAsync(loginModel);
 
-        if (result == null)
+        if (result == null || string.IsNullOrEmpty(result.Token))
             return Unauthorized(new { message = "Invalid email or password" });
 
-        return Ok(new { result });
+        return Ok(result);
     }
 
     [Authorize(Roles = "Operator")]

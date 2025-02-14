@@ -1,11 +1,12 @@
 ﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.Identity;
 
 namespace BankingSystem.Core.ServiceContracts;
 
 public interface IPersonAuthService
 {
-    Task<string?> AuthenticationPersonAsync(PersonLoginDto loginDto);
+    Task<AuthenticationResponse> AuthenticationPersonAsync(PersonLoginDto loginDto);
     Task<bool> RegisterPersonAsync(PersonRegisterDto registerDto);
-    public Task<string> GenerateJwtToken(IdentityPerson user);
+    public Task<AuthenticationResponse> GenerateJwtToken(IdentityPerson user);
 }
