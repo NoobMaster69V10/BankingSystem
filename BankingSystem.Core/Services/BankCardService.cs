@@ -19,7 +19,6 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                 Cvv = bankCardRegisterDto.Cvv,
                 PinCode = bankCardRegisterDto.PinCode,
                 ExpirationDate = bankCardRegisterDto.ExpirationDate,
-                PersonId = person!.PersonId,
                 Firstname = bankCardRegisterDto.Firstname,
                 Lastname = bankCardRegisterDto.Lastname
             };

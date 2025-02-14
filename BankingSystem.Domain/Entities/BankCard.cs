@@ -27,6 +27,6 @@ public class BankCard
     [StringLength(4, MinimumLength = 4, ErrorMessage = "PIN code must be exactly 4 digits.")]
     public string PinCode { get; set; }
 
-    [Required(ErrorMessage = "Person ID is required.")]
-    public  string PersonId { get; set; }
+    [Required(ErrorMessage = "Account ID is required.")]
+    public  string AccountId { get; set; }
 }

@@ -22,13 +22,13 @@ public class PersonRepository : IPersonRepository
     public async Task<Person?> GetUserByIdAsync(string id)
     {
         const string query = @"
-                         SELECT u.Id as PersonID, u.[Name], u.LastName, u.Email, u.IdNumber, u.BirthDate,
-                         b.Id as BankAccountID, b.IBAN, b.Balance, b.Currency, b.PersonId,
-                         bc.Id as BankCardID, bc.Firstname, bc.Lastname, bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.PersonId
-                         FROM [BankingSystem].[dbo].[AspNetUsers] u
-                         LEFT JOIN BankAccounts b ON u.Id = b.PersonId
-                         LEFT JOIN BankCards bc ON u.Id = bc.PersonId
-                         WHERE u.Id = @ID;";
+                         SELECT u.Id as PersonID, u.FirstName, u.LastName, u.Email, u.IdNumber, u.BirthDate,
+                            b.Id as BankAccountID, b.IBAN, b.Balance, b.Currency, b.PersonId,
+                            bc.Id as BankCardID, bc.Firstname, bc.Lastname, bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.AccountId
+                            FROM AspNetUsers u
+                            JOIN BankAccounts b ON u.Id = b.PersonId
+                            LEFT JOIN BankCards bc ON b.Id = bc.AccountId
+                         WHERE u.Id = @ID";
 
         var userDictionary = new Dictionary<string, Person>();
 
@@ -61,9 +61,9 @@ public class PersonRepository : IPersonRepository
     public async Task<Person?> GetUserByUsernameAsync(string username)
     {
         const string query = @"
-            SELECT Id FROM [BankingSystem].[dbo].[AspNetUsers] WHERE u.UserName = @Username";
+            SELECT Id as PersonId FROM AspNetUsers u WHERE u.UserName = @Username";
 
-        var users = await _connection.QueryFirstOrDefaultAsync<Person>(query, _transaction);
+        var users = await _connection.QueryFirstOrDefaultAsync<Person>(query,new{ Username = username}, _transaction);
 
         return users;
     }
