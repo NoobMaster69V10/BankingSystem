@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.CompilerServices;
 
 namespace BankingSystem.Domain.Entities;
 
 public class BankAccount
 {
+    public int BankAccountId { get; set; }
 
     [Required(ErrorMessage = "IBAN is required.")]
     [StringLength(34, MinimumLength = 15, ErrorMessage = "IBAN must be between 15 and 34 characters.")]

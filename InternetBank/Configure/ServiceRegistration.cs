@@ -1,6 +1,7 @@
 ﻿using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
+using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.RepositoryContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
@@ -19,17 +20,18 @@ public static class ServiceRegistration
         services.AddIdentity<IdentityPerson, IdentityRole>()
             .AddEntityFrameworkStores<BankingSystemDbContext>()
             .AddDefaultTokenProviders();
-        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IPersonAuthService, PersonAuthService>();
         services.AddScoped<IBankAccountService, BankAccountService>();
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IBankCardRepository, BankCardRepository>();
         services.AddScoped<IBankCardService, BankCardService>();
         services.AddScoped<IAccountTransactionService, AccountTransactionService>();
         services.AddScoped<IAccountTransactionRepository, TransactionRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IPersonRepository, PersonRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IExchangeRateApi, ExchangeRateApi>();
         services.AddScoped<IAtmService, AtmService>();
+        services.AddScoped<IPersonService, PersonService>();
         services.AddHttpClient();
     }
 }

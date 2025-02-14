@@ -1,9 +1,9 @@
-﻿using System.Data;
-using BankingSystem.Domain.Entities;
+﻿using BankingSystem.Domain.Entities;
 
 namespace BankingSystem.Domain.RepositoryContracts;
 
-public interface IUserRepository : ITransaction
+public interface IPersonRepository : ITransaction
 {
     Task<Person?> GetUserByUsernameAsync(string username);
+    Task<Person?> GetUserByIdAsync(string id);
 }

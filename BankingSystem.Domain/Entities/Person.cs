@@ -5,7 +5,7 @@ namespace BankingSystem.Domain.Entities;
 public class Person
 {
     [Required(ErrorMessage = "Person ID is required.")]
-    public required string Id { get; set; }
+    public required string PersonId { get; set; }
 
     [Required(ErrorMessage = "Name is required.")]
     public required string Name { get; set; }
@@ -24,4 +24,7 @@ public class Person
     [Required(ErrorMessage = "Email is required.")]
     [EmailAddress(ErrorMessage = "Invalid email format.")]
     public required string Email { get; set; }
+
+    public IList<BankAccount> BankAccounts { get; set; }
+    public IList<BankCard> Cards { get; set; }
 }

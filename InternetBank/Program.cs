@@ -11,7 +11,7 @@ using InternetBank.UI.Configure;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DBCon");
+var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -46,7 +46,7 @@ builder.Services.AddAuthentication(options =>
     });
 
 builder.Services.AddScoped<IDbConnection>(_ =>
-    new SqlConnection(Environment.GetEnvironmentVariable("CONNECTION_STRING")));
+    new SqlConnection(connectionString));
 
 
 var app = builder.Build();
