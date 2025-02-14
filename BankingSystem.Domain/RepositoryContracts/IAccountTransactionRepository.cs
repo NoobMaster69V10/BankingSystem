@@ -1,5 +1,4 @@
 ﻿using BankingSystem.Domain.Entities;
-using System.Data;
 
 namespace BankingSystem.Domain.RepositoryContracts;
 

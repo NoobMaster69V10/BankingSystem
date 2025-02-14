@@ -5,14 +5,12 @@ using BankingSystem.Domain.UnitOfWorkContracts;
 
 namespace BankingSystem.Core.Services;
 
-public class BankCardService(IUnitOfWork unitOfWork) : IBankCardService
+public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerService) : IBankCardService
 {
     public async Task<bool> CreateBankCardAsync(BankCardRegisterDto bankCardRegisterDto)
     {
         try
         {
-            await unitOfWork.BeginTransactionAsync();
-
             var person = await unitOfWork.PersonRepository.GetUserByUsernameAsync(bankCardRegisterDto.Username);
 
             var card = new BankCard
@@ -27,13 +25,11 @@ public class BankCardService(IUnitOfWork unitOfWork) : IBankCardService
             };
 
             await unitOfWork.BankCardRepository.CreateCardAsync(card);
-            await unitOfWork.CommitAsync();
-
             return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            loggerService.LogErrorInConsole(ex.ToString());
             return false;
         }
     }

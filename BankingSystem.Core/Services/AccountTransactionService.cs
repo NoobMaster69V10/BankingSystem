@@ -6,7 +6,7 @@ using BankingSystem.Domain.UnitOfWorkContracts;
 
 namespace BankingSystem.Core.Services;
 
-public class AccountTransactionService(IUnitOfWork unitOfWork, IExchangeRateApi exchangeRateApi) : IAccountTransactionService
+public class AccountTransactionService(IUnitOfWork unitOfWork, IExchangeRateApi exchangeRateApi, ILoggerService loggerService) : IAccountTransactionService
 {
     public async Task<string> TransactionBetweenAccountsAsync(TransactionDto transactionDto, string userId)
     {
@@ -63,9 +63,10 @@ public class AccountTransactionService(IUnitOfWork unitOfWork, IExchangeRateApi 
 
             return "Your don't have account with this id";
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             await unitOfWork.RollbackAsync();
+            loggerService.LogErrorInConsole(ex.ToString());
             return "The transaction was failed.";
         }
     }

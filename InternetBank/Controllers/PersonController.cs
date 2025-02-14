@@ -31,7 +31,7 @@ namespace InternetBank.UI.Controllers
         }
 
         [Authorize(Roles = "Operator")]
-        [HttpPost("register-user")]
+        [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] PersonRegisterDto registerModel)
         {
             if (!await personAuthService.RegisterPersonAsync(registerModel))
