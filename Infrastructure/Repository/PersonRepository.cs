@@ -19,7 +19,7 @@ public class PersonRepository : IPersonRepository
     {
         _transaction = transaction;
     }
-    public async Task<Person?> GetUserByIdAsync(string id)
+    public async Task<Person?> GetPersonByIdAsync(string id)
     {
         const string query = @"
                          SELECT u.Id as PersonID, u.FirstName, u.LastName, u.Email, u.IdNumber, u.BirthDate,
@@ -61,10 +61,40 @@ public class PersonRepository : IPersonRepository
     public async Task<Person?> GetUserByUsernameAsync(string username)
     {
         const string query = @"
-            SELECT Id as PersonId FROM AspNetUsers u WHERE u.UserName = @Username";
+                         SELECT u.Id as PersonID, u.FirstName, u.LastName, u.Email, u.IdNumber, u.BirthDate,
+                            b.Id as BankAccountID, b.IBAN, b.Balance, b.Currency, b.PersonId,
+                            bc.Id as BankCardID, bc.Firstname, bc.Lastname, bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.AccountId
+                            FROM AspNetUsers u
+                            JOIN BankAccounts b ON u.Id = b.PersonId
+                            LEFT JOIN BankCards bc ON b.Id = bc.AccountId
+                         WHERE u.Username = @Username";
 
-        var users = await _connection.QueryFirstOrDefaultAsync<Person>(query,new{ Username = username}, _transaction);
+        var userDictionary = new Dictionary<string, Person>();
 
-        return users;
+        var users = await _connection.QueryAsync<Person, BankAccount, BankCard, Person>(
+            query,
+            (person, bankAccount, bankCard) =>
+            {
+                if (!userDictionary.TryGetValue(person.PersonId, out var currentUser))
+                {
+                    currentUser = person;
+                    currentUser.BankAccounts = new List<BankAccount>();
+                    currentUser.Cards = new List<BankCard>();
+                    userDictionary.Add(currentUser.PersonId, currentUser);
+                }
+
+                if (bankAccount != null! && currentUser.BankAccounts!.All(a => a.BankAccountId != bankAccount.BankAccountId))
+                    currentUser.BankAccounts!.Add(bankAccount);
+
+                if (bankCard != null! && currentUser.Cards!.All(c => c.BankCardId != bankCard.BankCardId))
+                    currentUser.Cards!.Add(bankCard);
+
+                return currentUser;
+            },
+            new { Username = username },
+            splitOn: "BankAccountID,BankCardID",
+            transaction: _transaction);
+
+        return users.FirstOrDefault();
     }
 }

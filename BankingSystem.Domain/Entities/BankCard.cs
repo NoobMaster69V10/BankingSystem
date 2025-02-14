@@ -28,5 +28,5 @@ public class BankCard
     public string PinCode { get; set; }
 
     [Required(ErrorMessage = "Account ID is required.")]
-    public  string AccountId { get; set; }
+    public int AccountId { get; set; }
 }

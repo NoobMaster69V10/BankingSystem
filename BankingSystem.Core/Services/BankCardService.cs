@@ -13,18 +13,27 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
         {
             var person = await unitOfWork.PersonRepository.GetUserByUsernameAsync(bankCardRegisterDto.Username);
 
-            var card = new BankCard
-            {
-                CardNumber = bankCardRegisterDto.CardNumber,
-                Cvv = bankCardRegisterDto.Cvv,
-                PinCode = bankCardRegisterDto.PinCode,
-                ExpirationDate = bankCardRegisterDto.ExpirationDate,
-                Firstname = bankCardRegisterDto.Firstname,
-                Lastname = bankCardRegisterDto.Lastname
-            };
+            if (person is null)
+                throw new Exception("Person not found, username is incorrect");
 
-            await unitOfWork.BankCardRepository.CreateCardAsync(card);
-            return true;
+            if (person.BankAccounts.Count(bc => bc.BankAccountId == bankCardRegisterDto.BankAccountId) > 0)
+            {
+                var card = new BankCard
+                {
+                    CardNumber = bankCardRegisterDto.CardNumber,
+                    Cvv = bankCardRegisterDto.Cvv,
+                    PinCode = bankCardRegisterDto.PinCode,
+                    ExpirationDate = bankCardRegisterDto.ExpirationDate,
+                    Firstname = bankCardRegisterDto.Firstname,
+                    Lastname = bankCardRegisterDto.Lastname,
+                    AccountId = bankCardRegisterDto.BankAccountId
+                };
+
+                await unitOfWork.BankCardRepository.CreateCardAsync(card);
+                return true;
+            }
+
+            return false;
         }
         catch (Exception ex)
         {
