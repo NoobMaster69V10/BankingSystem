@@ -1,9 +1,9 @@
-﻿using Dapper;
-using System.Data;
+﻿using System.Data;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
+using Dapper;
 
-namespace BankingSystem.Infrastructure.Data.Repository;
+namespace BankingSystem.Infrastructure.Repository;
 
 public class BankCardRepository : IBankCardRepository
 {
@@ -24,5 +24,19 @@ public class BankCardRepository : IBankCardRepository
             "INSERT INTO Cards(Name, Lastname, CardNumber, ExpirationDate, CVV, PinCode, PersonId) VALUES (@Name, @Lastname, @CardNumber, @ExpirationDate, @CVV, @PinCode, @PersonId)";
 
         await _connection.ExecuteAsync(query, card, _transaction);
+    }
+
+    public async Task<BankCard?> GetCardAsync(string cardNumber)
+    {
+        return await _connection.QuerySingleOrDefaultAsync<BankCard>(
+            "select * from BankCards where cardNumber = @CardNumber", new
+            {
+                CardNumber = cardNumber
+            });
+    }
+    public async Task<bool> ValidateCardAsync(string cardNumber, string pinCode)
+    {
+        var card = await GetCardAsync(cardNumber);
+        return card != null && pinCode == card.PinCode;
     }
 }

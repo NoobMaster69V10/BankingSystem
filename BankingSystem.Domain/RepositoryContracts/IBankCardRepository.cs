@@ -3,8 +3,8 @@ using System.Data;
 
 namespace BankingSystem.Domain.RepositoryContracts;
 
-public interface IBankCardRepository
+public interface IBankCardRepository : ITransaction
 {
     Task CreateCardAsync(BankCard card);
-    void SetTransaction(IDbTransaction transaction);
+    Task<bool> ValidateCardAsync(string cardNumber,string pinCode);
 }

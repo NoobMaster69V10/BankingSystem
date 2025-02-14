@@ -1,9 +1,9 @@
-﻿using Dapper;
-using System.Data;
+﻿using System.Data;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
+using Dapper;
 
-namespace BankingSystem.Infrastructure.Data.Repository;
+namespace BankingSystem.Infrastructure.Repository;
 
 public class TransactionRepository : IAccountTransactionRepository
 {

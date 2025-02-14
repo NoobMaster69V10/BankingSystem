@@ -21,4 +21,12 @@
     <ProjectReference Include="..\BankingSystem.Core\BankingSystem.Core.csproj" />
     <ProjectReference Include="..\Infrastructure\BankingSystem.Infrastructure.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="bin\Debug\net8.0\appsettings.Development.json" />
+    <_ContentIncludedByDefault Remove="bin\Debug\net8.0\appsettings.json" />
+    <_ContentIncludedByDefault Remove="bin\Debug\net8.0\InternetBank.UI.deps.json" />
+    <_ContentIncludedByDefault Remove="bin\Debug\net8.0\InternetBank.UI.runtimeconfig.json" />
+    <_ContentIncludedByDefault Remove="bin\Debug\net8.0\InternetBank.UI.staticwebassets.endpoints.json" />
+  </ItemGroup>
 </Project>

@@ -3,8 +3,7 @@ using System.Data;
 
 namespace BankingSystem.Domain.RepositoryContracts;
 
-public interface IAccountTransactionRepository
+public interface IAccountTransactionRepository : ITransaction
 {
     Task AddAccountTransactionAsync(AccountTransaction accountTransaction);
-    void SetTransaction(IDbTransaction transaction);
 }

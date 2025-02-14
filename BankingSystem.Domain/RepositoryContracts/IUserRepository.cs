@@ -3,8 +3,7 @@ using BankingSystem.Domain.Entities;
 
 namespace BankingSystem.Domain.RepositoryContracts;
 
-public interface IUserRepository
+public interface IUserRepository : ITransaction
 {
     Task<Person?> GetUserByUsernameAsync(string username);
-    void SetTransaction(IDbTransaction transaction);
 }
