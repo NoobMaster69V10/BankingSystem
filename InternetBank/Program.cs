@@ -3,10 +3,10 @@ using System.Data;
 using System.Text;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using BankingSystem.Infrastructure.Data.DatabaseContext;
+using BankingSystem.Infrastructure.Data.DataSeeder;
 using InternetBank.UI.Configure;
 
 Env.Load();
@@ -59,17 +59,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var roles = new[] { "Operator", "Person" };
-
-    foreach (var role in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-            await roleManager.CreateAsync(new IdentityRole(role));
-    }
+    var seeder = scope.ServiceProvider.GetRequiredService<ApplicationDataSeeder>();
+    await seeder.Seed();
 }
 
 app.UseAuthentication();

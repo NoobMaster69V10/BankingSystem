@@ -9,7 +9,6 @@ using BankingSystem.Core.DTO.Response;
 using Microsoft.Extensions.Configuration;
 using BankingSystem.Core.ServiceContracts;
 
-
 namespace BankingSystem.Core.Services;
 
 public class PersonAuthService(IConfiguration configuration, UserManager<IdentityPerson> userManager, RoleManager<IdentityRole> roleManager) : IPersonAuthService
@@ -22,9 +21,6 @@ public class PersonAuthService(IConfiguration configuration, UserManager<Identit
             return new AuthenticationResponse
             {
                 Token = string.Empty,
-                Email = loginDto.Email,
-                UserId = string.Empty,
-                Expiration = DateTime.MinValue,
                 ErrorMessage = "Invalid email or password"
             };
         }
@@ -87,9 +83,6 @@ public class PersonAuthService(IConfiguration configuration, UserManager<Identit
         return new AuthenticationResponse()
         {
             Token = token, 
-            Email = person.Email, 
-            UserId = person.Id, 
-            Expiration = expiration
         };
     }
 }
