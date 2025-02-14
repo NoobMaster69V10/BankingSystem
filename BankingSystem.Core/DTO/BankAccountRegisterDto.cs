@@ -17,5 +17,5 @@ public class BankAccountRegisterDto
 
     [Required(ErrorMessage = "Currency is required.")]
     [AllowedValues("GEL", "USD", "EUR", ErrorMessage = "Currency must be GEL, USD, or EUR.")]
-    public  string Currency { get; set; }
+    public string Currency { get; set; }
 }

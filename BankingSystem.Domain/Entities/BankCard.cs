@@ -7,14 +7,14 @@ public class BankCard
     public int BankCardId { get; set; }
 
     [Required(ErrorMessage = "Firstname is required.")]
-    public  string Firstname { get; set; }
+    public string Firstname { get; set; }
 
     [Required(ErrorMessage = "Lastname is required.")]
-    public  string Lastname { get; set; }
+    public string Lastname { get; set; }
 
     [Required(ErrorMessage = "Card number is required.")]
     [CreditCard(ErrorMessage = "Invalid card number format.")]
-    public  string CardNumber { get; set; }
+    public string CardNumber { get; set; }
 
     [Required(ErrorMessage = "Expiration date is required.")]
     public DateTime ExpirationDate { get; set; }

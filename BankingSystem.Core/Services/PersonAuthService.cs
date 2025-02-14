@@ -1,14 +1,13 @@
-﻿using BankingSystem.Core.ServiceContracts;
+﻿using System.Text;
 using System.Security.Claims;
-using System.Text;
+using BankingSystem.Core.DTO;
+using BankingSystem.Core.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using BankingSystem.Core.DTO;
 using BankingSystem.Core.DTO.Response;
-using BankingSystem.Core.Identity;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Identity;
+using BankingSystem.Core.ServiceContracts;
 
 
 namespace BankingSystem.Core.Services;
@@ -32,15 +31,13 @@ public class PersonAuthService(IConfiguration configuration, UserManager<Identit
         var tokenResponse = await GenerateJwtToken(user);
         return tokenResponse;
     }
-
-
     public async Task<bool> RegisterPersonAsync(PersonRegisterDto registerDto)
     {
         var user = new IdentityPerson
         {
             UserName = registerDto.Email,
             Email = registerDto.Email,
-            Name = registerDto.Name,
+            FirstName = registerDto.Name,
             Lastname = registerDto.Lastname,
             BirthDate = registerDto.BirthDate,
             IdNumber = registerDto.IdNumber
@@ -61,20 +58,17 @@ public class PersonAuthService(IConfiguration configuration, UserManager<Identit
 
         return true;
     }
-
-    public async Task<AuthenticationResponse> GenerateJwtToken(IdentityPerson user)
+    public async Task<AuthenticationResponse> GenerateJwtToken(IdentityPerson person)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var roles = await userManager.GetRolesAsync(user);
+        var roles = await userManager.GetRolesAsync(person);
         var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
 
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Email!),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("userId", user.Id)
+            new Claim("personId", person.Id)
         };
 
         claims.AddRange(roleClaims);
@@ -87,14 +81,14 @@ public class PersonAuthService(IConfiguration configuration, UserManager<Identit
             expires: expiration,
             signingCredentials: credentials
         );
-        JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-        string token = tokenHandler.WriteToken(tokenGenerator);
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.WriteToken(tokenGenerator);
         
         return new AuthenticationResponse()
         {
             Token = token, 
-            Email = user.Email, 
-            UserId = user.Id, 
+            Email = person.Email, 
+            UserId = person.Id, 
             Expiration = expiration
         };
     }

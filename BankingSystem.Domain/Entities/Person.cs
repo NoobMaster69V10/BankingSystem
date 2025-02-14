@@ -8,7 +8,7 @@ public class Person
     public required string PersonId { get; set; }
 
     [Required(ErrorMessage = "Name is required.")]
-    public required string Name { get; set; }
+    public required string FirstName { get; set; }
 
     [Required(ErrorMessage = "Lastname is required.")]
     public required string Lastname { get; set; }

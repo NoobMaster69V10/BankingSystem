@@ -5,14 +5,12 @@ using BankingSystem.Domain.UnitOfWorkContracts;
 
 namespace BankingSystem.Core.Services;
 
-public class BankAccountService(IUnitOfWork unitOfWork) : IBankAccountService
+public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerService) : IBankAccountService
 {
     public async Task<bool> CreateBankAccountAsync(BankAccountRegisterDto bankAccountRegisterDto)
     {
         try
         {
-            await unitOfWork.BeginTransactionAsync();
-
             var person = await unitOfWork.PersonRepository.GetUserByUsernameAsync(bankAccountRegisterDto.Username);
 
             var bankAccount = new BankAccount
@@ -25,12 +23,11 @@ public class BankAccountService(IUnitOfWork unitOfWork) : IBankAccountService
 
             await unitOfWork.AccountRepository.CreateAccountAsync(bankAccount);
 
-            await unitOfWork.CommitAsync();
             return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            loggerService.LogErrorInConsole(ex.ToString());
             return false;
         }
     }

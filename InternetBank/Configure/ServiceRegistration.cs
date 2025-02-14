@@ -33,5 +33,7 @@ public static class ServiceRegistration
         services.AddScoped<IAtmService, AtmService>();
         services.AddScoped<IPersonService, PersonService>();
         services.AddHttpClient();
+        services.AddLogging();
+        services.AddScoped<ILoggerService, LoggerService>();
     }
 }
