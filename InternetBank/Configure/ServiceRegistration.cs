@@ -1,7 +1,6 @@
 ﻿using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
-using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.RepositoryContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;

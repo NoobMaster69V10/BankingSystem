@@ -25,4 +25,10 @@ public class AtmController : ControllerBase
         }
         return BadRequest(response);
     }
+
+    [HttpPost("balance")]
+    public async Task<ActionResult<ApiResponse>> ShowBalance(decimal balance)
+    {
+        var response
+    }
 }
