@@ -28,14 +28,14 @@ public class AccountRepository : IAccountRepository
 
     public async Task UpdateAccountAsync(BankAccount account)
     {
-        const string query = "UPDATE BankAccounts SET IBAN = @IBAN, Balance = @Balance, Currency = @Currency,  PersonId= @PersonId WHERE Id = @Id";
+        const string query = "UPDATE BankAccounts SET IBAN = @IBAN, Balance = @Balance, Currency = @Currency,  PersonId= @PersonId WHERE Id = @BankAccountId";
 
         await _connection.ExecuteAsync(query, account, _transaction);
     }
 
     public async Task<BankAccount> GetAccountByIdAsync(int id)
     {
-        const string query = "SELECT * FROM BankAccounts WHERE Id = @Id";
+        const string query = "SELECT Id AS BankAccountId,IBAN, Balance, Currency, PersonId FROM BankAccounts WHERE Id = @Id";
 
         return await _connection.QueryFirstAsync<BankAccount>(query, new { Id = id }, _transaction);
     }

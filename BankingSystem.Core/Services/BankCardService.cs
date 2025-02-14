@@ -13,7 +13,7 @@ public class BankCardService(IUnitOfWork unitOfWork) : IBankCardService
         {
             await unitOfWork.BeginTransactionAsync();
 
-            var person = await unitOfWork.UserRepository.GetUserByUsernameAsync(bankCardRegisterDto.Username);
+            var person = await unitOfWork.PersonRepository.GetUserByUsernameAsync(bankCardRegisterDto.Username);
 
             var card = new BankCard
             {
@@ -21,7 +21,7 @@ public class BankCardService(IUnitOfWork unitOfWork) : IBankCardService
                 Cvv = bankCardRegisterDto.Cvv,
                 PinCode = bankCardRegisterDto.PinCode,
                 ExpirationDate = bankCardRegisterDto.ExpirationDate,
-                PersonId = person!.Id,
+                PersonId = person!.PersonId,
                 Firstname = bankCardRegisterDto.Firstname,
                 Lastname = bankCardRegisterDto.Lastname
             };

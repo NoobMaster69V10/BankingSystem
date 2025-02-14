@@ -8,32 +8,49 @@ namespace BankingSystem.Core.Services;
 
 public class AccountTransactionService(IUnitOfWork unitOfWork, IExchangeRateApi exchangeRateApi) : IAccountTransactionService
 {
-    public async Task<string> TransactionBetweenAccountsAsync(TransactionDto transactionDto)
+    public async Task<string> TransactionBetweenAccountsAsync(TransactionDto transactionDto, string userId)
     {
         try
         {
             await unitOfWork.BeginTransactionAsync();
-
             var fromAccount = await unitOfWork.AccountRepository.GetAccountByIdAsync(transactionDto.FromAccountId);
             var toAccount = await unitOfWork.AccountRepository.GetAccountByIdAsync(transactionDto.ToAccountId);
 
-            var transaction = new AccountTransaction
+            if (fromAccount.PersonId == userId)
             {
-                FromAccountId = transactionDto.FromAccountId,
-                ToAccountId = transactionDto.ToAccountId,
-                Currency = fromAccount.Currency,
-                Amount = transactionDto.Amount,
-                TransactionDate = DateTime.Now
-            };
+                var transaction = new AccountTransaction
+                {
+                    FromAccountId = transactionDto.FromAccountId,
+                    ToAccountId = transactionDto.ToAccountId,
+                    Currency = fromAccount.Currency,
+                    Amount = transactionDto.Amount,
+                    TransactionDate = DateTime.Now
+                };
 
-            if (fromAccount.PersonId != toAccount.PersonId)
-            {
-                var transactionFee = transaction.Amount * 0.01m + 0.5m;
-                if ((transaction.Amount + transactionFee) > fromAccount.Balance)
+                if (fromAccount.PersonId != toAccount.PersonId)
+                {
+                    var transactionFee = transaction.Amount * 0.01m + 0.5m;
+                    if ((transaction.Amount + transactionFee) > fromAccount.Balance)
+                    {
+                        return "The transaction was failed. You don't have enough money";
+                    }
+                    fromAccount.Balance -= transaction.Amount + transactionFee;
+                    transaction.Amount = await ConvertCurrencyAsync(transaction.Amount, fromAccount.Currency, toAccount.Currency);
+                    toAccount.Balance += transaction.Amount;
+                    await unitOfWork.AccountRepository.UpdateAccountAsync(fromAccount);
+                    await unitOfWork.AccountRepository.UpdateAccountAsync(toAccount);
+                    await unitOfWork.TransactionRepository.AddAccountTransactionAsync(transaction);
+
+                    await unitOfWork.CommitAsync();
+                    return "The transaction was completed successfully.";
+                }
+
+                if (transaction.Amount > fromAccount.Balance)
                 {
                     return "The transaction was failed. You don't have enough money";
                 }
-                fromAccount.Balance -= transaction.Amount + transactionFee;
+
+                fromAccount.Balance -= transaction.Amount;
                 transaction.Amount = await ConvertCurrencyAsync(transaction.Amount, fromAccount.Currency, toAccount.Currency);
                 toAccount.Balance += transaction.Amount;
                 await unitOfWork.AccountRepository.UpdateAccountAsync(fromAccount);
@@ -44,20 +61,7 @@ public class AccountTransactionService(IUnitOfWork unitOfWork, IExchangeRateApi 
                 return "The transaction was completed successfully.";
             }
 
-            if (transaction.Amount > fromAccount.Balance)
-            {
-                return "The transaction was failed. You don't have enough money";
-            }
-
-            fromAccount.Balance -= transaction.Amount;
-            transaction.Amount = await ConvertCurrencyAsync(transaction.Amount, fromAccount.Currency, toAccount.Currency);
-            toAccount.Balance += transaction.Amount;
-            await unitOfWork.AccountRepository.UpdateAccountAsync(fromAccount);
-            await unitOfWork.AccountRepository.UpdateAccountAsync(toAccount);
-            await unitOfWork.TransactionRepository.AddAccountTransactionAsync(transaction);
-
-            await unitOfWork.CommitAsync();
-            return "The transaction was completed successfully.";
+            return "Your don't have account with this id";
         }
         catch (Exception)
         {
