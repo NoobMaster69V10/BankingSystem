@@ -57,7 +57,7 @@ public class BankCardRepository : IBankCardRepository
         await _connection.ExecuteAsync(query, new { PinCode = pinCode, CardNumber = cardNumber }, _transaction);        
     }
 
-    public async Task<Decimal> GetBalanceAsync(string cardNumber)
+    public async Task<decimal> GetBalanceAsync(string cardNumber)
     {
         const string query = @"
         SELECT ba.Balance 

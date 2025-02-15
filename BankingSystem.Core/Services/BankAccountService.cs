@@ -1,4 +1,6 @@
-﻿using BankingSystem.Core.DTO;
+﻿using System.Net;
+using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Response;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
@@ -7,11 +9,11 @@ namespace BankingSystem.Core.Services;
 
 public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerService) : IBankAccountService
 {
-    public async Task<bool> CreateBankAccountAsync(BankAccountRegisterDto bankAccountRegisterDto)
+    public async Task<ApiResponse> CreateBankAccountAsync(BankAccountRegisterDto bankAccountRegisterDto)
     {
         try
         {
-            var person = await unitOfWork.PersonRepository.GetUserByUsernameAsync(bankAccountRegisterDto.Username);
+            var person = await unitOfWork.PersonRepository.GetPersonByUsernameAsync(bankAccountRegisterDto.Username);
 
             var bankAccount = new BankAccount
             {
@@ -23,12 +25,19 @@ public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerSer
 
             await unitOfWork.AccountRepository.CreateAccountAsync(bankAccount);
 
-            return true;
+            return new ApiResponse
+            {
+                StatusCode = HttpStatusCode.OK
+            };
         }
         catch (Exception ex)
         {
             loggerService.LogErrorInConsole(ex.ToString());
-            return false;
+            return new ApiResponse
+            {
+                IsSuccess = false,
+                ErrorMessages = [ "Error account can not be added!" ]
+            };
         }
     }
 }

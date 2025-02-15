@@ -1,8 +1,9 @@
 ﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Response;
 
 namespace BankingSystem.Core.ServiceContracts;
 
 public interface IBankAccountService
 {
-    Task<bool> CreateBankAccountAsync(BankAccountRegisterDto bankAccountRegisterDto);
+    Task<ApiResponse> CreateBankAccountAsync(BankAccountRegisterDto bankAccountRegisterDto);
 }

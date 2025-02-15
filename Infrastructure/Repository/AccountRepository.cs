@@ -39,4 +39,11 @@ public class AccountRepository : IAccountRepository
 
         return await _connection.QueryFirstAsync<BankAccount>(query, new { Id = id }, _transaction);
     }
+
+    public async Task<IEnumerable<BankAccount>> GetAccountsByIdAsync(int id)
+    {
+        const string query = "SELECT Id AS BankAccountId,IBAN, Balance, Currency, PersonId FROM BankAccounts WHERE Id = @Id";
+
+        return await _connection.QueryAsync<BankAccount>(query, new { Id = id }, _transaction);
+    }
 }

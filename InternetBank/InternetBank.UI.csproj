@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Filters\**" />
+    <Content Remove="Filters\**" />
+    <EmbeddedResource Remove="Filters\**" />
+    <None Remove="Filters\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
       <PrivateAssets>all</PrivateAssets>
@@ -28,9 +35,5 @@
     <_ContentIncludedByDefault Remove="bin\Debug\net8.0\InternetBank.UI.deps.json" />
     <_ContentIncludedByDefault Remove="bin\Debug\net8.0\InternetBank.UI.runtimeconfig.json" />
     <_ContentIncludedByDefault Remove="bin\Debug\net8.0\InternetBank.UI.staticwebassets.endpoints.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Filters\" />
   </ItemGroup>
 </Project>

@@ -11,16 +11,23 @@ public class BankController(IBankAccountService accountService, IBankCardService
     [HttpPost("account")]
     public async Task<IActionResult> CreateBankAccount(BankAccountRegisterDto bankAccountRegisterDto)
     {
-        await accountService.CreateBankAccountAsync(bankAccountRegisterDto);
-
-        return Ok(new { message = "Account created successfully" });
+        var response = await accountService.CreateBankAccountAsync(bankAccountRegisterDto);
+        if(response.IsSuccess)
+        {
+            return Ok(response);
+        }
+        return BadRequest(response);
     }
 
     [Authorize(Roles = "Operator")]
     [HttpPost("card")]
     public async Task<IActionResult> CreateBankCard(BankCardRegisterDto cardRegisterDto)
     {
-        await cardService.CreateBankCardAsync(cardRegisterDto);
-        return Ok(new { message = "Card created successfully" });
+        var response = await cardService.CreateBankCardAsync(cardRegisterDto);
+        if (response.IsSuccess)
+        {
+            return Ok(response);
+        }
+        return BadRequest(response);
     }
 }

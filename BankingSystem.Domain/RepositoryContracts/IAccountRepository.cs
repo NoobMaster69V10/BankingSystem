@@ -1,5 +1,4 @@
 ﻿using BankingSystem.Domain.Entities;
-using System.Data;
 
 namespace BankingSystem.Domain.RepositoryContracts;
 
@@ -10,4 +9,5 @@ public interface IAccountRepository : ITransaction
     Task UpdateAccountAsync(BankAccount account);
 
     Task<BankAccount> GetAccountByIdAsync(int id);
+    Task<IEnumerable<BankAccount>> GetAccountsByIdAsync(int id);
 }
