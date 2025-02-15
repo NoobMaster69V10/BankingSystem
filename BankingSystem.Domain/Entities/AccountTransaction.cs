@@ -7,7 +7,6 @@ public class AccountTransaction
     public string Currency { get; set; }
     public DateTime TransactionDate { get; set; }
     public int FromAccountId { get; set; }
-    public BankAccount? FromAccount { get; set; }
     public int ToAccountId { get; set; }
-    public BankAccount? ToAccount { get; set; }
+    public bool FromAtm { get; set; }
 }

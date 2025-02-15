@@ -25,4 +25,6 @@ public class BankCardRegisterDto
 
     [StringLengthFixedValidation(4, ErrorMessage = "Pin code must be exactly 4 characters.")]
     public  string PinCode { get; set; }
+    [Required(ErrorMessage = "BankAccountId is required.")]
+    public int BankAccountId { get; set; }
 }

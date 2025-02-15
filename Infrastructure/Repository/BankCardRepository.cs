@@ -21,7 +21,7 @@ public class BankCardRepository : IBankCardRepository
     public async Task CreateCardAsync(BankCard card)
     {
         const string query =
-            "INSERT INTO Cards(Name, Lastname, CardNumber, ExpirationDate, CVV, PinCode, PersonId) VALUES (@Name, @Lastname, @CardNumber, @ExpirationDate, @CVV, @PinCode, @PersonId)";
+            "INSERT INTO BankCards(FirstName, Lastname, CardNumber, ExpirationDate, CVV, PinCode, AccountId) VALUES (@FirstName, @Lastname, @CardNumber, @ExpirationDate, @CVV, @PinCode, @AccountId)";
 
         await _connection.ExecuteAsync(query, card, _transaction);
     }

@@ -8,6 +8,6 @@ public class PersonService(IUnitOfWork unitOfWork) : IPersonService
 {
     public async Task<Person?> GetPersonById(string id)
     {
-        return await unitOfWork.PersonRepository.GetUserByIdAsync(id);
+        return await unitOfWork.PersonRepository.GetPersonByIdAsync(id);
     }
 }

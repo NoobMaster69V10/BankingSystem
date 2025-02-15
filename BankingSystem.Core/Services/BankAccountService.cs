@@ -11,7 +11,7 @@ public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerSer
     {
         try
         {
-            var person = await unitOfWork.PersonRepository.GetUserByUsernameAsync(bankAccountRegisterDto.Username);
+            var person = await unitOfWork.PersonRepository.GetPersonByIdAsync(bankAccountRegisterDto.Username);
 
             var bankAccount = new BankAccount
             {

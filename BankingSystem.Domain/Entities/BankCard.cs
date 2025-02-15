@@ -22,12 +22,11 @@ public class BankCard
     [Required(ErrorMessage = "CVV is required.")]
     [StringLength(3, MinimumLength = 3, ErrorMessage = "CVV must be exactly 3 digits.")]
     public  string Cvv { get; set; }
+
     [Required(ErrorMessage = "PIN code is required.")]
-    
     [StringLength(4, MinimumLength = 4, ErrorMessage = "PIN code must be exactly 4 digits.")]
-    [RegularExpression(@"^\d{4}$", ErrorMessage = "PIN code must contain only digits.")] 
     public string PinCode { get; set; }
-    
-    [Required(ErrorMessage = "Bank account  is required.")]
-    public int BankAccountId { get; set; }
+
+    [Required(ErrorMessage = "Account ID is required.")]
+    public int AccountId { get; set; }
 }
