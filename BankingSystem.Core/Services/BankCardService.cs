@@ -23,7 +23,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                 };
             }
 
-            var bankAccounts = await unitOfWork.AccountRepository.GetAccountsByIdAsync(bankCardRegisterDto.BankAccountId);
+            var bankAccounts = await unitOfWork.BankAccountRepository.GetAccountsByIdAsync(bankCardRegisterDto.BankAccountId);
 
             if (bankAccounts.Count(b => b.BankAccountId == bankCardRegisterDto.BankAccountId) == 0)
             {

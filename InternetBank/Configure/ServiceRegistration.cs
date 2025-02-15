@@ -22,7 +22,7 @@ public static class ServiceRegistration
             .AddDefaultTokenProviders();
         services.AddScoped<IPersonAuthService, PersonAuthService>();
         services.AddScoped<IBankAccountService, BankAccountService>();
-        services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IBankAccountRepository, BankAccountRepository>();
         services.AddScoped<IBankCardRepository, BankCardRepository>();
         services.AddScoped<IBankCardService, BankCardService>();
         services.AddScoped<IAccountTransactionService, AccountTransactionService>();

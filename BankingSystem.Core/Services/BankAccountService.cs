@@ -23,7 +23,7 @@ public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerSer
                 Currency = bankAccountRegisterDto.Currency
             };
 
-            await unitOfWork.AccountRepository.CreateAccountAsync(bankAccount);
+            await unitOfWork.BankAccountRepository.CreateAccountAsync(bankAccount);
 
             return new ApiResponse
             {

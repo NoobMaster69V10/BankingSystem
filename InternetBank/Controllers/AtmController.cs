@@ -1,16 +1,19 @@
 using BankingSystem.Core.DTO;
 using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.ServiceContracts;
+using BankingSystem.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InternetBank.UI.Controllers;
 public class AtmController : CustomControllerBase
 {
     private readonly IAtmService _atmService;
+    private readonly IAccountTransactionService _accountTransactionService;
 
-    public AtmController(IAtmService atmService)
+    public AtmController(IAtmService atmService, IAccountTransactionService accountTransactionService)
     {
         _atmService = atmService;
+        _accountTransactionService = accountTransactionService;
     }
 
     [HttpPost("authorize-card")]
@@ -59,14 +62,37 @@ public class AtmController : CustomControllerBase
         pinDto.CardNumber = cardNumber;
         var response = await _atmService.ChangePinAsync(pinDto);
         
-        return response.IsSuccess ? Ok(response) : BadRequest(response);
+        if (response.IsSuccess)
+        {
+            HttpContext.Session.Clear();  
+            return Ok(response);
+        }
+
+        return BadRequest(response);
 
     }
+    
+    [HttpPost("withdraw-money")]
+    public async Task<ActionResult<ApiResponse>> WithdrawMoney([FromBody]WithdrawMoneyDto withdrawMoneyDto)
+    {
+        var cardNumber = HttpContext.Session.GetString("AuthorizedCard");
+        if (string.IsNullOrEmpty(cardNumber))
+        {
+            return Unauthorized(new ApiResponse
+            {
+                IsSuccess = false,
+                ErrorMessages = ["Please authorize your card first"]
+            });
+        }
+        withdrawMoneyDto.CardNumber = cardNumber;
+        var response = await _accountTransactionService.WithdrawMoneyAsync(withdrawMoneyDto);
+        return response.IsSuccess ? Ok(response) : BadRequest(response);
+    }
+    
     
     [HttpPost("logout")]
     public ActionResult<ApiResponse> Logout()
     {
-        // Clear all session data
         HttpContext.Session.Clear();
         
         return Ok(new ApiResponse 

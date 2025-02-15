@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Unicode;
 using BankingSystem.Core.DTO;
 using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.ServiceContracts;
@@ -87,6 +88,8 @@ public class AtmService : IAtmService
             return _response;
         }
     }
+    
+    
     
     // public async Task<ApiResponse> ShowBalanceAsync(CardAuthorizationDto cardDto)
     // {

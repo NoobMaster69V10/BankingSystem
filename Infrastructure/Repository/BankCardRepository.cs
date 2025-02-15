@@ -56,7 +56,7 @@ public class BankCardRepository : IBankCardRepository
 
         await _connection.ExecuteAsync(query, new { PinCode = pinCode, CardNumber = cardNumber }, _transaction);        
     }
-
+    
     public async Task<decimal> GetBalanceAsync(string cardNumber)
     {
         const string query = @"
@@ -66,4 +66,11 @@ public class BankCardRepository : IBankCardRepository
         WHERE bc.CardNumber = @CardNumber";
 
         return await _connection.QuerySingleOrDefaultAsync<decimal>(query, new { CardNumber = cardNumber });    }
+
+    public async  Task<BankAccount?> GetAccountAsync(string cardNumber)
+    {
+        return await _connection.QuerySingleOrDefaultAsync<BankAccount>(
+            "Select AccountId from BankAccounts where CardNumber = @CardNumber", 
+            new { CardNumber = cardNumber });
+    }
 }

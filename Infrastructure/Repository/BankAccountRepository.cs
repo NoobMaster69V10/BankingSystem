@@ -5,12 +5,12 @@ using Dapper;
 
 namespace BankingSystem.Infrastructure.Repository;
 
-public class AccountRepository : IAccountRepository
+public class BankAccountRepository : IBankAccountRepository
 {
     private readonly IDbConnection _connection;
     private IDbTransaction _transaction = null!;
 
-    public AccountRepository(IDbConnection connection)
+    public BankAccountRepository(IDbConnection connection)
     {
         _connection = connection;
     }
@@ -45,5 +45,11 @@ public class AccountRepository : IAccountRepository
         const string query = "SELECT Id AS BankAccountId,IBAN, Balance, Currency, PersonId FROM BankAccounts WHERE Id = @Id";
 
         return await _connection.QueryAsync<BankAccount>(query, new { Id = id }, _transaction);
+    }
+
+    public Task UpdateBalanceAsync(BankAccount? account, decimal balance)
+    {
+        const string query = "UPDATE BankAccounts SET Balance = @Balance WHERE Id = @Id";
+        return _connection.ExecuteAsync(query,new {Id = account.BankAccountId}, _transaction);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace BankingSystem.Domain.RepositoryContracts;
 
-public interface IAccountRepository : ITransaction
+public interface IBankAccountRepository : ITransaction
 {
     Task CreateAccountAsync(BankAccount account);
 
@@ -10,4 +10,5 @@ public interface IAccountRepository : ITransaction
 
     Task<BankAccount> GetAccountByIdAsync(int id);
     Task<IEnumerable<BankAccount>> GetAccountsByIdAsync(int id);
+    Task UpdateBalanceAsync(BankAccount? account, decimal balance);
 }
