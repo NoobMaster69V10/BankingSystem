@@ -39,4 +39,31 @@ public class BankCardRepository : IBankCardRepository
         var card = await GetCardAsync(cardNumber);
         return card != null && pinCode == card.PinCode;
     }
+
+    public async Task UpdatePinAsync(string cardNumber, string pinCode)
+    {
+        var card = await GetCardAsync(cardNumber);
+    
+        if (card == null)
+        {
+            throw new KeyNotFoundException("Card not found.");
+        }
+
+        const string query = @"
+        UPDATE BankCards 
+        SET PinCode = @PinCode 
+        WHERE CardNumber = @CardNumber";
+
+        await _connection.ExecuteAsync(query, new { PinCode = pinCode, CardNumber = cardNumber }, _transaction);        
+    }
+
+    public async Task<Decimal> GetBalanceAsync(string cardNumber)
+    {
+        const string query = @"
+        SELECT ba.Balance 
+        FROM BankAccounts ba
+        INNER JOIN BankCards bc ON bc.AccountId = ba.Id
+        WHERE bc.CardNumber = @CardNumber";
+
+        return await _connection.QuerySingleOrDefaultAsync<decimal>(query, new { CardNumber = cardNumber });    }
 }

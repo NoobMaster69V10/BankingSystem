@@ -5,9 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InternetBank.UI.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class PersonController(IPersonAuthService personAuthService, IAccountTransactionService transactionService, IPersonService personService) : ControllerBase
+    public class PersonController(IPersonAuthService personAuthService, IAccountTransactionService transactionService, IPersonService personService) : CustomControllerBase
     {
         [Authorize(Roles = "Person")]
         [HttpPost("transfer-money")]

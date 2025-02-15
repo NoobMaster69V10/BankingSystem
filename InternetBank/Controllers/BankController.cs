@@ -5,9 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InternetBank.UI.Controllers;
 
-[Route("api/[controller]")]
-[ApiController]
-public class BankController(IBankAccountService accountService, IBankCardService cardService) : ControllerBase
+public class BankController(IBankAccountService accountService, IBankCardService cardService) : CustomControllerBase
 {
     [Authorize(Roles = "Operator")]
     [HttpPost("account")]

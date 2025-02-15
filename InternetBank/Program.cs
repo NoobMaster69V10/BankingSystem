@@ -18,7 +18,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<BankingSystemDbContext>(options =>
     options.UseSqlServer(connectionString));
-
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(20);      
+    options.Cookie.HttpOnly = true;                      
+    options.Cookie.IsEssential = true;                   
+});
 
 builder.Services.AddApplicationServices();
 
@@ -65,8 +70,12 @@ using (var scope = app.Services.CreateScope())
     await seeder.Seed();
 }
 
+app.UseSession();
+
 app.UseAuthentication();
+
 app.UseAuthorization();
+
 
 app.MapControllers();
 

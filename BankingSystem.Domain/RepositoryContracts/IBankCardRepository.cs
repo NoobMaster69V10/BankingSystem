@@ -7,4 +7,7 @@ public interface IBankCardRepository : ITransaction
 {
     Task CreateCardAsync(BankCard card);
     Task<bool> ValidateCardAsync(string cardNumber,string pinCode);
+    Task UpdatePinAsync(string cardNumber, string pinCode);
+    
+    Task<Decimal> GetBalanceAsync(string cardNumber);
 }

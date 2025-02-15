@@ -29,4 +29,8 @@
     <_ContentIncludedByDefault Remove="bin\Debug\net8.0\InternetBank.UI.runtimeconfig.json" />
     <_ContentIncludedByDefault Remove="bin\Debug\net8.0\InternetBank.UI.staticwebassets.endpoints.json" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Filters\" />
+  </ItemGroup>
 </Project>

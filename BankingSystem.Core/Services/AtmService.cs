@@ -43,4 +43,75 @@ public class AtmService : IAtmService
             return _response;
         }
     }
+    public async Task<ApiResponse> ShowBalanceAsync(string cardNumber)
+    {
+        try
+        {
+            var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardNumber);
+            _response.StatusCode = HttpStatusCode.OK;
+            _response.Result = balance;
+            return _response;
+        }
+        catch (Exception ex)
+        {
+            _response.StatusCode = HttpStatusCode.BadRequest;
+            _response.IsSuccess = false;
+            _response.ErrorMessages.Add(ex.Message);
+            return _response;
+        }
+    }
+
+
+    public async Task<ApiResponse> ChangePinAsync(ChangePinDto changePinDto)
+    {
+        try
+        {   
+            var isValid = await _unitOfWork.BankCardRepository.ValidateCardAsync(changePinDto.CardNumber,changePinDto.CurrentPin);
+            _response.StatusCode = HttpStatusCode.OK;
+            if (!isValid)
+            {
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.IsSuccess = false;
+                _response.ErrorMessages.Add("Current PIN is incorrect");
+                return _response;
+            }
+            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
+            _response.StatusCode = HttpStatusCode.OK;
+            return _response;
+        }
+        catch (Exception ex)
+        {
+            _response.StatusCode = HttpStatusCode.BadRequest;
+            _response.IsSuccess = false;
+            _response.ErrorMessages.Add(ex.Message);
+            return _response;
+        }
+    }
+    
+    // public async Task<ApiResponse> ShowBalanceAsync(CardAuthorizationDto cardDto)
+    // {
+    //     try
+    //     {
+    //         var authorized = await _unitOfWork.BankCardRepository.ValidateCardAsync(cardDto.CardNumber,
+    //             cardDto.PinCode);
+    //         if (!authorized)
+    //         {
+    //             _response.StatusCode = HttpStatusCode.BadRequest;
+    //             _response.IsSuccess = false;
+    //             _response.ErrorMessages.Add("Card number or pin code is invalid.");
+    //             return _response;
+    //         }
+    //
+    //         var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardDto.CardNumber);
+    //         _response.StatusCode = HttpStatusCode.OK;
+    //         return _response;
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _response.StatusCode = HttpStatusCode.BadRequest;
+    //         _response.IsSuccess = false;
+    //         _response.ErrorMessages.Add(ex.Message);
+    //         return _response;
+    //     }
+    // }
 }

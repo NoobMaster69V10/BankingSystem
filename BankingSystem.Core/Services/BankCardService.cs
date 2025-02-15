@@ -1,7 +1,9 @@
 ﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.UnitOfWorkContracts;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BankingSystem.Core.Services;
 
@@ -19,7 +21,6 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                 Cvv = bankCardRegisterDto.Cvv,
                 PinCode = bankCardRegisterDto.PinCode,
                 ExpirationDate = bankCardRegisterDto.ExpirationDate,
-                PersonId = person!.PersonId,
                 Firstname = bankCardRegisterDto.Firstname,
                 Lastname = bankCardRegisterDto.Lastname
             };
@@ -33,4 +34,5 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
             return false;
         }
     }
+    
 }

@@ -6,4 +6,8 @@ namespace BankingSystem.Core.ServiceContracts;
 public interface IAtmService
 {
     Task<ApiResponse> AuthorizeCardAsync(CardAuthorizationDto cardAuthorizationDto);
+    
+    // Task<ApiResponse> ShowBalanceAsync(CardAuthorizationDto cardDto);
+    Task<ApiResponse> ShowBalanceAsync(string cardNumber);
+    Task<ApiResponse> ChangePinAsync(ChangePinDto pinDto);
 }
