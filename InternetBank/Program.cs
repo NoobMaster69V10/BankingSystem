@@ -49,6 +49,9 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddDbContext<BankingSystemDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddDistributedMemoryCache();
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(20);      
