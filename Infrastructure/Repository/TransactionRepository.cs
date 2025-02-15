@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using BankingSystem.Core.DTO;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
 using Dapper;
@@ -25,5 +26,12 @@ public class TransactionRepository : IAccountTransactionRepository
             "INSERT INTO AccountTransactions(Amount, Currency, TransactionDate, FromAccountId, ToAccountId) VALUES (@Amount, @Currency, @TransactionDate, @FromAccountId, @ToAccountId)";
 
         await _connection.ExecuteAsync(query, transactionObj, _transaction);
+    }
+
+    public async Task AddAtmTransactionAsync(AtmTransaction atmTransaction)
+    {
+        const string query =
+            "Insert into ATMWithdrawals (Amount,Currency,TransactionDate,AccountId) VALUES (@Amount,@Currency,@TrasactionDate,@AccountId)";
+        await _connection.ExecuteAsync(query, atmTransaction, _transaction);
     }
 }

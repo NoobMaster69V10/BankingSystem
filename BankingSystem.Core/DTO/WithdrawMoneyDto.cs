@@ -9,4 +9,6 @@ public class WithdrawMoneyDto
     public string CardNumber { get; set; }
     [Required(ErrorMessage = "Amount is required.")]
     public int Amount { get; set; }
+    
+    public string Currency { get; set; }
 }

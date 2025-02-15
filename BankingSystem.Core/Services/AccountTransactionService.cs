@@ -84,6 +84,7 @@ public class AccountTransactionService(
     {
         try
         {
+            await unitOfWork.BeginTransactionAsync();
             var bankAccount = await unitOfWork.BankCardRepository.GetAccountAsync(withdrawMoneyDto.CardNumber);
             if (bankAccount == null)
             {
@@ -105,7 +106,15 @@ public class AccountTransactionService(
             }
 
             var newAmount = balance - withdrawMoneyDto.Amount;
-            await unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, newAmount);
+            await unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, newAmount); 
+            var atmTransaction = new AtmTransaction
+            { 
+                Amount = withdrawMoneyDto.Amount,
+                Currency = withdrawMoneyDto.Currency,
+                TransactionDate = DateTime.Now, 
+                AccountId = bankAccount.BankAccountId
+            };
+            await unitOfWork.TransactionRepository.AddAtmTransactionAsync(atmTransaction);
             return new ApiResponse()
             {
                 StatusCode = HttpStatusCode.OK,
