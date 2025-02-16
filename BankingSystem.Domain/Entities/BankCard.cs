@@ -4,7 +4,7 @@ namespace BankingSystem.Domain.Entities;
 
 public class BankCard
 {
-    public int BankCardId { get; set; }
+    public int Id { get; set; }
 
     [Required(ErrorMessage = "Firstname is required.")]
     public string Firstname { get; set; }

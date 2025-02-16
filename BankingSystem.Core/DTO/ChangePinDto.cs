@@ -4,7 +4,6 @@ namespace BankingSystem.Core.DTO;
 
 public class ChangePinDto
 {
-    [Required]
     public string CardNumber { get; set; }
     
     [Required(ErrorMessage = "New PIN code is required.")]

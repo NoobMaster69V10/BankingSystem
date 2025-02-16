@@ -50,6 +50,6 @@ public class BankAccountRepository : IBankAccountRepository
     public Task UpdateBalanceAsync(BankAccount? account, decimal balance)
     {
         const string query = "UPDATE BankAccounts SET Balance = @Balance WHERE Id = @Id";
-        return _connection.ExecuteAsync(query,new {Id = account.BankAccountId}, _transaction);
+        return _connection.ExecuteAsync(query,new {Id = account.Id,Balance = balance}, _transaction);
     }
 }

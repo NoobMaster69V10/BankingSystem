@@ -31,7 +31,7 @@ public class TransactionRepository : IAccountTransactionRepository
     public async Task AddAtmTransactionAsync(AtmTransaction atmTransaction)
     {
         const string query =
-            "Insert into ATMWithdrawals (Amount,Currency,TransactionDate,AccountId) VALUES (@Amount,@Currency,@TrasactionDate,@AccountId)";
+            "Insert into ATMWithdrawals (Amount,Currency,TransactionDate,AccountId) VALUES (@Amount,@Currency,@TransactionDate,@AccountId)";
         await _connection.ExecuteAsync(query, atmTransaction, _transaction);
     }
 }

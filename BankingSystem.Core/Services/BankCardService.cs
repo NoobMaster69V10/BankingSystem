@@ -25,7 +25,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
 
             var bankAccounts = await unitOfWork.BankAccountRepository.GetAccountsByIdAsync(bankCardRegisterDto.BankAccountId);
 
-            if (bankAccounts.Count(b => b.BankAccountId == bankCardRegisterDto.BankAccountId) == 0)
+            if (bankAccounts.Count(b => b.Id == bankCardRegisterDto.BankAccountId) == 0)
             {
                 return new ApiResponse
                 {

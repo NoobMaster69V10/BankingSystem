@@ -68,7 +68,6 @@ public class AtmService : IAtmService
         try
         {   
             var isValid = await _unitOfWork.BankCardRepository.ValidateCardAsync(changePinDto.CardNumber,changePinDto.CurrentPin);
-            _response.StatusCode = HttpStatusCode.OK;
             if (!isValid)
             {
                 _response.StatusCode = HttpStatusCode.BadRequest;
@@ -76,7 +75,7 @@ public class AtmService : IAtmService
                 _response.ErrorMessages.Add("Current PIN is incorrect");
                 return _response;
             }
-            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
+            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.NewPin);
             _response.StatusCode = HttpStatusCode.OK;
             return _response;
         }

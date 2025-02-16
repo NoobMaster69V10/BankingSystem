@@ -51,7 +51,7 @@ public class AtmController : CustomControllerBase
     public async Task<ActionResult<ApiResponse>> ChangePin([FromBody]ChangePinDto pinDto)
     {
         var cardNumber = HttpContext.Session.GetString("AuthorizedCard");
-        if (string.IsNullOrEmpty(cardNumber))
+        if (string.IsNullOrEmpty(cardNumber) || pinDto.CardNumber != cardNumber) 
         {
             return Unauthorized(new ApiResponse
             {
@@ -59,7 +59,6 @@ public class AtmController : CustomControllerBase
                 ErrorMessages = ["Please authorize your card first"]
             });
         }
-        pinDto.CardNumber = cardNumber;
         var response = await _atmService.ChangePinAsync(pinDto);
         
         if (response.IsSuccess)
