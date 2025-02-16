@@ -7,6 +7,6 @@ namespace BankingSystem.Core.ServiceContracts;
 public interface IPersonAuthService
 {
     Task<AuthenticationResponse> AuthenticationPersonAsync(PersonLoginDto loginDto);
-    Task<bool> RegisterPersonAsync(PersonRegisterDto registerDto);
+    Task<AuthenticationResponse> RegisterPersonAsync(PersonRegisterDto registerDto);
     Task<AuthenticationResponse> GenerateJwtToken(IdentityPerson user);
 }

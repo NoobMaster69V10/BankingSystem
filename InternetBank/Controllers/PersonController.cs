@@ -20,35 +20,50 @@ namespace InternetBank.UI.Controllers
 
         [Authorize(Roles = "Person")]
         [HttpGet("info")]
-        public async Task<IActionResult> GetPersonInfo()
+        public async Task<ActionResult<ApiResponse>> GetPersonInfo()
         {
             var userId = User.FindFirst("personId")!.Value;
-
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new ApiResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessages = ["User ID not found"]
+                });
+            }
             var result = await personService.GetPersonById(userId);
-
+            if (result == null)
+            {
+                return NotFound(new ApiResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessages = ["User not found."]
+                });
+            }
             return Ok(result);
         }
 
         [Authorize(Roles = "Operator")]
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser([FromBody] PersonRegisterDto registerModel)
+        public async Task<ActionResult<AuthenticationResponse>> RegisterUser([FromBody] PersonRegisterDto registerModel)
         {
-            if (!await personAuthService.RegisterPersonAsync(registerModel))
+            var response = await personAuthService.RegisterPersonAsync(registerModel);
+            if (!response.IsSuccess)
             {
-                return BadRequest("Invalid operation.");
+                return BadRequest(response);
             }
-            return Ok(new { message = "User registered successfully!" });
+            return Ok(response);
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] PersonLoginDto loginModel)
+        public async Task<ActionResult<AuthenticationResponse>> Login([FromBody] PersonLoginDto loginModel)
         {
-            var result = await personAuthService.AuthenticationPersonAsync(loginModel);
-
-            if (result == null)
-                return Unauthorized(new { message = "Invalid email or password" });
-
-            return Ok(new { result });
+            var response = await personAuthService.AuthenticationPersonAsync(loginModel);
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response);
+            }
+            return Ok(new { response });
         }
     }
 }
