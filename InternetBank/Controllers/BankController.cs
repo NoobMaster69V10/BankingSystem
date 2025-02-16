@@ -22,7 +22,7 @@ public class BankController(IBankAccountService accountService, IBankCardService
 
     [Authorize(Roles = "Operator")]
     [HttpPost("card")]
-    public async Task<IActionResult> CreateBankCard(BankCardRegisterDto cardRegisterDto)
+    public async Task<ActionResult<ApiResponse>> CreateBankCard(BankCardRegisterDto cardRegisterDto)
     {
         var response = await cardService.CreateBankCardAsync(cardRegisterDto);
         if (response.IsSuccess)
