@@ -8,5 +8,4 @@ public class AccountTransaction
     public DateTime TransactionDate { get; set; }
     public int FromAccountId { get; set; }
     public int ToAccountId { get; set; }
-    public bool FromAtm { get; set; }
 }

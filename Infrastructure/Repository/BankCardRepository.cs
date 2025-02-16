@@ -28,7 +28,7 @@ public class BankCardRepository : IBankCardRepository
 
     public async Task<BankCard?> GetCardAsync(string cardNumber)
     {
-        return await _connection.QuerySingleOrDefaultAsync<BankCard>(
+        return await _connection.QueryFirstOrDefaultAsync<BankCard>(
             "select * from BankCards where CardNumber = @CardNumber", new
             {
                 CardNumber = cardNumber
@@ -59,11 +59,13 @@ public class BankCardRepository : IBankCardRepository
     
     public async Task<decimal> GetBalanceAsync(string cardNumber)
     {
-        const string query = @"
-        SELECT ba.Balance 
-        FROM BankAccounts ba
-        INNER JOIN BankCards bc ON bc.AccountId = ba.Id
-        WHERE bc.CardNumber = @CardNumber";
+        const string query = """
+                             
+                                     SELECT ba.Balance 
+                                     FROM BankAccounts ba
+                                     INNER JOIN BankCards bc ON bc.AccountId = ba.Id
+                                     WHERE bc.CardNumber = @CardNumber
+                             """;
 
         return await _connection.QuerySingleOrDefaultAsync<decimal>(query, new { CardNumber = cardNumber });    }
 

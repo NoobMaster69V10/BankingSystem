@@ -1,4 +1,5 @@
 ﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace InternetBank.UI.Controllers
     {
         [Authorize(Roles = "Person")]
         [HttpPost("transfer-money")]
-        public async Task<IActionResult> TransferMoney(TransactionDto transactionDto)
+        public async Task<ActionResult<ApiResponse>> TransferMoney(TransactionDto transactionDto)
         {
             var userId = User.FindFirst("personId")!.Value;
             var message = await transactionService.TransactionBetweenAccountsAsync(transactionDto, userId);

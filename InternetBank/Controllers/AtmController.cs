@@ -32,11 +32,11 @@ public class AtmController : CustomControllerBase
     }
      
    
-    [HttpPost("balance")]
-    public async Task<ActionResult<ApiResponse>> ShowBalance()
+    [HttpGet("balance")]
+    public async Task<ActionResult<ApiResponse>> ShowBalance(string cardNumber)
     {
-        var cardNumber = HttpContext.Session.GetString("AuthorizedCard");
-        if (string.IsNullOrEmpty(cardNumber))
+        var sessionCardNumber = HttpContext.Session.GetString("AuthorizedCard");
+        if (string.IsNullOrEmpty(cardNumber) || sessionCardNumber != cardNumber)
         {
             return Unauthorized(new ApiResponse 
             { 
@@ -75,7 +75,7 @@ public class AtmController : CustomControllerBase
     public async Task<ActionResult<ApiResponse>> WithdrawMoney([FromBody]WithdrawMoneyDto withdrawMoneyDto)
     {
         var cardNumber = HttpContext.Session.GetString("AuthorizedCard");
-        if (string.IsNullOrEmpty(cardNumber))
+        if (string.IsNullOrEmpty(cardNumber) || withdrawMoneyDto.CardNumber != cardNumber)
         {
             return Unauthorized(new ApiResponse
             {
@@ -83,7 +83,6 @@ public class AtmController : CustomControllerBase
                 ErrorMessages = ["Please authorize your card first"]
             });
         }
-        withdrawMoneyDto.CardNumber = cardNumber;
         var response = await _accountTransactionService.WithdrawMoneyAsync(withdrawMoneyDto);
         return response.IsSuccess ? Ok(response) : BadRequest(response);
     }

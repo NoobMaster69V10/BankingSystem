@@ -33,23 +33,25 @@ public class BankAccountRepository : IBankAccountRepository
         await _connection.ExecuteAsync(query, account, _transaction);
     }
 
-    public async Task<BankAccount> GetAccountByIdAsync(int id)
+    public async Task<BankAccount?> GetAccountByIdAsync(int id)
     {
-        const string query = "SELECT Id AS BankAccountId,IBAN, Balance, Currency, PersonId FROM BankAccounts WHERE Id = @Id";
+        const string query = "SELECT Id,IBAN, Balance, Currency, PersonId FROM BankAccounts WHERE Id = @Id";
 
-        return await _connection.QueryFirstAsync<BankAccount>(query, new { Id = id }, _transaction);
+        return await _connection.QueryFirstAsync<BankAccount?>(query, new { Id = id }, _transaction);
     }
-
-    public async Task<IEnumerable<BankAccount>> GetAccountsByIdAsync(int id)
-    {
-        const string query = "SELECT Id AS BankAccountId,IBAN, Balance, Currency, PersonId FROM BankAccounts WHERE Id = @Id";
-
-        return await _connection.QueryAsync<BankAccount>(query, new { Id = id }, _transaction);
-    }
-
+    
     public Task UpdateBalanceAsync(BankAccount? account, decimal balance)
     {
         const string query = "UPDATE BankAccounts SET Balance = @Balance WHERE Id = @Id";
         return _connection.ExecuteAsync(query,new {Id = account.Id,Balance = balance}, _transaction);
+    }
+
+    public async Task<BankAccount?> GetAccountByIbanAsync(string iban)
+    {
+        return await _connection.QueryFirstOrDefaultAsync<BankAccount?>(
+            "select * from BankAccounts where IBAN = @iban", new
+            {
+                    IBAN = iban
+            });
     }
 }

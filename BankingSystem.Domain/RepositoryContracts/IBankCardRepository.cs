@@ -10,4 +10,5 @@ public interface IBankCardRepository : ITransaction
     Task UpdatePinAsync(string cardNumber, string pinCode);
     Task<decimal> GetBalanceAsync(string cardNumber); 
     Task<BankAccount?> GetAccountAsync(string cardNumber);
+    Task<BankCard?> GetCardAsync(string cardNumber);
 }

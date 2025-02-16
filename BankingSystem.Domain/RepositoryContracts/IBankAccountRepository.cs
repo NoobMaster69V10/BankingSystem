@@ -8,7 +8,7 @@ public interface IBankAccountRepository : ITransaction
 
     Task UpdateAccountAsync(BankAccount account);
 
-    Task<BankAccount> GetAccountByIdAsync(int id);
-    Task<IEnumerable<BankAccount>> GetAccountsByIdAsync(int id);
+    Task<BankAccount?> GetAccountByIdAsync(int id);
     Task UpdateBalanceAsync(BankAccount? account, decimal balance);
+    Task<BankAccount?> GetAccountByIbanAsync(string iban);
 }

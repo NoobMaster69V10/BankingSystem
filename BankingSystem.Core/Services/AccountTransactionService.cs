@@ -13,132 +13,156 @@ public class AccountTransactionService(
     IExchangeRateApi exchangeRateApi,
     ILoggerService loggerService) : IAccountTransactionService
 {
-    public async Task<string> TransactionBetweenAccountsAsync(TransactionDto transactionDto, string userId)
+    public async Task<ApiResponse> TransactionBetweenAccountsAsync(TransactionDto transactionDto, string userId)
     {
         try
         {
             await unitOfWork.BeginTransactionAsync();
+
             var fromAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.FromAccountId);
             var toAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.ToAccountId);
 
-            if (fromAccount.PersonId == userId)
+            if (fromAccount.PersonId != userId)
             {
-                var transaction = new AccountTransaction
+                return new ApiResponse
                 {
-                    FromAccountId = transactionDto.FromAccountId,
-                    ToAccountId = transactionDto.ToAccountId,
-                    Currency = fromAccount.Currency,
-                    Amount = transactionDto.Amount,
-                    TransactionDate = DateTime.Now,
-                    FromAtm = false
+                    StatusCode = HttpStatusCode.Forbidden,
+                    IsSuccess = false,
+                    ErrorMessages = ["You don't have permission to make transactions from this account."]
                 };
-
-                if (fromAccount.PersonId != toAccount.PersonId)
-                {
-                    var transactionFee = transaction.Amount * 0.01m + 0.5m;
-                    if ((transaction.Amount + transactionFee) > fromAccount.Balance)
-                    {
-                        return "The transaction was failed. You don't have enough money";
-                    }
-
-                    fromAccount.Balance -= transaction.Amount + transactionFee;
-                    transaction.Amount =
-                        await ConvertCurrencyAsync(transaction.Amount, fromAccount.Currency, toAccount.Currency);
-                    toAccount.Balance += transaction.Amount;
-                    await unitOfWork.BankAccountRepository.UpdateAccountAsync(fromAccount);
-                    await unitOfWork.BankAccountRepository.UpdateAccountAsync(toAccount);
-                    await unitOfWork.TransactionRepository.AddAccountTransactionAsync(transaction);
-
-                    await unitOfWork.CommitAsync();
-                    return "The transaction was completed successfully.";
-                }
-
-                if (transaction.Amount > fromAccount.Balance)
-                {
-                    return "The transaction was failed. You don't have enough money";
-                }
-
-                fromAccount.Balance -= transaction.Amount;
-                transaction.Amount =
-                    await ConvertCurrencyAsync(transaction.Amount, fromAccount.Currency, toAccount.Currency);
-                toAccount.Balance += transaction.Amount;
-                await unitOfWork.BankAccountRepository.UpdateAccountAsync(fromAccount);
-                await unitOfWork.BankAccountRepository.UpdateAccountAsync(toAccount);
-                await unitOfWork.TransactionRepository.AddAccountTransactionAsync(transaction);
-
-                await unitOfWork.CommitAsync();
-                return "The transaction was completed successfully.";
             }
 
-            return "Your don't have account with this id";
+            decimal transactionFee = 0;
+            if (fromAccount.PersonId != toAccount.PersonId)
+            {
+                transactionFee = transactionDto.Amount * 0.01m + 0.5m;
+            }
+
+            if (transactionDto.Amount + transactionFee > fromAccount.Balance)
+            {
+                return new ApiResponse
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = false,
+                    ErrorMessages = ["Insufficient balance for this transaction."]
+                };
+            }
+
+            var transaction = new AccountTransaction
+            {
+                FromAccountId = transactionDto.FromAccountId,
+                ToAccountId = transactionDto.ToAccountId,
+                Currency = fromAccount.Currency,
+                Amount = transactionDto.Amount,
+                TransactionDate = DateTime.UtcNow,
+            };
+
+            fromAccount.Balance -= transactionDto.Amount + transactionFee;
+            transaction.Amount =
+                await ConvertCurrencyAsync(transactionDto.Amount, fromAccount.Currency, toAccount.Currency);
+            toAccount.Balance += transaction.Amount;
+
+            await unitOfWork.BankAccountRepository.UpdateAccountAsync(fromAccount);
+            await unitOfWork.BankAccountRepository.UpdateAccountAsync(toAccount);
+            await unitOfWork.TransactionRepository.AddAccountTransactionAsync(transaction);
+            await unitOfWork.CommitAsync();
+
+            return new ApiResponse
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = true,
+                Result = new
+                {
+                    Message = "Transaction completed successfully.",
+                    TransactionId = transaction.Id,
+                    FromAccountBalance = fromAccount.Balance,
+                    ToAccountBalance = toAccount.Balance
+                }
+            };
         }
         catch (Exception ex)
         {
             await unitOfWork.RollbackAsync();
             loggerService.LogErrorInConsole(ex.ToString());
-            return "The transaction was failed.";
+
+            return new ApiResponse
+            {
+                StatusCode = HttpStatusCode.InternalServerError,
+                IsSuccess = false,
+                ErrorMessages = ["An error occurred during the transaction."]
+            };
         }
     }
+
 
     public async Task<ApiResponse> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto)
     {
         try
         {
+            await unitOfWork.BeginTransactionAsync();
+
             var bankAccount = await unitOfWork.BankCardRepository.GetAccountAsync(withdrawMoneyDto.CardNumber);
             if (bankAccount == null)
             {
-                return new ApiResponse()
+                return new ApiResponse
                 {
+                    StatusCode = HttpStatusCode.NotFound,
                     IsSuccess = false,
-                    ErrorMessages = ["This Bank Account does not exist."]
+                    ErrorMessages = ["This bank account does not exist."]
                 };
             }
 
             var balance = await unitOfWork.BankCardRepository.GetBalanceAsync(withdrawMoneyDto.CardNumber);
             if (balance < withdrawMoneyDto.Amount)
             {
-                return new ApiResponse()
+                return new ApiResponse
                 {
+                    StatusCode = HttpStatusCode.BadRequest,
                     IsSuccess = false,
-                    ErrorMessages = ["You don't have enough money."]
+                    ErrorMessages = ["Insufficient funds."]
                 };
             }
 
-            var newAmount = balance - withdrawMoneyDto.Amount;
+            var newBalance = balance - withdrawMoneyDto.Amount;
+            await unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, newBalance);
 
-            await unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, newAmount); 
-            
             var atmTransaction = new AtmTransaction
-            { 
+            {
                 Amount = withdrawMoneyDto.Amount,
                 Currency = withdrawMoneyDto.Currency,
-                TransactionDate = DateTime.Now, 
+                TransactionDate = DateTime.UtcNow,
                 AccountId = bankAccount.Id
             };
+
             await unitOfWork.TransactionRepository.AddAtmTransactionAsync(atmTransaction);
-            
             await unitOfWork.CommitAsync();
 
-            return new ApiResponse()
+            return new ApiResponse
             {
                 StatusCode = HttpStatusCode.OK,
                 IsSuccess = true,
-                Result = new 
+                Result = new
                 {
-                    NewBalance = newAmount, withdrawMoneyDto.CardNumber
+                    Message = "Withdrawal successful.",
+                    NewBalance = newBalance,
+                    withdrawMoneyDto.CardNumber
                 }
             };
         }
         catch (Exception ex)
         {
-            loggerService.LogErrorInConsole(ex.ToString());
-            return new ApiResponse()
+            await unitOfWork.RollbackAsync();
+            loggerService.LogErrorInConsole($"Error in WithdrawMoneyAsync: {ex}");
+
+            return new ApiResponse
             {
+                StatusCode = HttpStatusCode.InternalServerError,
                 IsSuccess = false,
-                ErrorMessages = ["An error occured."]
+                ErrorMessages = ["An error occurred while processing the withdrawal."]
             };
         }
     }
+
 
     private async Task<decimal> ConvertCurrencyAsync(decimal amount, string fromCurrency, string toCurrency)
     {

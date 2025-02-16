@@ -13,30 +13,61 @@ public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerSer
     {
         try
         {
-            var person = await unitOfWork.PersonRepository.GetPersonByUsernameAsync(bankAccountRegisterDto.Username);
+            var bankAccount = await unitOfWork.BankAccountRepository.GetAccountByIbanAsync(bankAccountRegisterDto.Iban);
+            if (bankAccount != null)
+            {
+                return new ApiResponse
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = false,
+                    ErrorMessages = ["Bank account already exists"]
+                };
+            }
 
-            var bankAccount = new BankAccount
+            var person =
+                await unitOfWork.PersonRepository.GetPersonByUsernameAsync(bankAccountRegisterDto.Username);
+            if (person == null)
+            {
+                return new ApiResponse
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    IsSuccess = false,
+                    ErrorMessages = ["User not found."]
+                };
+            }
+
+            var account = new BankAccount
             {
                 IBAN = bankAccountRegisterDto.Iban,
                 Balance = bankAccountRegisterDto.Balance,
-                PersonId = person!.PersonId,
+                PersonId = person.PersonId,
                 Currency = bankAccountRegisterDto.Currency
             };
 
-            await unitOfWork.BankAccountRepository.CreateAccountAsync(bankAccount);
+            await unitOfWork.BankAccountRepository.CreateAccountAsync(account);
 
             return new ApiResponse
             {
-                StatusCode = HttpStatusCode.OK
+                StatusCode = HttpStatusCode.Created,
+                IsSuccess = true,
+                Result = new
+                {
+                    Message = "Bank account created successfully.",
+                    AccountId = account.Id,
+                    IBAN = account.IBAN,
+                    Balance = account.Balance,
+                    Currency = account.Currency
+                }
             };
         }
         catch (Exception ex)
         {
-            loggerService.LogErrorInConsole(ex.ToString());
+            loggerService.LogErrorInConsole($"Error in CreateBankAccountAsync: {ex}");
             return new ApiResponse
             {
+                StatusCode = HttpStatusCode.InternalServerError,
                 IsSuccess = false,
-                ErrorMessages = [ "Error account can not be added!" ]
+                ErrorMessages = ["Error: Account could not be created."]
             };
         }
     }
