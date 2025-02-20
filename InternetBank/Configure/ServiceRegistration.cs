@@ -10,6 +10,7 @@ using BankingSystem.Infrastructure.ExternalApis;
 using BankingSystem.Infrastructure.Repository;
 using BankingSystem.Infrastructure.UnitOfWork;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.OpenApi.Models;
 
 namespace InternetBank.UI.Configure;
 
@@ -35,6 +36,37 @@ public static class ServiceRegistration
         services.AddHttpClient();
         services.AddLogging();
         services.AddScoped<ILoggerService, LoggerService>();
+        services.AddScoped<IReportRepository, ReportRepository>();
+        services.AddScoped<IReportService, ReportService>();
         services.AddTransient<ApplicationDataSeeder>();
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "Enter 'Bearer {token}' in the field below."
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
     }
 }

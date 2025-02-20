@@ -16,24 +16,19 @@ public class PersonAuthService(
     UserManager<IdentityPerson> userManager,
     RoleManager<IdentityRole> roleManager) : IPersonAuthService
 {
-    public async Task<AuthenticationResponse> AuthenticationPersonAsync(PersonLoginDto loginDto)
+    public async Task<AdvancedApiResponse<string>> AuthenticationPersonAsync(PersonLoginDto loginDto)
     {
         var user = await userManager.FindByEmailAsync(loginDto.Email);
         if (user == null || !await userManager.CheckPasswordAsync(user, loginDto.Password))
         {
-            return new AuthenticationResponse
-            {
-                IsSuccess = false,
-                Token = string.Empty,
-                ErrorMessage = "Invalid email or password"
-            };
+            return AdvancedApiResponse<string>.ErrorResponse("Invalid email or password");
         }
 
-        var tokenResponse = await GenerateJwtToken(user);
-        return tokenResponse;
+        var token = await GenerateJwtToken(user);
+        return AdvancedApiResponse<string>.SuccessResponse(token);
     }
 
-    public async Task<AuthenticationResponse> RegisterPersonAsync(PersonRegisterDto registerDto)
+    public async Task<AdvancedApiResponse<string>> RegisterPersonAsync(PersonRegisterDto registerDto)
     {
         var user = new IdentityPerson
         {
@@ -49,11 +44,7 @@ public class PersonAuthService(
 
         if (!result.Succeeded)
         {
-            return new AuthenticationResponse
-            {
-                IsSuccess = false,
-                ErrorMessage = string.Join(", ", result.Errors.Select(e => e.Description))
-            };
+            return AdvancedApiResponse<string>.ErrorResponse(string.Join(" ", result.Errors.Select(e => e.Description)));
         }
 
         if (string.IsNullOrEmpty(registerDto.Role))
@@ -61,33 +52,24 @@ public class PersonAuthService(
 
         if (!await roleManager.RoleExistsAsync(registerDto.Role))
         {
-            return new AuthenticationResponse
-            {
-                IsSuccess = false,
-                ErrorMessage = $"The role '{registerDto.Role}' does not exist."
-            };
+            return AdvancedApiResponse<string>.ErrorResponse($"The role '{registerDto.Role}' does not exist.");
         }
 
         await userManager.AddToRoleAsync(user, registerDto.Role);
 
-        var tokenResponse = await GenerateJwtToken(user);
-
-        return new AuthenticationResponse
-        {
-            IsSuccess = true,
-            Token = tokenResponse.Token
-        };
+        return AdvancedApiResponse<string>.SuccessResponse(default!, "User successfully registered.");
     }
 
-    public async Task<AuthenticationResponse> GenerateJwtToken(IdentityPerson person)
+    public async Task<string> GenerateJwtToken(IdentityPerson person)
     {
         var jwtKey = configuration["Jwt:Key"];
         var jwtIssuer = configuration["Jwt:Issuer"];
         var jwtAudience = configuration["Jwt:Audience"];
+        var expirationMinutes = configuration["Jwt:EXPIRATION_MINUTES"];
 
-        if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience))
+        if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience) || string.IsNullOrEmpty(expirationMinutes))
         {
-            return new AuthenticationResponse { IsSuccess = false, ErrorMessage = "JWT configuration is missing." };
+            throw new Exception("JWT configuration is missing.");
         }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
@@ -98,12 +80,12 @@ public class PersonAuthService(
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, person.Id)
+            new Claim("personId", person.Id)
         };
 
         claims.AddRange(roleClaims);
 
-        var expiration = DateTime.UtcNow.AddHours(1);
+        var expiration = DateTime.UtcNow.AddMinutes(int.Parse(expirationMinutes));
 
         var tokenGenerator = new JwtSecurityToken(
             jwtIssuer,
@@ -116,10 +98,6 @@ public class PersonAuthService(
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.WriteToken(tokenGenerator);
 
-        return new AuthenticationResponse
-        {
-            IsSuccess = true,
-            Token = token
-        };
+        return token;
     }
 }

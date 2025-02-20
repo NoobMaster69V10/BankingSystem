@@ -5,7 +5,7 @@ namespace BankingSystem.Domain.Entities;
 
 public class BankAccount
 {
-    public int Id { get; set; }
+    public int BankAccountId { get; set; }
 
     [Required(ErrorMessage = "IBAN is required.")]
     [StringLength(34, MinimumLength = 15, ErrorMessage = "IBAN must be between 15 and 34 characters.")]

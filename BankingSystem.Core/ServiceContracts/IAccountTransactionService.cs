@@ -5,6 +5,6 @@ namespace BankingSystem.Core.ServiceContracts;
 
 public interface IAccountTransactionService
 {
-    Task<ApiResponse> TransactionBetweenAccountsAsync(TransactionDto transactionDto, string userId);
+    Task<AdvancedApiResponse<string>> TransactionBetweenAccountsAsync(TransactionDto transactionDto, string userId);
     Task<ApiResponse> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto);
 }

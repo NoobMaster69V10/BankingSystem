@@ -35,6 +35,7 @@ CREATE TABLE AccountTransactions(
 	FromAccountId INT NOT NULL,
 	ToAccountId INT NOT NULL,
 	FromATM BIT DEFAULT 0,
+	TransactionFee decimal(18,2) DEFAULT 0,
 
 	FOREIGN KEY (FromAccountId)
 	REFERENCES BankAccounts(Id),

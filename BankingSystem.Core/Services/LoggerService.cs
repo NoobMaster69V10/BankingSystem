@@ -9,4 +9,9 @@ public class LoggerService(ILogger<LoggerService> logger) : ILoggerService
     {
         logger.LogError(errorMessage);
     }
+
+    public void LogSuccessInConsole(string message)
+    {
+        logger.LogInformation(message);
+    }
 }

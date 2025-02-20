@@ -26,7 +26,7 @@ public class PersonRepository : IPersonRepository
                             b.Id as BankAccountID, b.IBAN, b.Balance, b.Currency, b.PersonId,
                             bc.Id as BankCardID, bc.Firstname, bc.Lastname, bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.AccountId
                             FROM AspNetUsers u
-                            JOIN BankAccounts b ON u.Id = b.PersonId
+                            LEFT JOIN BankAccounts b ON u.Id = b.PersonId
                             LEFT JOIN BankCards bc ON b.Id = bc.AccountId
                          WHERE u.Id = @ID";
 
@@ -44,10 +44,10 @@ public class PersonRepository : IPersonRepository
                     userDictionary.Add(currentUser.PersonId, currentUser);
                 }
 
-                if (bankAccount != null! && currentUser.BankAccounts!.All(a => a.Id != bankAccount.Id))
+                if (bankAccount?.BankAccountId != null && currentUser.BankAccounts!.All(a => a.BankAccountId != bankAccount.BankAccountId))
                     currentUser.BankAccounts!.Add(bankAccount);
 
-                if (bankCard != null! && currentUser.Cards!.All(c => c.Id != bankCard.Id))
+                if (bankCard?.BankCardId != null && currentUser.Cards!.All(c => c.BankCardId != bankCard.BankCardId))
                     currentUser.Cards!.Add(bankCard);
 
                 return currentUser;

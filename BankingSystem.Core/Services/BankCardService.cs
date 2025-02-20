@@ -92,7 +92,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                 ExpirationDate = bankCardRegisterDto.ExpirationDate,
                 Firstname = bankCardRegisterDto.Firstname,
                 Lastname = bankCardRegisterDto.Lastname,
-                AccountId = bankAccount.Id
+                AccountId = bankAccount.BankAccountId
             };
 
             await unitOfWork.BankCardRepository.CreateCardAsync(newCard);
