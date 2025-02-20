@@ -53,7 +53,7 @@ public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerSer
                 Result = new
                 {
                     Message = "Bank account created successfully.",
-                    AccountId = account.Id,
+                    AccountId = account.BankAccountId,
                     IBAN = account.IBAN,
                     Balance = account.Balance,
                     Currency = account.Currency

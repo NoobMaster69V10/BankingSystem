@@ -14,16 +14,18 @@ public class UnitOfWork : IUnitOfWork
     public IAccountTransactionRepository TransactionRepository { get; }
     public IBankCardRepository BankCardRepository { get; }
     public IBankAccountRepository BankAccountRepository { get; }
+    public IReportRepository ReportRepository { get; }
 
     public UnitOfWork(IDbConnection connection, IPersonRepository personRepository,
         IAccountTransactionRepository transactionRepository, IBankCardRepository bankCardRepository,
-        IBankAccountRepository bankAccountRepository)
+        IBankAccountRepository bankAccountRepository, IReportRepository reportRepository)
     {
         _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         PersonRepository = personRepository ?? throw new ArgumentNullException(nameof(personRepository));
         TransactionRepository = transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
         BankCardRepository = bankCardRepository ?? throw new ArgumentNullException(nameof(bankCardRepository));
         BankAccountRepository = bankAccountRepository ?? throw new ArgumentNullException(nameof(bankAccountRepository));
+        ReportRepository = reportRepository ?? throw new ArgumentNullException(nameof(reportRepository));
         _connection.Open();
     }
 

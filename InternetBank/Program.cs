@@ -2,50 +2,24 @@ using DotNetEnv;
 using System.Data;
 using System.Text;
 using Microsoft.Data.SqlClient;
+using InternetBank.UI.Configure;
+using InternetBank.UI.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using BankingSystem.Infrastructure.Data.DataSeeder;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using BankingSystem.Infrastructure.Data.DatabaseContext;
-using BankingSystem.Infrastructure.Data.DataSeeder;
-using InternetBank.UI.Configure;
-using Microsoft.OpenApi.Models;
+using InternetBank.UI.ActionFilters;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddControllers(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter 'Bearer {token}' in the field below."
-    });
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+    options.Filters.Add<ModelValidationActionFilter>();
 });
+builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddDbContext<BankingSystemDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -87,7 +61,6 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<IDbConnection>(_ =>
     new SqlConnection(connectionString));
 
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -104,12 +77,13 @@ using (var scope = app.Services.CreateScope())
     await seeder.Seed();
 }
 
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+
 app.UseSession();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
-
 
 app.MapControllers();
 

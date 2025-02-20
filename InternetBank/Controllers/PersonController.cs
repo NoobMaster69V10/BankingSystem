@@ -1,5 +1,5 @@
-﻿using BankingSystem.Core.DTO;
-using BankingSystem.Core.DTO.Response;
+﻿using System.Runtime.InteropServices.JavaScript;
+using BankingSystem.Core.DTO;
 using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,60 +10,50 @@ namespace InternetBank.UI.Controllers
     {
         [Authorize(Roles = "Person")]
         [HttpPost("transfer-money")]
-        public async Task<ActionResult<ApiResponse>> TransferMoney(TransactionDto transactionDto)
+        public async Task<IActionResult> TransferMoney(TransactionDto transactionDto)
         {
             var userId = User.FindFirst("personId")!.Value;
-            var message = await transactionService.TransactionBetweenAccountsAsync(transactionDto, userId);
+            var response = await transactionService.TransactionBetweenAccountsAsync(transactionDto, userId);
 
-            return Ok(new { Message = message });
+            if (!response.Success)
+            {
+                return BadRequest(new { ErrorMessage = response.Message });
+            }
+
+            return Ok(new { response.Message });
         }
 
         [Authorize(Roles = "Person")]
-        [HttpGet("info")]
-        public async Task<ActionResult<ApiResponse>> GetPersonInfo()
+        [HttpGet("information")]
+        public async Task<IActionResult> GetPersonInfo()
         {
-            var userId = User.FindFirst("personId")!.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new ApiResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessages = ["User ID not found"]
-                });
-            }
-            var result = await personService.GetPersonById(userId);
-            if (result == null)
-            {
-                return NotFound(new ApiResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessages = ["User not found."]
-                });
-            }
-            return Ok(result);
+            var personId = User.FindFirst("personId")!.Value;
+            var response = await personService.GetPersonById(personId);
+
+            return Ok(response.Data);
         }
 
         [Authorize(Roles = "Operator")]
         [HttpPost("register")]
-        public async Task<ActionResult<AuthenticationResponse>> RegisterUser([FromBody] PersonRegisterDto registerModel)
+        public async Task<IActionResult> RegisterUser(PersonRegisterDto registerModel)
         {
             var response = await personAuthService.RegisterPersonAsync(registerModel);
-            if (!response.IsSuccess)
+            if (!response.Success)
             {
-                return BadRequest(response);
+                return BadRequest(new { ErrorMessage = response.Message });
             }
-            return Ok(response);
+            return Ok(new { response.Message });
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<AuthenticationResponse>> Login([FromBody] PersonLoginDto loginModel)
+        public async Task<IActionResult> Login(PersonLoginDto loginModel)
         {
             var response = await personAuthService.AuthenticationPersonAsync(loginModel);
-            if (!response.IsSuccess)
+            if (!response.Success)
             {
-                return BadRequest(response);
+                return BadRequest(new { ErrorMessage = response.Message });
             }
-            return Ok(new { response });
+            return Ok(new{ Token = response.Data });
         }
     }
 }

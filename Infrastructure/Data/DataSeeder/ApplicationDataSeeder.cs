@@ -1,52 +1,117 @@
 ﻿using BankingSystem.Core.Identity;
+using BankingSystem.Core.ServiceContracts;
+using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.RepositoryContracts;
 using BankingSystem.Infrastructure.Data.DatabaseContext;
 using Microsoft.AspNetCore.Identity;
-using static System.Formats.Asn1.AsnWriter;
+using Microsoft.Extensions.Configuration;
 
 namespace BankingSystem.Infrastructure.Data.DataSeeder;
 
-public class ApplicationDataSeeder
+public class ApplicationDataSeeder(
+    BankingSystemDbContext context,
+    UserManager<IdentityPerson> userManager,
+    RoleManager<IdentityRole> roleManager,
+    IBankAccountRepository bankAccountRepository,
+    IBankCardRepository bankCardRepository,
+    IPersonRepository personRepository,
+    IConfiguration configuration,
+    ILoggerService logger)
 {
-    private readonly UserManager<IdentityPerson> _userManager;
-    private readonly BankingSystemDbContext _context;
-    private readonly RoleManager<IdentityRole> _roleManager;
-    public ApplicationDataSeeder(BankingSystemDbContext context, UserManager<IdentityPerson> userManager, RoleManager<IdentityRole> roleManager)
-    {
-        _context = context;
-        _userManager = userManager;
-        _roleManager = roleManager;
-    }
-
     public async Task Seed()
     {
         await SeedData();
     }
 
-    public async Task SeedData()
+    private async Task SeedData()
+    {
+        try
+        {
+            await SeedRoles();
+            await SeedUsersAndAccounts();
+
+            logger.LogSuccessInConsole("Database seeding completed successfully.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogErrorInConsole($"Error seeding database: {ex.Message}");
+        }
+    }
+
+    private async Task SeedRoles()
     {
         var roles = new[] { "Operator", "Person" };
 
         foreach (var role in roles)
         {
-            if (!await _roleManager.RoleExistsAsync(role))
-                await _roleManager.CreateAsync(new IdentityRole(role));
-        }
-
-
-        if (!_context.IdentityPersons.Any())
-        {
-            var person = new IdentityPerson
-            {
-                UserName = "test@gmail.com",
-                Email = "test@gmail.com",
-                FirstName = "test",
-                Lastname = "test",
-                BirthDate = DateTime.Now,
-                IdNumber = "02313213211"
-            };
-
-            await _userManager.CreateAsync(person, "Testtest1#");
-            await _userManager.AddToRoleAsync(person, "Operator");
+            if (!await roleManager.RoleExistsAsync(role))
+                await roleManager.CreateAsync(new IdentityRole(role));
         }
     }
+
+    private async Task SeedUsersAndAccounts()
+    {
+        if (context.IdentityPersons.Any()) return;
+
+        var operatorPassword = configuration["Seeder:OperatorPassword"] ?? "Password1#";
+        var personPassword = configuration["Seeder:PersonPassword"] ?? "Password1#";
+
+        var users = new List<(string email, string role)>
+        {
+            ("test@gmail.com", "Operator"),
+            ("testperson1@gmail.com", "Person"),
+            ("testperson2@gmail.com", "Person")
+        };
+
+        foreach (var (email, role) in users)
+        {
+            var user = new IdentityPerson
+            {
+                UserName = email,
+                Email = email,
+                FirstName = email.Split('@')[0],
+                Lastname = "User",
+                BirthDate = DateTime.UtcNow.AddYears(-30),
+                IdNumber = "01010034023"
+            };
+
+            await userManager.CreateAsync(user, role == "Operator" ? operatorPassword : personPassword);
+
+            await userManager.AddToRoleAsync(user, role);
+
+            var person = await personRepository.GetPersonByUsernameAsync(email);
+
+            var bankAccount = new BankAccount
+            {
+                Currency = "GEL",
+                PersonId = person!.PersonId,
+                Balance = 5000,
+                IBAN = GenerateIban()
+            };
+
+            await bankAccountRepository.CreateAccountAsync(bankAccount);
+
+            var personFullInfo = await personRepository.GetPersonByIdAsync(person.PersonId);
+
+            var personAccountId = personFullInfo!.BankAccounts.First().BankAccountId;
+
+            var card = new BankCard
+            {
+                CardNumber = GenerateCardNumber(),
+                Cvv = GenerateCvv(),
+                PinCode = GeneratePinCode(),
+                ExpirationDate = DateTime.UtcNow.AddYears(5),
+                Firstname = user.FirstName,
+                Lastname = user.Lastname,
+                AccountId = personAccountId
+            };
+
+            await bankCardRepository.CreateCardAsync(card);
+        }
+    }
+
+    private string GenerateIban() => $"GE{new Random().Next(100000000, 999999999)}{new Random().Next(100000000, 999999999)}";
+    private string GenerateCardNumber() => $"{new Random().Next(100000000, 999999999)}{new Random().Next(10000, 99999)}";
+    private string GenerateCvv() => new Random().Next(100, 999).ToString();
+    private string GeneratePinCode() => new Random().Next(1000, 9999).ToString();
 }
