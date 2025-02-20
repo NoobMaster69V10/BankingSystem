@@ -14,10 +14,12 @@ public class BankCardRepository : IBankCardRepository
     {
         _connection = connection;
     }
+
     public void SetTransaction(IDbTransaction transaction)
     {
         _transaction = transaction;
     }
+
     public async Task CreateCardAsync(BankCard card)
     {
         const string query =
@@ -29,51 +31,59 @@ public class BankCardRepository : IBankCardRepository
     public async Task<BankCard?> GetCardAsync(string cardNumber)
     {
         return await _connection.QueryFirstOrDefaultAsync<BankCard>(
-            "select * from BankCards where CardNumber = @CardNumber", new
-            {
-                CardNumber = cardNumber
-            });
+            "select * from BankCards where CardNumber = @CardNumber", 
+            new { CardNumber = cardNumber },
+            _transaction);
     }
-    public async Task<bool> ValidateCardAsync(string cardNumber, string pinCode)
+
+    public async Task<bool> DoesCardExistAsync(string cardNumber)
     {
-        var card = await GetCardAsync(cardNumber);
-        return card != null && pinCode == card.PinCode;
+        string query = "SELECT CASE WHEN EXISTS (SELECT 1 FROM BankCards WHERE CardNumber = @CardNumber) THEN 1 ELSE 0 END";
+        return await _connection.ExecuteScalarAsync<bool>(query, new { CardNumber = cardNumber }, _transaction);
+    }
+
+    public async Task<bool> IsCardExpiredAsync(string cardNumber)
+    {
+        string query =
+            "SELECT CASE WHEN ExpirationDate < GETDATE() THEN 1 ELSE 0 END FROM BankCards WHERE CardNumber = @CardNumber";
+
+        return await _connection.ExecuteScalarAsync<bool>(query, new { CardNumber = cardNumber }, _transaction);
+    }
+
+    public async Task<bool> CheckPinCodeAsync(string cardNumber, string pinCode)
+    {
+        string query =
+            "SELECT CASE WHEN EXISTS (SELECT 1 FROM BankCards WHERE CardNumber = @CardNumber AND PinCode = @PinCode) THEN 1 ELSE 0 END";
+
+        return await _connection.ExecuteScalarAsync<bool>(query, new { CardNumber = cardNumber, PinCode = pinCode }, _transaction);
     }
 
     public async Task UpdatePinAsync(string cardNumber, string pinCode)
-    {
-        var card = await GetCardAsync(cardNumber);
-    
-        if (card == null)
-        {
-            throw new KeyNotFoundException("Card not found.");
-        }
-
+    { 
         const string query = @"
         UPDATE BankCards 
         SET PinCode = @PinCode 
         WHERE CardNumber = @CardNumber";
 
-        await _connection.ExecuteAsync(query, new { PinCode = pinCode, CardNumber = cardNumber }, _transaction);        
+        await _connection.ExecuteAsync(query, new { PinCode = pinCode, CardNumber = cardNumber }, _transaction);
     }
-    
+
     public async Task<decimal> GetBalanceAsync(string cardNumber)
     {
         const string query = """
-                             
                                      SELECT ba.Balance 
                                      FROM BankAccounts ba
                                      INNER JOIN BankCards bc ON bc.AccountId = ba.Id
                                      WHERE bc.CardNumber = @CardNumber
                              """;
 
-        return await _connection.QuerySingleOrDefaultAsync<decimal>(query, new { CardNumber = cardNumber });    }
-
-    public async Task<BankAccount?> GetAccountAsync(string cardNumber)
-    {
-        return await _connection.QuerySingleOrDefaultAsync<BankAccount>(
-            "SELECT b.* FROM BankCards bc INNER JOIN BankAccounts b ON bc.AccountId = b.Id WHERE bc.CardNumber = @CardNumber", 
-            new { CardNumber = cardNumber });
+        return await _connection.QuerySingleOrDefaultAsync<decimal>(query, new { CardNumber = cardNumber }, _transaction);
     }
 
+    public async Task<BankAccount?> GetAccountByCardAsync(string cardNumber)
+    {
+        return await _connection.QuerySingleOrDefaultAsync<BankAccount>(
+            "SELECT b.* FROM BankCards bc INNER JOIN BankAccounts b ON bc.AccountId = b.Id WHERE bc.CardNumber = @CardNumber",
+            new { CardNumber = cardNumber }, _transaction);
+    }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using BankingSystem.Domain.ExternalApiContracts;
 
-namespace BankingSystem.Infrastructure.Data.ExternalApis;
+namespace BankingSystem.Infrastructure.ExternalApis;
 
 public class ExchangeRateApi(IHttpClientFactory httpClientFactory) : IExchangeRateApi
 {

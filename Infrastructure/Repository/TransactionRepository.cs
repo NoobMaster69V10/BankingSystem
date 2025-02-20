@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using BankingSystem.Core.DTO;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
 using Dapper;

@@ -6,7 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InternetBank.UI.Controllers
 {
-    public class PersonController(IPersonAuthService personAuthService, IAccountTransactionService transactionService, IPersonService personService) : CustomControllerBase
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PersonController(
+        IPersonAuthService personAuthService,
+        IAccountTransactionService transactionService,
+        IPersonService personService) : ControllerBase
     {
         [Authorize(Roles = "Person")]
         [HttpPost("transfer-money")]
@@ -31,6 +36,7 @@ namespace InternetBank.UI.Controllers
                     ErrorMessages = ["User ID not found"]
                 });
             }
+
             var result = await personService.GetPersonById(userId);
             if (result == null)
             {
@@ -40,6 +46,7 @@ namespace InternetBank.UI.Controllers
                     ErrorMessages = ["User not found."]
                 });
             }
+
             return Ok(result);
         }
 
@@ -52,6 +59,7 @@ namespace InternetBank.UI.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(response);
         }
 
@@ -63,6 +71,7 @@ namespace InternetBank.UI.Controllers
             {
                 return BadRequest(response);
             }
+
             return Ok(new { response });
         }
     }

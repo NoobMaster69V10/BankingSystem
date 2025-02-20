@@ -11,7 +11,7 @@ namespace BankingSystem.Core.Services;
 public class AccountTransactionService(
     IUnitOfWork unitOfWork,
     IExchangeRateApi exchangeRateApi,
-    ILoggerService loggerService) : IAccountTransactionService
+    ILoggerService loggerService,IBankCardService bankCardService) : IAccountTransactionService
 {
     public async Task<ApiResponse> TransactionBetweenAccountsAsync(TransactionDto transactionDto, string userId)
     {
@@ -100,18 +100,16 @@ public class AccountTransactionService(
         try
         {
             await unitOfWork.BeginTransactionAsync();
-
-            var bankAccount = await unitOfWork.BankCardRepository.GetAccountAsync(withdrawMoneyDto.CardNumber);
-            if (bankAccount == null)
+            var validated = await bankCardService.ValidateCardAsync(withdrawMoneyDto.CardNumber,withdrawMoneyDto.Pin);
+            if (!validated.IsSuccess)
             {
                 return new ApiResponse
                 {
-                    StatusCode = HttpStatusCode.NotFound,
+                    StatusCode = HttpStatusCode.BadRequest,
                     IsSuccess = false,
-                    ErrorMessages = ["This bank account does not exist."]
+                    ErrorMessages = ["Pin or CardNumber is Incorrect"]
                 };
             }
-
             var balance = await unitOfWork.BankCardRepository.GetBalanceAsync(withdrawMoneyDto.CardNumber);
             if (balance < withdrawMoneyDto.Amount)
             {
@@ -123,6 +121,27 @@ public class AccountTransactionService(
                 };
             }
 
+            var bankAccount = await unitOfWork.BankCardRepository.GetAccountByCardAsync(withdrawMoneyDto.CardNumber);
+            if (bankAccount == null)
+            {
+                return new ApiResponse
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = false,
+                    ErrorMessages = ["Account not found"]
+                };
+            }
+
+            if (withdrawMoneyDto.Amount <= 0)
+            { 
+                return new ApiResponse
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = false,
+                    ErrorMessages = ["Amount Should more than zero"]
+                };
+                
+            }
             var newBalance = balance - withdrawMoneyDto.Amount;
             await unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, newBalance);
 

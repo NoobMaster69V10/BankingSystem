@@ -1,5 +1,4 @@
 using System.Net;
-using System.Text.Unicode;
 using BankingSystem.Core.DTO;
 using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.ServiceContracts;
@@ -11,72 +10,71 @@ public class AtmService : IAtmService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ApiResponse _response;
+    private readonly IBankCardService _bankCardService;
+    private readonly ILoggerService _loggerService;
 
 
-    public AtmService(IUnitOfWork unitOfWork)
+    public AtmService(IUnitOfWork unitOfWork, IBankCardService bankCardService, ILoggerService loggerService)
     {
         _unitOfWork = unitOfWork;
+        _bankCardService = bankCardService;
+        _loggerService = loggerService;
         _response = new();
     }
 
-    public async Task<ApiResponse> AuthorizeCardAsync(CardAuthorizationDto cardAuthorizationDto)
+    public async Task<ApiResponse> AuthorizeCardAsync(string cardNumber, string pin)
     {
         try
         {
-            var authorized = await _unitOfWork.BankCardRepository.ValidateCardAsync(cardAuthorizationDto.CardNumber,
-                cardAuthorizationDto.PinCode);
-            if (!authorized)
+            return await _bankCardService.ValidateCardAsync(cardNumber, pin);
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogErrorInConsole($"Error in CreateBankAccountAsync: {ex}");
+            throw;
+        }
+    }
+    public async Task<ApiResponse> ShowBalanceAsync(CardAuthorizationDto cardDto)
+    {
+        try
+        {
+            var response = await AuthorizeCardAsync(cardDto.CardNumber, cardDto.PinCode);
+            if (!response.IsSuccess)
             {
-                _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.IsSuccess = false;
-                _response.ErrorMessages.Add("Card number or pin code is invalid.");
-                return _response;
+                return response;
             }
-
-            _response.StatusCode = HttpStatusCode.NoContent;
-            return _response;
-        }
-        catch (Exception ex)
-        {
-            _response.StatusCode = HttpStatusCode.BadRequest;
-            _response.IsSuccess = false;
-            _response.ErrorMessages.Add(ex.Message);
-            return _response;
-        }
-    }
-    public async Task<ApiResponse> ShowBalanceAsync(string cardNumber)
-    {
-        try
-        {
-            var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardNumber);
+            var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardDto.CardNumber);
             _response.StatusCode = HttpStatusCode.OK;
-            _response.Result = balance;
+            _response.Result = new
+            {
+                Balance = balance
+            };
             return _response;
         }
         catch (Exception ex)
         {
-            _response.StatusCode = HttpStatusCode.BadRequest;
+            _loggerService.LogErrorInConsole($"Error in ShowBalanceAsync: {ex}");
             _response.IsSuccess = false;
-            _response.ErrorMessages.Add(ex.Message);
+            _response.StatusCode = HttpStatusCode.BadRequest;
             return _response;
         }
     }
-
 
     public async Task<ApiResponse> ChangePinAsync(ChangePinDto changePinDto)
     {
         try
         {   
-            var isValid = await _unitOfWork.BankCardRepository.ValidateCardAsync(changePinDto.CardNumber,changePinDto.CurrentPin);
-            if (!isValid)
+            var response = await AuthorizeCardAsync(changePinDto.CardNumber,changePinDto.CurrentPin);
+            if (!response.IsSuccess)
             {
-                _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.IsSuccess = false;
-                _response.ErrorMessages.Add("Current PIN is incorrect");
-                return _response;
+                return response;
             }
-            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.NewPin);
-            _response.StatusCode = HttpStatusCode.OK;
+            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CurrentPin, changePinDto.NewPin);
+            _response.StatusCode = HttpStatusCode.Accepted;
+            _response.Result = new
+            {
+                Message = "Success"
+            };
             return _response;
         }
         catch (Exception ex)
@@ -87,33 +85,4 @@ public class AtmService : IAtmService
             return _response;
         }
     }
-    
-    
-    
-    // public async Task<ApiResponse> ShowBalanceAsync(CardAuthorizationDto cardDto)
-    // {
-    //     try
-    //     {
-    //         var authorized = await _unitOfWork.BankCardRepository.ValidateCardAsync(cardDto.CardNumber,
-    //             cardDto.PinCode);
-    //         if (!authorized)
-    //         {
-    //             _response.StatusCode = HttpStatusCode.BadRequest;
-    //             _response.IsSuccess = false;
-    //             _response.ErrorMessages.Add("Card number or pin code is invalid.");
-    //             return _response;
-    //         }
-    //
-    //         var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardDto.CardNumber);
-    //         _response.StatusCode = HttpStatusCode.OK;
-    //         return _response;
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         _response.StatusCode = HttpStatusCode.BadRequest;
-    //         _response.IsSuccess = false;
-    //         _response.ErrorMessages.Add(ex.Message);
-    //         return _response;
-    //     }
-    // }
 }

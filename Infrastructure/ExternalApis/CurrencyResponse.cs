@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace BankingSystem.Infrastructure.Data.ExternalApis;
+namespace BankingSystem.Infrastructure.ExternalApis;
 public class CurrencyResponse
 {
     [JsonPropertyName("currencies")]
