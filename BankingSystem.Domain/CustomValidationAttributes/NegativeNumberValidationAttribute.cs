@@ -9,10 +9,6 @@ public class NegativeNumberValidationAttribute : ValidationAttribute
         if (value == null!)
             return new ValidationResult("Number is required.");
 
-
-        if (value is decimal and < 0)
-            return new ValidationResult("Number must be 0 or positive.");
-
-        return ValidationResult.Success!;
+        return value is decimal and < 0 ? new ValidationResult("Number must be 0 or positive.") : ValidationResult.Success!;
     }
 }

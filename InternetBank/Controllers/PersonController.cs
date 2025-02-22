@@ -55,7 +55,7 @@ namespace InternetBank.UI.Controllers
         public async Task<ActionResult<AuthenticationResponse>> RegisterUser([FromBody] PersonRegisterDto registerModel)
         {
             var response = await personAuthService.RegisterPersonAsync(registerModel);
-            if (!response.IsSuccess)
+            if (!response.Success)
             {
                 return BadRequest(response);
             }
@@ -67,7 +67,7 @@ namespace InternetBank.UI.Controllers
         public async Task<ActionResult<AuthenticationResponse>> Login([FromBody] PersonLoginDto loginModel)
         {
             var response = await personAuthService.AuthenticationPersonAsync(loginModel);
-            if (!response.IsSuccess)
+            if (!response.Success)
             {
                 return BadRequest(response);
             }

@@ -1,7 +1,7 @@
-using System.Net;
 using BankingSystem.Core.DTO;
-using BankingSystem.Core.DTO.Response;
+using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
+using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.UnitOfWorkContracts;
 
 namespace BankingSystem.Core.Services;
@@ -9,80 +9,78 @@ namespace BankingSystem.Core.Services;
 public class AtmService : IAtmService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ApiResponse _response;
     private readonly IBankCardService _bankCardService;
     private readonly ILoggerService _loggerService;
-
 
     public AtmService(IUnitOfWork unitOfWork, IBankCardService bankCardService, ILoggerService loggerService)
     {
         _unitOfWork = unitOfWork;
         _bankCardService = bankCardService;
         _loggerService = loggerService;
-        _response = new();
     }
 
-    public async Task<ApiResponse> AuthorizeCardAsync(string cardNumber, string pin)
+    public async Task<Result> AuthorizeCardAsync(string cardNumber, string pin)
     {
         try
         {
-            return await _bankCardService.ValidateCardAsync(cardNumber, pin);
+            var validationResult = await _bankCardService.ValidateCardAsync(cardNumber, pin);
+            if (!validationResult.IsSuccess)
+            {
+                return Result.Failure(validationResult.Error);
+            }
+
+            return Result.Success();
         }
         catch (Exception ex)
         {
-            _loggerService.LogErrorInConsole($"Error in CreateBankAccountAsync: {ex}");
-            throw;
+            _loggerService.LogErrorInConsole($"Error in AuthorizeCardAsync: {ex}");
+            return Error.Failure("Error occured while authorize");
         }
     }
-    public async Task<ApiResponse> ShowBalanceAsync(CardAuthorizationDto cardDto)
+
+    public async Task<ResultT<decimal>> ShowBalanceAsync(CardAuthorizationDto cardDto)
     {
         try
         {
-            var response = await AuthorizeCardAsync(cardDto.CardNumber, cardDto.PinCode);
-            if (!response.IsSuccess)
+            var authResult = await AuthorizeCardAsync(cardDto.CardNumber, cardDto.PinCode);
+            if (!authResult.IsSuccess)
             {
-                return response;
+                return ResultT<decimal>.Failure(authResult.Error);
             }
+
             var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardDto.CardNumber);
-            _response.StatusCode = HttpStatusCode.OK;
-            _response.Result = new
-            {
-                Balance = balance
-            };
-            return _response;
+            return ResultT<decimal>.Success(balance);
         }
         catch (Exception ex)
         {
             _loggerService.LogErrorInConsole($"Error in ShowBalanceAsync: {ex}");
-            _response.IsSuccess = false;
-            _response.StatusCode = HttpStatusCode.BadRequest;
-            return _response;
+            return ResultT<decimal>.Failure(
+                Error.Failure(
+                    "An error occurred while retrieving the balance"
+                ));
+            
         }
     }
 
-    public async Task<ApiResponse> ChangePinAsync(ChangePinDto changePinDto)
+    public async Task<Result> ChangePinAsync(ChangePinDto changePinDto)
     {
         try
-        {   
-            var response = await AuthorizeCardAsync(changePinDto.CardNumber,changePinDto.CurrentPin);
-            if (!response.IsSuccess)
+        {
+            var authResult = await AuthorizeCardAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
+            if (!authResult.IsSuccess)
             {
-                return response;
+                return Result.Failure(authResult.Error);
             }
+
             await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CurrentPin, changePinDto.NewPin);
-            _response.StatusCode = HttpStatusCode.Accepted;
-            _response.Result = new
-            {
-                Message = "Success"
-            };
-            return _response;
+            return Result.Success();
         }
         catch (Exception ex)
         {
-            _response.StatusCode = HttpStatusCode.BadRequest;
-            _response.IsSuccess = false;
-            _response.ErrorMessages.Add(ex.Message);
-            return _response;
+            _loggerService.LogErrorInConsole($"Error in ChangePinAsync: {ex}");
+            return Error.Failure(
+                "An error occurred while changing the PIN"
+            );
         }
     }
 }

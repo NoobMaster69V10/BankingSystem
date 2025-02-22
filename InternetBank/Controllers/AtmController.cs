@@ -18,7 +18,7 @@ public class AtmController : ControllerBase
     }
     
     [HttpPost("balance")]
-    public async Task<ActionResult<ApiResponse>> ShowBalance(CardAuthorizationDto cardDto)
+    public async Task<IActionResult> ShowBalance(CardAuthorizationDto cardDto)
     {
         var response = await _atmService.ShowBalanceAsync(cardDto);
         return response.IsSuccess ? Ok(response) : BadRequest(response);

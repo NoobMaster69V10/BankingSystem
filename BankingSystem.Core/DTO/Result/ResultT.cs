@@ -1,8 +1,8 @@
-using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Errors;
 
-namespace BankingSystem.Core.DTO.Response;
+namespace BankingSystem.Core.DTO.Result;
 
-public sealed class ResultT<TValue> : Result
+public sealed class ResultT<TValue> : global::Result
 {
     private readonly TValue? _value;
 
@@ -32,6 +32,6 @@ public sealed class ResultT<TValue> : Result
     public static ResultT<TValue> Success(TValue value) =>
         new(value);
 
-    public new static ResultT<TValue> Failure(Error error) =>
+    public static new ResultT<TValue> Failure(Error error) =>
         new(error);
 }

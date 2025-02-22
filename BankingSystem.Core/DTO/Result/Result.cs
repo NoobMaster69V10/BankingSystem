@@ -1,7 +1,5 @@
 using System.Text.Json.Serialization;
-using BankingSystem.Domain.Entities;
-
-namespace BankingSystem.Core.DTO.Response;
+using BankingSystem.Domain.Errors;
 
 public class Result
 {
@@ -20,7 +18,8 @@ public class Result
     public bool IsSuccess { get; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public Error? Error { get; }  
+    public Error? Error { get; }
+
     public static implicit operator Result(Error error) =>
         new(error);
 
