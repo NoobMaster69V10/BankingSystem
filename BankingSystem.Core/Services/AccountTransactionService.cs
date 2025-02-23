@@ -27,9 +27,14 @@ public class AccountTransactionService(
             var fromAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.FromAccountId);
             var toAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.ToAccountId);
 
-            if (fromAccount is null || toAccount is null)
+            if (fromAccount is null)
             {
-                return CustomResult<AccountTransaction>.Failure(CustomError.ValidationError("Bank account not found!"));
+                return CustomResult<AccountTransaction>.Failure(CustomError.ValidationError($"Bank account with id '{transactionDto.FromAccountId}' not found!"));
+            }
+
+            if (toAccount is null)
+            {
+                return CustomResult<AccountTransaction>.Failure(CustomError.ValidationError($"Bank account with id '{transactionDto.ToAccountId}' not found!"));
             }
 
             if (fromAccount.PersonId != userId)
@@ -126,7 +131,6 @@ public class AccountTransactionService(
             return CustomResult<bool>.Failure(CustomError.ServerError("An error occurred during the transaction."));
         }
     }
-
 
     private async Task<decimal> ConvertCurrencyAsync(decimal amount, string fromCurrency, string toCurrency)
     {

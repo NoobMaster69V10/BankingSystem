@@ -1,7 +1,10 @@
-﻿namespace BankingSystem.Domain.Entities;
+﻿using System.Text.Json.Serialization;
+
+namespace BankingSystem.Domain.Entities;
 
 public class AccountTransaction
 {
+    [JsonIgnore]
     public int Id { get; set; }
     public decimal Amount { get; set; }
     public string Currency { get; set; }

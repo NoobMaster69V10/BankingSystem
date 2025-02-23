@@ -38,13 +38,11 @@ public class PersonAuthService(
         }
     }
 
-    public async Task<CustomResult<IdentityPerson>> RegisterPersonAsync(PersonRegisterDto registerDto)
+    public async Task<CustomResult<PersonRegisterDto>> RegisterPersonAsync(PersonRegisterDto registerDto)
     {
         try
         {
-
-        
-            var user = new IdentityPerson
+            var person = new IdentityPerson
             {
                 UserName = registerDto.Email,
                 Email = registerDto.Email,
@@ -54,11 +52,11 @@ public class PersonAuthService(
                 IdNumber = registerDto.IdNumber
             };
 
-            var result = await userManager.CreateAsync(user, registerDto.Password);
+            var result = await userManager.CreateAsync(person, registerDto.Password);
 
             if (!result.Succeeded)
             {
-                return CustomResult<IdentityPerson>.Failure(new CustomError("UNEXPECTED_ERROR", string.Join(" ", result.Errors.Select(e => e.Description))));
+                return CustomResult<PersonRegisterDto>.Failure(new CustomError("UNEXPECTED_ERROR", string.Join(" ", result.Errors.Select(e => e.Description))));
             }
 
             if (string.IsNullOrEmpty(registerDto.Role))
@@ -66,17 +64,17 @@ public class PersonAuthService(
 
             if (!await roleManager.RoleExistsAsync(registerDto.Role))
             {
-                return CustomResult<IdentityPerson>.Failure(CustomError.RecordNotFound($"The role '{registerDto.Role}' does not exist."));
+                return CustomResult<PersonRegisterDto>.Failure(CustomError.RecordNotFound($"The role '{registerDto.Role}' does not exist."));
             }
 
-            await userManager.AddToRoleAsync(user, registerDto.Role);
+            await userManager.AddToRoleAsync(person, registerDto.Role);
 
-            return CustomResult<IdentityPerson>.Success(user);
+            return CustomResult<PersonRegisterDto>.Success(registerDto);
         }
         catch (Exception ex)
         {
             loggerService.LogErrorInConsole(ex.Message);
-            return CustomResult<IdentityPerson>.Failure(CustomError.ServerError("Error occurred while authenticating person"));
+            return CustomResult<PersonRegisterDto>.Failure(CustomError.ServerError("Error occurred while authenticating person"));
         }
     }
 

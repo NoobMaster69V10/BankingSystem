@@ -43,6 +43,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
     {
         try
         {
+            await unitOfWork.BeginTransactionAsync();
             var existingCard = await unitOfWork.BankCardRepository.GetCardAsync(bankCardRegisterDto.CardNumber);
             if (existingCard != null)
             {
@@ -62,6 +63,17 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                 return CustomResult<BankCard>.Failure(CustomError.RecordNotFound("Bank account not found."));
             }
 
+            if (!person.BankAccounts.Any())
+            {
+                return CustomResult<BankCard>.Failure(CustomError.RecordNotFound($"'{bankCardRegisterDto.Username}' does not have accounts, please create accounts first!"));
+            }
+
+
+            if (person.BankAccounts.All(ba => ba.BankAccountId != bankCardRegisterDto.BankAccountId))
+            {
+                return CustomResult<BankCard>.Failure(CustomError.RecordNotFound($"'{bankCardRegisterDto.Username}' does not have account with accountId - '{bankCardRegisterDto.BankAccountId}'!"));
+            }
+
             var (hashedPin, hashedCvv, salt) = HashingHelper.HashPinAndCvv(bankCardRegisterDto.PinCode, bankCardRegisterDto.Cvv);
 
             var newCard = new BankCard
@@ -77,10 +89,12 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
             };
 
             await unitOfWork.BankCardRepository.CreateCardAsync(newCard);
+            await unitOfWork.CommitAsync();
             return CustomResult<BankCard>.Success(newCard);
         }
         catch (Exception ex)
         {
+            await unitOfWork.RollbackAsync();
             loggerService.LogErrorInConsole(ex.ToString());
             return CustomResult<BankCard>.Failure(CustomError.ServerError("Bank card could not be created."));
         }

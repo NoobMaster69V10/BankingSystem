@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace BankingSystem.Domain.Entities;
 
 public class BankAccount
 {
+    [JsonIgnore]
     public int BankAccountId { get; set; }
 
     [Required(ErrorMessage = "IBAN is required.")]

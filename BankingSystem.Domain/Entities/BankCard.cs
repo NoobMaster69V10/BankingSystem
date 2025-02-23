@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace BankingSystem.Domain.Entities;
 
 public class BankCard
 {
+    [JsonIgnore]
     public int BankCardId { get; set; }
 
     [Required(ErrorMessage = "Firstname is required.")]
@@ -20,6 +22,7 @@ public class BankCard
     public DateTime ExpirationDate { get; set; }
     public  string Cvv { get; set; }
     public string PinCode { get; set; }
+    [JsonIgnore]
     public string Salt { get; set; }
 
     [Required(ErrorMessage = "Account ID is required.")]
