@@ -20,7 +20,7 @@ public class AtmService : IAtmService
         _loggerService = loggerService;
     }
 
-    public async Task<CustomResult<bool>> AuthorizeCardAsync(string cardNumber, string pin)
+    private async Task<CustomResult<bool>> AuthorizeCardAsync(string cardNumber, string pin)
     {
         try
         {
@@ -43,15 +43,12 @@ public class AtmService : IAtmService
     {
         try
         {
-            // The issue is here - we need to handle the failure case properly
             var authResult = await AuthorizeCardAsync(cardDto.CardNumber, cardDto.PinCode);
-            if (authResult.IsFailure)  // Changed from !authResult.IsSuccess
+            if (authResult.IsFailure)  
             {
-                // Directly return the error with the correct type
                 return CustomResult<BalanceResponseDto>.Failure(authResult.Error);
             }
 
-            // Only proceed if authorization was successful
             var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardDto.CardNumber);
             var response = new BalanceResponseDto(
                 balance: balance,

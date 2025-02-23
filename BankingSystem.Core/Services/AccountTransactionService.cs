@@ -1,8 +1,10 @@
 ﻿using System.Net;
 using BankingSystem.Core.DTO;
 using BankingSystem.Core.DTO.Response;
+using BankingSystem.Core.DTO.Result;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Core.ServiceContracts;
+using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
 
@@ -79,53 +81,31 @@ public class AccountTransactionService(
     }
 
 
-    public async Task<ApiResponse> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto)
+    public async Task<CustomResult<bool>> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto)
     {
         try
         {
             await unitOfWork.BeginTransactionAsync();
+            if (withdrawMoneyDto.Amount <= 0)
+            {
+                return CustomResult<bool>.Failure(new CustomError("AmountLessOrEqualZero", "Amount must be greater than 0."));
+            }
             var validated = await bankCardService.ValidateCardAsync(withdrawMoneyDto.CardNumber,withdrawMoneyDto.Pin);
             if (!validated.IsSuccess)
             {
-                return new ApiResponse
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = false,
-                    ErrorMessages = ["Pin or CardNumber is Incorrect"]
-                };
+                return  CustomResult<bool>.Failure(validated.Error);
             }
             var balance = await unitOfWork.BankCardRepository.GetBalanceAsync(withdrawMoneyDto.CardNumber);
             if (balance < withdrawMoneyDto.Amount)
             {
-                return new ApiResponse
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = false,
-                    ErrorMessages = ["Insufficient funds."]
-                };
+                return CustomResult<bool>.Failure(new CustomError("NotEnoughBalance","Not enough balance."));
             }
 
             var bankAccount = await unitOfWork.BankCardRepository.GetAccountByCardAsync(withdrawMoneyDto.CardNumber);
-            if (bankAccount == null)
-            {
-                return new ApiResponse
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = false,
-                    ErrorMessages = ["Account not found"]
-                };
+            if (bankAccount == null){
+                return CustomResult<bool>.Failure(CustomError.RecordNotFound("Bank account not found."));
             }
-
-            if (withdrawMoneyDto.Amount <= 0)
-            { 
-                return new ApiResponse
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = false,
-                    ErrorMessages = ["Amount Should more than zero"]
-                };
-                
-            }
+            
             var newBalance = balance - withdrawMoneyDto.Amount;
             await unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, newBalance);
 
@@ -139,30 +119,13 @@ public class AccountTransactionService(
 
             await unitOfWork.TransactionRepository.AddAtmTransactionAsync(atmTransaction);
             await unitOfWork.CommitAsync();
-
-            return new ApiResponse
-            {
-                StatusCode = HttpStatusCode.OK,
-                IsSuccess = true,
-                Result = new
-                {
-                    Message = "Withdrawal successful.",
-                    NewBalance = newBalance,
-                    withdrawMoneyDto.CardNumber
-                }
-            };
+            return CustomResult<bool>.Success(true);  
         }
         catch (Exception ex)
         {
             await unitOfWork.RollbackAsync();
             loggerService.LogErrorInConsole($"Error in WithdrawMoneyAsync: {ex}");
-
-            return new ApiResponse
-            {
-                StatusCode = HttpStatusCode.InternalServerError,
-                IsSuccess = false,
-                ErrorMessages = ["An error occurred while processing the withdrawal."]
-            };
+            return CustomResult<bool>.Failure(CustomError.ServerError("An error occurred during the transaction."));
         }
     }
 

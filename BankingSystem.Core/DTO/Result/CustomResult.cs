@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using BankingSystem.Domain.Errors;
 
 namespace BankingSystem.Core.DTO.Result;
@@ -8,30 +9,45 @@ public class CustomResult<T>
 
     private CustomResult(T value)
     {
-        _value = value;
+        Value = value;
         IsSuccess = true;
-        Error = CustomError.None;
+        // Error = CustomError.None;
     }
 
     private CustomResult(CustomError error)
     {
-        _value = default;
         if (error == CustomError.None)
         {
             throw new ArgumentException("invalid error", nameof(error));
         }
+
         IsSuccess = false;
         Error = error;
     }
-
+    
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool IsSuccess { get; }
-
+    
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool IsFailure => !IsSuccess;
 
-    public T? Value =>
-        IsSuccess ? _value! : throw new InvalidOperationException("Value can not be accessed when IsSuccess is false");
+    public T Value
+    {
+        get
+        {
+            if (IsFailure)
+            {
+                throw new InvalidOperationException("there is no value for failure");
+            }
 
-    public CustomError Error { get; }
+            return _value!;
+        }
+
+        private init => _value = value;
+    }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public CustomError? Error { get; } 
 
     public static CustomResult<T> Success(T value)
     {
@@ -42,9 +58,4 @@ public class CustomResult<T>
     {
         return new CustomResult<T>(error);
     }
-    public static implicit operator CustomResult<T>(CustomError error) =>
-        new(error);
-
-    public static implicit operator CustomResult<T>(T value) =>
-        new(value);
 }

@@ -1,19 +1,26 @@
-namespace BankingSystem.Domain.Errors;
-
-public sealed record CustomError(string Code, string Message)
+namespace BankingSystem.Domain.Errors
 {
-    private static readonly string RecordNotFoundCode = "RecordNotFound";
-    private static readonly string ValidationErrorCode = "ValidationError";
-
-    public static readonly CustomError None = new(string.Empty, string.Empty);
-
-    public static CustomError RecordNotFound(string message)
+    public sealed record CustomError(string Code, string Message)
     {
-        return new CustomError(RecordNotFoundCode, message);
-    }
+        private const string RecordNotFoundCode = "RecordNotFound";
+        private const string ValidationErrorCode = "ValidationError";
+        private const string ServerErrorCode = "ServerError";
 
-    public static CustomError ValidationError(string message)
-    {
-        return new CustomError(ValidationErrorCode, message);
+        public static readonly CustomError None = new(string.Empty, string.Empty);
+        
+        public static CustomError RecordNotFound(string message)
+        {
+            return new CustomError(RecordNotFoundCode, message);
+        }
+
+        public static CustomError ServerError(string message)
+        {
+            return new CustomError(ServerErrorCode, message);
+        }
+
+        public static CustomError ValidationError(string message)
+        {
+            return new CustomError(ValidationErrorCode, message);
+        }
     }
 }

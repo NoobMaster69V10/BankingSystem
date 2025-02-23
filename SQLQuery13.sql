@@ -50,7 +50,7 @@ Create Table AtmWithdrawals(
 	Currency NVARCHAR(3) NOT NULL CHECK (Currency IN ('USD', 'EUR', 'GEL')),
 	TransactionDate DATE NOT NULL DEFAULT GETDATE(),
 	AccountId INT NOT NULL,
-
+	TransactionFee decimal NOT Null
 	FOREIGN KEY (AccountId)
 	REFERENCES BankAccounts(Id),
 

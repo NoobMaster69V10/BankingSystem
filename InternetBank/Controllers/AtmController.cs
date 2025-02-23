@@ -21,19 +21,14 @@ public class AtmController : ControllerBase
     public async Task<IActionResult> ShowBalance(CardAuthorizationDto cardDto)
     {
         var result = await _atmService.ShowBalanceAsync(cardDto);
-        if (result.IsFailure)
-        {
-            return BadRequest(result.Error);
-        }
-        return Ok(result.Value);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
     }
 
     [HttpPost("withdraw-money")]
-    public async Task<ActionResult<ApiResponse>> WithdrawMoney([FromBody] WithdrawMoneyDto cardDto)
+    public async Task<IActionResult> WithdrawMoney([FromBody] WithdrawMoneyDto cardDto)
     {
-        var response = await _accountTransactionService.WithdrawMoneyAsync(cardDto);
-        return response.IsSuccess ? Ok(response) : BadRequest(response);
-
+        var result = await _accountTransactionService.WithdrawMoneyAsync(cardDto);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
     }
 
     [HttpPost("change-pin")]
