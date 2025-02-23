@@ -20,9 +20,12 @@ public class AtmController : ControllerBase
     [HttpPost("balance")]
     public async Task<IActionResult> ShowBalance(CardAuthorizationDto cardDto)
     {
-        var response = await _atmService.ShowBalanceAsync(cardDto);
-        return response.IsSuccess ? Ok(response) : BadRequest(response);
-
+        var result = await _atmService.ShowBalanceAsync(cardDto);
+        if (result.IsFailure)
+        {
+            return BadRequest(result.Error);
+        }
+        return Ok(result.Value);
     }
 
     [HttpPost("withdraw-money")]

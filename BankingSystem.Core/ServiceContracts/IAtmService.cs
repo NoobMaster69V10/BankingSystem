@@ -6,6 +6,6 @@ namespace BankingSystem.Core.ServiceContracts;
 
 public interface IAtmService
 {
-    Task<ResultT<decimal>> ShowBalanceAsync(CardAuthorizationDto cardDto);
-    Task<Result> ChangePinAsync(ChangePinDto pinDto);
+    Task<CustomResult<BalanceResponseDto>> ShowBalanceAsync(CardAuthorizationDto cardDto);
+    Task<CustomResult<bool>> ChangePinAsync(ChangePinDto pinDto);
 }

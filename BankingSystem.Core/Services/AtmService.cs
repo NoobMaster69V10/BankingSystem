@@ -1,4 +1,5 @@
 using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Errors;
@@ -19,67 +20,73 @@ public class AtmService : IAtmService
         _loggerService = loggerService;
     }
 
-    public async Task<Result> AuthorizeCardAsync(string cardNumber, string pin)
+    public async Task<CustomResult<bool>> AuthorizeCardAsync(string cardNumber, string pin)
     {
         try
         {
             var validationResult = await _bankCardService.ValidateCardAsync(cardNumber, pin);
             if (!validationResult.IsSuccess)
             {
-                return Result.Failure(validationResult.Error);
+                return CustomResult<bool>.Failure(validationResult.Error);
             }
 
-            return Result.Success();
+            return CustomResult<bool>.Success(true);
         }
         catch (Exception ex)
         {
             _loggerService.LogErrorInConsole($"Error in AuthorizeCardAsync: {ex}");
-            return Error.Failure("Error occured while authorize");
+            return CustomResult<bool>.Failure(new CustomError("AUTH_ERROR", "Error occurred while authorizing"));
         }
     }
 
-    public async Task<ResultT<decimal>> ShowBalanceAsync(CardAuthorizationDto cardDto)
+    public async Task<CustomResult<BalanceResponseDto>> ShowBalanceAsync(CardAuthorizationDto cardDto)
     {
         try
         {
+            // The issue is here - we need to handle the failure case properly
             var authResult = await AuthorizeCardAsync(cardDto.CardNumber, cardDto.PinCode);
-            if (!authResult.IsSuccess)
+            if (authResult.IsFailure)  // Changed from !authResult.IsSuccess
             {
-                return ResultT<decimal>.Failure(authResult.Error);
+                // Directly return the error with the correct type
+                return CustomResult<BalanceResponseDto>.Failure(authResult.Error);
             }
 
+            // Only proceed if authorization was successful
             var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardDto.CardNumber);
-            return ResultT<decimal>.Success(balance);
+            var response = new BalanceResponseDto(
+                balance: balance,
+                cardNumber: cardDto.CardNumber
+            );
+        
+            return CustomResult<BalanceResponseDto>.Success(response);
         }
         catch (Exception ex)
         {
             _loggerService.LogErrorInConsole($"Error in ShowBalanceAsync: {ex}");
-            return ResultT<decimal>.Failure(
-                Error.Failure(
-                    "An error occurred while retrieving the balance"
-                ));
-            
+            return CustomResult<BalanceResponseDto>.Failure(
+                new CustomError("BALANCE_ERROR", "An error occurred while retrieving the balance")
+            );
         }
     }
 
-    public async Task<Result> ChangePinAsync(ChangePinDto changePinDto)
+    public async Task<CustomResult<bool>> ChangePinAsync(ChangePinDto changePinDto)
     {
         try
         {
             var authResult = await AuthorizeCardAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
             if (!authResult.IsSuccess)
             {
-                return Result.Failure(authResult.Error);
+                return CustomResult<bool>.Failure(authResult.Error);
             }
 
-            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CurrentPin, changePinDto.NewPin);
-            return Result.Success();
+            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
+            return CustomResult<bool>.Success(true);
         }
         catch (Exception ex)
         {
             _loggerService.LogErrorInConsole($"Error in ChangePinAsync: {ex}");
-            return Error.Failure(
-                "An error occurred while changing the PIN"
+            return CustomResult<bool>.Failure(
+                new CustomError("PIN_CHANGE_ERROR", "An error occurred while changing the PIN")
             );
         }
     }
