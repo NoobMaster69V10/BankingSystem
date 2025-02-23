@@ -5,4 +5,5 @@ public interface IAccountTransactionRepository : ITransaction
 {
     Task AddAccountTransactionAsync(AccountTransaction accountTransaction);
     Task AddAtmTransactionAsync(AtmTransaction atmTransaction);
+    Task<int> GetTotalWithdrawnTodayAsync(int accountId);
 }

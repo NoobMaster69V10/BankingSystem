@@ -30,7 +30,18 @@ public class TransactionRepository : IAccountTransactionRepository
     public async Task AddAtmTransactionAsync(AtmTransaction atmTransaction)
     {
         const string query =
-            "Insert into ATMWithdrawals (Amount,Currency,TransactionDate,AccountId) VALUES (@Amount,@Currency,@TransactionDate,@AccountId)";
+            "Insert into ATMWithdrawals (Amount,Currency,TransactionDate,AccountId,TransactionFee) VALUES (@Amount,@Currency,@TransactionDate,@AccountId,@TransactionFee)";
         await _connection.ExecuteAsync(query, atmTransaction, _transaction);
     }
+
+    public async Task<int> GetTotalWithdrawnTodayAsync(int accountId)
+    {
+        const string query = @"
+        SELECT COALESCE(SUM(Amount), 0)
+        FROM ATMWithdrawals
+        WHERE AccountId = @AccountId AND CAST(TransactionDate AS DATE) = CAST(GETDATE() AS DATE)";
+    
+        return await _connection.QueryFirstOrDefaultAsync<int>(query, new { AccountId = accountId },_transaction);
+    }
+
 }
