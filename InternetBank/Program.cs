@@ -1,8 +1,8 @@
 using DotNetEnv;
 using InternetBank.UI.Configure;
 using InternetBank.UI.Middlewares;
-using BankingSystem.Infrastructure.Data.DataSeeder;
 using InternetBank.UI.ActionFilters;
+using BankingSystem.Infrastructure.Data.DataSeeder;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);

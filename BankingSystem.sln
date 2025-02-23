@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankingSystem.Core", "BankingSystem.Core\BankingSystem.Core.csproj", "{DF1958C7-F7E9-4C7F-BF40-D6579BD1389A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankingSystem.Infrastructure", "Infrastructure\BankingSystem.Infrastructure.csproj", "{B4815AE9-022F-4B14-B514-AEFEE3F8CF70}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankingSystem.Infrastructure", "BankingSystem.Infrastructure\BankingSystem.Infrastructure.csproj", "{B4815AE9-022F-4B14-B514-AEFEE3F8CF70}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternetBank.UI", "InternetBank\InternetBank.UI.csproj", "{A039C24E-2153-4A83-9A02-69366BD23A7C}"
 EndProject
