@@ -9,53 +9,40 @@ public class CustomResult<T>
 
     private CustomResult(T value)
     {
-        Value = value;
+        _value = value;
         IsSuccess = true;
-        // Error = CustomError.None;
+        Error = CustomError.None;
     }
 
     private CustomResult(CustomError error)
     {
         if (error == CustomError.None)
         {
-            throw new ArgumentException("invalid error", nameof(error));
+            throw new ArgumentException("Invalid error", nameof(error));
         }
 
         IsSuccess = false;
         Error = error;
     }
-    
+
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool IsSuccess { get; }
-    
+
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool IsFailure => !IsSuccess;
 
-    public T Value
-    {
-        get
-        {
-            if (IsFailure)
-            {
-                throw new InvalidOperationException("there is no value for failure");
-            }
-
-            return _value!;
-        }
-
-        private init => _value = value;
-    }
+    public T? Value => IsSuccess ? _value : default;  
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public CustomError? Error { get; } 
+    public CustomError? Error { get; }
 
-    public static CustomResult<T> Success(T value)
-    {
-        return new CustomResult<T>(value);
-    }
+    public static CustomResult<T> Success(T value) => new(value);
 
-    public static CustomResult<T> Failure(CustomError error)
+    public static CustomResult<T> Failure(CustomError error) => new(error);
+
+    public bool TryGetValue(out T? value)
     {
-        return new CustomResult<T>(error);
+        value = _value;
+        return IsSuccess;
     }
 }
