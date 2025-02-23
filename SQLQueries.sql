@@ -6,7 +6,7 @@ CREATE TABLE BankAccounts(
 	PersonId NVARCHAR(450) NOT NULL,
 
 	FOREIGN KEY (PersonId)
-	REFERENCES AspNetUsers(Id)
+	REFERENCES AspNetUsers(Id) ON DELETE CASCADE
 )
 
 
@@ -24,7 +24,7 @@ CREATE TABLE BankCards(
 	Salt NVARCHAR(64) NOT NULL,
 
     AccountId INT NOT NULL,
-    FOREIGN KEY (AccountId) REFERENCES BankAccounts(Id)
+    FOREIGN KEY (AccountId) REFERENCES BankAccounts(Id) ON DELETE CASCADE
 )
 
 

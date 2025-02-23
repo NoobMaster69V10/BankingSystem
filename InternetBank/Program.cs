@@ -6,7 +6,6 @@ using InternetBank.UI.ActionFilters;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 
 builder.Services.AddControllers(options =>
 {
