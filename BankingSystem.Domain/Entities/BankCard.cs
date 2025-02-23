@@ -18,14 +18,9 @@ public class BankCard
 
     [Required(ErrorMessage = "Expiration date is required.")]
     public DateTime ExpirationDate { get; set; }
-
-    [Required(ErrorMessage = "CVV is required.")]
-    [StringLength(3, MinimumLength = 3, ErrorMessage = "CVV must be exactly 3 digits.")]
     public  string Cvv { get; set; }
-
-    [Required(ErrorMessage = "PIN code is required.")]
-    [StringLength(4, MinimumLength = 4, ErrorMessage = "PIN code must be exactly 4 digits.")]
     public string PinCode { get; set; }
+    public string Salt { get; set; }
 
     [Required(ErrorMessage = "Account ID is required.")]
     public int AccountId { get; set; }

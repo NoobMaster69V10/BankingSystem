@@ -1,22 +1,30 @@
-﻿using BankingSystem.Core.DTO.Response;
+﻿using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.UnitOfWorkContracts;
 
 namespace BankingSystem.Core.Services;
 
-public class PersonService(IUnitOfWork unitOfWork) : IPersonService
+public class PersonService(IUnitOfWork unitOfWork, ILoggerService loggerService) : IPersonService
 {
-    public async Task<AdvancedApiResponse<Person>> GetPersonById(string personId)
+    public async Task<CustomResult<Person>> GetPersonById(string personId)
     {
-        var result = await unitOfWork.PersonRepository.GetPersonByIdAsync(personId);
-
-        var test = 2;
-        if (string.IsNullOrEmpty(personId) || result is null)
+        try
         {
-            throw new Exception("User not found");
+            var person = await unitOfWork.PersonRepository.GetPersonByIdAsync(personId);
+
+            if (string.IsNullOrEmpty(personId) || person is null)
+            {
+                return CustomResult<Person>.Failure(CustomError.RecordNotFound("User not found"));
+            }
+           
+            return CustomResult<Person>.Success(person);
         }
-       
-        return AdvancedApiResponse<Person>.SuccessResponse(result);
+        catch (Exception ex)
+        {
+            loggerService.LogErrorInConsole(ex.Message);
+            return CustomResult<Person>.Failure(CustomError.ServerError("Error occurred while getting person"));
+        }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.Net;
-using BankingSystem.Core.DTO;
-using BankingSystem.Core.DTO.Response;
+﻿using BankingSystem.Core.DTO;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Core.ServiceContracts;
@@ -15,13 +13,13 @@ public class AccountTransactionService(
     IExchangeRateApi exchangeRateApi,
     ILoggerService loggerService,IBankCardService bankCardService) : IAccountTransactionService
 {
-    public async Task<AdvancedApiResponse<string>> TransactionBetweenAccountsAsync(TransactionDto transactionDto, string userId)
+    public async Task<CustomResult<AccountTransaction>> TransactionBetweenAccountsAsync(TransactionDto transactionDto, string userId)
     {
         try
         {
             if (transactionDto.FromAccountId == transactionDto.ToAccountId)
             {
-                return AdvancedApiResponse<string>.ErrorResponse("It is not possible to make a transaction between the same accounts.");
+                return CustomResult<AccountTransaction>.Failure(CustomError.ValidationError("It is not possible to make a transaction between the same accounts."));
             }
 
             await unitOfWork.BeginTransactionAsync();
@@ -31,12 +29,12 @@ public class AccountTransactionService(
 
             if (fromAccount is null || toAccount is null)
             {
-                return AdvancedApiResponse<string>.ErrorResponse("Bank account not found!");
+                return CustomResult<AccountTransaction>.Failure(CustomError.ValidationError("Bank account not found!"));
             }
 
             if (fromAccount.PersonId != userId)
             {
-                return AdvancedApiResponse<string>.ErrorResponse("You don't have permission to make transactions from this account.");
+                return CustomResult<AccountTransaction>.Failure(CustomError.ValidationError("You don't have permission to make transactions from this account."));
             }
 
             decimal transactionFee = 0;
@@ -47,7 +45,7 @@ public class AccountTransactionService(
 
             if (transactionDto.Amount + transactionFee > fromAccount.Balance)
             {
-                return AdvancedApiResponse<string>.ErrorResponse("Insufficient balance for this transaction.");
+                return CustomResult<AccountTransaction>.Failure(CustomError.ValidationError("Insufficient balance for this transaction."));
             }
 
             var transaction = new AccountTransaction
@@ -69,14 +67,14 @@ public class AccountTransactionService(
             await unitOfWork.TransactionRepository.AddAccountTransactionAsync(transaction);
             await unitOfWork.CommitAsync();
 
-            return AdvancedApiResponse<string>.SuccessResponse("", "Transaction completed successfully.");
+            return CustomResult<AccountTransaction>.Success(transaction);
         }
         catch (Exception ex)
         {
             await unitOfWork.RollbackAsync();
             loggerService.LogErrorInConsole(ex.Message);
 
-            return AdvancedApiResponse<string>.ErrorResponse("An error occurred during the transaction.");
+            return CustomResult<AccountTransaction>.Failure(CustomError.ServerError("An error occurred during the transaction."));
         }
     }
 

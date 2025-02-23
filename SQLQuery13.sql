@@ -19,8 +19,9 @@ CREATE TABLE BankCards(
         AND CardNumber NOT LIKE '%[^0-9]%'
     ),
     ExpirationDate DATE NOT NULL CHECK (ExpirationDate > GETDATE()),
-    CVV NVARCHAR(3) NOT NULL CHECK (LEN(CVV) = 3 AND CVV NOT LIKE '%[^0-9]%'),
-    PinCode NVARCHAR(4) NOT NULL CHECK (LEN(PinCode) = 4 AND PinCode NOT LIKE '%[^0-9]%'),
+    CVV NVARCHAR(128) NOT NULL,
+    PinCode NVARCHAR(128) NOT NULL,
+	Salt NVARCHAR(64) NOT NULL,
 
     AccountId INT NOT NULL,
     FOREIGN KEY (AccountId) REFERENCES BankAccounts(Id)
@@ -53,9 +54,5 @@ Create Table AtmWithdrawals(
 	TransactionFee decimal NOT Null
 	FOREIGN KEY (AccountId)
 	REFERENCES BankAccounts(Id),
-
 )
-
-
-
 

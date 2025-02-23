@@ -113,7 +113,7 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
 
         if (transactions.IsNullOrEmpty())
         {
-            return AdvancedApiResponse<IEnumerable<DailyTransactions>>.ErrorResponse("There is not transactions");
+            return AdvancedApiResponse<IEnumerable<DailyTransactions>>.ErrorResponse("There is not transaction");
         }
         return AdvancedApiResponse<IEnumerable<DailyTransactions>>.SuccessResponse(transactions);
     }

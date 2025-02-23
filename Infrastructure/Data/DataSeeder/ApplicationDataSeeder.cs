@@ -1,4 +1,6 @@
-﻿using BankingSystem.Core.Identity;
+﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.Helpers;
+using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
@@ -95,11 +97,14 @@ public class ApplicationDataSeeder(
 
             var personAccountId = personFullInfo!.BankAccounts.First().BankAccountId;
 
+            var (hashedPin, hashedCvv, salt) = HashingHelper.HashPinAndCvv(GeneratePinCode(), GenerateCvv());
+
             var card = new BankCard
             {
                 CardNumber = GenerateCardNumber(),
-                Cvv = GenerateCvv(),
-                PinCode = GeneratePinCode(),
+                Cvv = hashedCvv,
+                PinCode = hashedPin,
+                Salt = salt,
                 ExpirationDate = DateTime.UtcNow.AddYears(5),
                 Firstname = user.FirstName,
                 Lastname = user.Lastname,

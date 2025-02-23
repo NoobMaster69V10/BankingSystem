@@ -1,9 +1,9 @@
-﻿using BankingSystem.Core.DTO.Response;
+﻿using BankingSystem.Core.DTO.Result;
 using BankingSystem.Domain.Entities;
 
 namespace BankingSystem.Core.ServiceContracts;
 
 public interface IPersonService
 {
-    Task<AdvancedApiResponse<Person>> GetPersonById(string id);
+    Task<CustomResult<Person>> GetPersonById(string id);
 }

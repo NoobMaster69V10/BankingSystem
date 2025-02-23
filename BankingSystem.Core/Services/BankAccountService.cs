@@ -1,39 +1,28 @@
-﻿using System.Net;
-using BankingSystem.Core.DTO;
-using BankingSystem.Core.DTO.Response;
+﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Result;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Core.ServiceContracts;
+using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.UnitOfWorkContracts;
 
 namespace BankingSystem.Core.Services;
 
 public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerService) : IBankAccountService
 {
-    public async Task<ApiResponse> CreateBankAccountAsync(BankAccountRegisterDto bankAccountRegisterDto)
+    public async Task<CustomResult<BankAccount>> CreateBankAccountAsync(BankAccountRegisterDto bankAccountRegisterDto)
     {
         try
         {
             var bankAccount = await unitOfWork.BankAccountRepository.GetAccountByIbanAsync(bankAccountRegisterDto.Iban);
             if (bankAccount != null)
             {
-                return new ApiResponse
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = false,
-                    ErrorMessages = ["Bank account already exists"]
-                };
+                return CustomResult<BankAccount>.Failure(CustomError.ValidationError("Bank account already exists."));
             }
 
-            var person =
-                await unitOfWork.PersonRepository.GetPersonByUsernameAsync(bankAccountRegisterDto.Username);
+            var person = await unitOfWork.PersonRepository.GetPersonByUsernameAsync(bankAccountRegisterDto.Username);
             if (person == null)
             {
-                return new ApiResponse
-                {
-                    StatusCode = HttpStatusCode.NotFound,
-                    IsSuccess = false,
-                    ErrorMessages = ["User not found."]
-                };
+                return CustomResult<BankAccount>.Failure(CustomError.RecordNotFound("User not found."));
             }
 
             var account = new BankAccount
@@ -46,29 +35,12 @@ public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerSer
 
             await unitOfWork.BankAccountRepository.CreateAccountAsync(account);
 
-            return new ApiResponse
-            {
-                StatusCode = HttpStatusCode.Created,
-                IsSuccess = true,
-                Result = new
-                {
-                    Message = "Bank account created successfully.",
-                    AccountId = account.BankAccountId,
-                    IBAN = account.IBAN,
-                    Balance = account.Balance,
-                    Currency = account.Currency
-                }
-            };
+            return CustomResult<BankAccount>.Success(account);
         }
         catch (Exception ex)
         {
             loggerService.LogErrorInConsole($"Error in CreateBankAccountAsync: {ex}");
-            return new ApiResponse
-            {
-                StatusCode = HttpStatusCode.InternalServerError,
-                IsSuccess = false,
-                ErrorMessages = ["Error: Account could not be created."]
-            };
+            return CustomResult<BankAccount>.Failure(CustomError.ServerError("Account could not be created."));
         }
     }
 }

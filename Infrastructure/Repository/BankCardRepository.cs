@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using BankingSystem.Core.Helpers;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
 using Dapper;
@@ -23,7 +24,7 @@ public class BankCardRepository : IBankCardRepository
     public async Task CreateCardAsync(BankCard card)
     {
         const string query =
-            "INSERT INTO BankCards(FirstName, Lastname, CardNumber, ExpirationDate, CVV, PinCode, AccountId) VALUES (@FirstName, @Lastname, @CardNumber, @ExpirationDate, @CVV, @PinCode, @AccountId)";
+            "INSERT INTO BankCards(FirstName, Lastname, CardNumber, ExpirationDate, CVV, PinCode, Salt, AccountId) VALUES (@FirstName, @Lastname, @CardNumber, @ExpirationDate, @CVV, @PinCode, @Salt, @AccountId)";
 
         await _connection.ExecuteAsync(query, card, _transaction);
     }
@@ -53,9 +54,11 @@ public class BankCardRepository : IBankCardRepository
     public async Task<bool> CheckPinCodeAsync(string cardNumber, string pinCode)
     {
         string query =
-            "SELECT CASE WHEN EXISTS (SELECT 1 FROM BankCards WHERE CardNumber = @CardNumber AND PinCode = @PinCode) THEN 1 ELSE 0 END";
+            "SELECT PinCode, Salt FROM BankCards WHERE CardNumber = @CardNumber";
 
-        return await _connection.ExecuteScalarAsync<bool>(query, new { CardNumber = cardNumber, PinCode = pinCode }, _transaction);
+        var result = await _connection.QuerySingleOrDefaultAsync<(string PinCode, string Salt)>(query, new { CardNumber = cardNumber }, _transaction);
+
+        return HashingHelper.VerifyHash(pinCode, result.PinCode, result.Salt);
     }
 
     public async Task UpdatePinAsync(string cardNumber, string pinCode)

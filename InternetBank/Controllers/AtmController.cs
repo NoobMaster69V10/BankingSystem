@@ -1,5 +1,4 @@
 using BankingSystem.Core.DTO;
-using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,7 +31,7 @@ public class AtmController : ControllerBase
     }
 
     [HttpPost("change-pin")]
-    public async Task<ActionResult<ApiResponse>> ChangePin(ChangePinDto cardDto)
+    public async Task<IActionResult> ChangePin(ChangePinDto cardDto)
     {
         var response = await _atmService.ChangePinAsync(cardDto);
         return response.IsSuccess ? Ok(response) : BadRequest(response);

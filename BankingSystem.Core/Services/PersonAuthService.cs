@@ -5,59 +5,79 @@ using BankingSystem.Core.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using BankingSystem.Core.DTO.Response;
+using BankingSystem.Core.DTO.Result;
 using Microsoft.Extensions.Configuration;
 using BankingSystem.Core.ServiceContracts;
+using BankingSystem.Domain.Errors;
 
 namespace BankingSystem.Core.Services;
 
 public class PersonAuthService(
     IConfiguration configuration,
     UserManager<IdentityPerson> userManager,
-    RoleManager<IdentityRole> roleManager) : IPersonAuthService
+    RoleManager<IdentityRole> roleManager,
+    ILoggerService loggerService) : IPersonAuthService
 {
-    public async Task<AdvancedApiResponse<string>> AuthenticationPersonAsync(PersonLoginDto loginDto)
+    public async Task<CustomResult<string>> AuthenticationPersonAsync(PersonLoginDto loginDto)
     {
-        var user = await userManager.FindByEmailAsync(loginDto.Email);
-        if (user == null || !await userManager.CheckPasswordAsync(user, loginDto.Password))
+        try
         {
-            return AdvancedApiResponse<string>.ErrorResponse("Invalid email or password");
-        }
+            var user = await userManager.FindByEmailAsync(loginDto.Email);
+            if (user == null || !await userManager.CheckPasswordAsync(user, loginDto.Password))
+            {
+                return CustomResult<string>.Failure(CustomError.RecordNotFound("Invalid email or password"));
+            }
 
-        var token = await GenerateJwtToken(user);
-        return AdvancedApiResponse<string>.SuccessResponse(token);
+            var token = await GenerateJwtToken(user);
+            return CustomResult<string>.Success(token);
+        }
+        catch (Exception ex)
+        {
+            loggerService.LogErrorInConsole(ex.Message);
+            return CustomResult<string>.Failure(CustomError.ServerError("Error occurred while authenticating person"));
+        }
     }
 
-    public async Task<AdvancedApiResponse<string>> RegisterPersonAsync(PersonRegisterDto registerDto)
+    public async Task<CustomResult<IdentityPerson>> RegisterPersonAsync(PersonRegisterDto registerDto)
     {
-        var user = new IdentityPerson
+        try
         {
-            UserName = registerDto.Email,
-            Email = registerDto.Email,
-            FirstName = registerDto.Name,
-            Lastname = registerDto.Lastname,
-            BirthDate = registerDto.BirthDate,
-            IdNumber = registerDto.IdNumber
-        };
 
-        var result = await userManager.CreateAsync(user, registerDto.Password);
+        
+            var user = new IdentityPerson
+            {
+                UserName = registerDto.Email,
+                Email = registerDto.Email,
+                FirstName = registerDto.Name,
+                Lastname = registerDto.Lastname,
+                BirthDate = registerDto.BirthDate,
+                IdNumber = registerDto.IdNumber
+            };
 
-        if (!result.Succeeded)
-        {
-            return AdvancedApiResponse<string>.ErrorResponse(string.Join(" ", result.Errors.Select(e => e.Description)));
+            var result = await userManager.CreateAsync(user, registerDto.Password);
+
+            if (!result.Succeeded)
+            {
+                return CustomResult<IdentityPerson>.Failure(new CustomError("UNEXPECTED_ERROR", string.Join(" ", result.Errors.Select(e => e.Description))));
+            }
+
+            if (string.IsNullOrEmpty(registerDto.Role))
+                registerDto.Role = "User";
+
+            if (!await roleManager.RoleExistsAsync(registerDto.Role))
+            {
+                return CustomResult<IdentityPerson>.Failure(CustomError.RecordNotFound($"The role '{registerDto.Role}' does not exist."));
+            }
+
+            await userManager.AddToRoleAsync(user, registerDto.Role);
+
+            return CustomResult<IdentityPerson>.Success(user);
         }
-
-        if (string.IsNullOrEmpty(registerDto.Role))
-            registerDto.Role = "User";
-
-        if (!await roleManager.RoleExistsAsync(registerDto.Role))
+        catch (Exception ex)
         {
-            return AdvancedApiResponse<string>.ErrorResponse($"The role '{registerDto.Role}' does not exist.");
+            loggerService.LogErrorInConsole(ex.Message);
+            return CustomResult<IdentityPerson>.Failure(CustomError.ServerError("Error occurred while authenticating person"));
         }
-
-        await userManager.AddToRoleAsync(user, registerDto.Role);
-
-        return AdvancedApiResponse<string>.SuccessResponse(default!, "User successfully registered.");
     }
 
     public async Task<string> GenerateJwtToken(IdentityPerson person)

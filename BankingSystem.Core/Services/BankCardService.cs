@@ -1,5 +1,6 @@
 ﻿using BankingSystem.Core.DTO;
 using BankingSystem.Core.DTO.Result;
+using BankingSystem.Core.Helpers;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Errors;
@@ -11,23 +12,31 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
 {
     public async Task<CustomResult<bool>> ValidateCardAsync(string cardNumber, string pinCode)
     {
-        var cardExists = await unitOfWork.BankCardRepository.DoesCardExistAsync(cardNumber);
-        if (!cardExists)
+        try
         {
-            return CustomResult<bool>.Failure(CustomError.RecordNotFound("Card number not found"));
-        }
+            var cardExists = await unitOfWork.BankCardRepository.DoesCardExistAsync(cardNumber);
+            if (!cardExists)
+            {
+                return CustomResult<bool>.Failure(CustomError.RecordNotFound("Card number not found"));
+            }
 
-        if (!await unitOfWork.BankCardRepository.CheckPinCodeAsync(cardNumber, pinCode))
+            if (!await unitOfWork.BankCardRepository.CheckPinCodeAsync(cardNumber, pinCode))
+            {
+                return CustomResult<bool>.Failure(new CustomError("INVALID_PIN", "Pin code does not match"));
+            }
+
+            if (await unitOfWork.BankCardRepository.IsCardExpiredAsync(cardNumber))
+            {
+                return CustomResult<bool>.Failure(new CustomError("CARD_EXPIRED", "Card is expired"));
+            }
+
+            return CustomResult<bool>.Success(true);
+        }
+        catch (Exception ex)
         {
-            return CustomResult<bool>.Failure(new CustomError("INVALID_PIN", "Pin code does not match"));
+            loggerService.LogErrorInConsole(ex.Message);
+            return CustomResult<bool>.Failure(CustomError.ServerError("Error occurred while validating card"));
         }
-
-        if (await unitOfWork.BankCardRepository.IsCardExpiredAsync(cardNumber))
-        {
-            return CustomResult<bool>.Failure(new CustomError("CARD_EXPIRED", "Card is expired"));
-        }
-
-        return CustomResult<bool>.Success(true);
     }
 
     public async Task<CustomResult<BankCard>> CreateBankCardAsync(BankCardRegisterDto bankCardRegisterDto)
@@ -50,14 +59,17 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                 await unitOfWork.BankAccountRepository.GetAccountByIdAsync(bankCardRegisterDto.BankAccountId);
             if (bankAccount == null)
             {
-                return CustomResult<BankCard>.Failure(CustomError.RecordNotFound("Bank account not found"));
+                return CustomResult<BankCard>.Failure(CustomError.RecordNotFound("Bank account not found."));
             }
+
+            var (hashedPin, hashedCvv, salt) = HashingHelper.HashPinAndCvv(bankCardRegisterDto.PinCode, bankCardRegisterDto.Cvv);
 
             var newCard = new BankCard
             {
                 CardNumber = bankCardRegisterDto.CardNumber,
-                Cvv = bankCardRegisterDto.Cvv,
-                PinCode = bankCardRegisterDto.PinCode,
+                Cvv = hashedCvv,
+                PinCode = hashedPin,
+                Salt = salt,
                 ExpirationDate = bankCardRegisterDto.ExpirationDate,
                 Firstname = bankCardRegisterDto.Firstname,
                 Lastname = bankCardRegisterDto.Lastname,
@@ -70,7 +82,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
         catch (Exception ex)
         {
             loggerService.LogErrorInConsole(ex.ToString());
-            return CustomResult<BankCard>.Failure(new CustomError("asdasd", "asdasd"));
+            return CustomResult<BankCard>.Failure(CustomError.ServerError("Bank card could not be created."));
         }
     }
 }

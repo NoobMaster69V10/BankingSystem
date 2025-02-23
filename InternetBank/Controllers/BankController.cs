@@ -15,7 +15,7 @@ public class BankController(IBankAccountService accountService, IBankCardService
         var response = await accountService.CreateBankAccountAsync(bankAccountRegisterDto);
         if(response.IsSuccess)
         {
-            return Ok(response);
+            return Created("account", response.Value);
         }
         return BadRequest(response);
     }
@@ -27,7 +27,7 @@ public class BankController(IBankAccountService accountService, IBankCardService
         var response = await cardService.CreateBankCardAsync(cardRegisterDto);
         if (response.IsSuccess)
         {
-            return Ok(response);
+            return Created("card", response.Value);
         }
         return BadRequest(response);
     }
