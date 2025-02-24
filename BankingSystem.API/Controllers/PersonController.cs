@@ -10,7 +10,8 @@ namespace InternetBank.UI.Controllers
     public class PersonController(
         IPersonAuthService personAuthService,
         IAccountTransactionService transactionService,
-        IPersonService personService) : ControllerBase
+        IPersonService personService,
+        IEmailService emailService) : ControllerBase
     {
         [Authorize(Roles = "Person")]
         [HttpPost("transfer-money")]
@@ -62,8 +63,20 @@ namespace InternetBank.UI.Controllers
             {
                 return BadRequest(response);
             }
-
             return Created("login", new { Token = response.Value });
+        }
+        
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPassword)
+        {
+            var result = await personAuthService.ForgotPasswordAsync(forgotPassword);
+            return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
+        }
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPassword)
+        {
+            var result = await personAuthService.ResetPasswordAsync(resetPassword);
+            return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
         }
     }
 }

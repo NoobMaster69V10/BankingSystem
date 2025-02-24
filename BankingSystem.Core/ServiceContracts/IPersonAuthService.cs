@@ -9,6 +9,8 @@ namespace BankingSystem.Core.ServiceContracts;
 public interface IPersonAuthService
 {
     Task<CustomResult<string>> AuthenticationPersonAsync(PersonLoginDto loginDto);
+    Task<CustomResult<string>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
     Task<CustomResult<PersonRegisterDto>> RegisterPersonAsync(PersonRegisterDto registerDto);
     Task<string> GenerateJwtToken(IdentityPerson user);
+    Task<CustomResult<bool>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
 }

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
-namespace InternetBank.UI.Configure;
+namespace BankingSytem.API.Configure;
 
 public static class IdentityServiceRegistration
 {

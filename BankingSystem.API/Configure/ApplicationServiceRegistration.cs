@@ -13,7 +13,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
-namespace InternetBank.UI.Configure;
+namespace BankingSytem.API.Configure;
 
 public static class ApplicationServiceRegistration
 {

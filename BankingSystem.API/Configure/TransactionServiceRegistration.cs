@@ -3,7 +3,7 @@ using BankingSystem.Core.Services;
 using BankingSystem.Domain.RepositoryContracts;
 using BankingSystem.Infrastructure.Repository;
 
-namespace InternetBank.UI.Configure;
+namespace BankingSytem.API.Configure;
 
 public static class TransactionServiceRegistration
 {

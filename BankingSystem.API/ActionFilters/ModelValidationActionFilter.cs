@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace InternetBank.UI.ActionFilters;
+namespace BankingSytem.API.ActionFilters;
 
 public class ModelValidationActionFilter : IActionFilter
 {
