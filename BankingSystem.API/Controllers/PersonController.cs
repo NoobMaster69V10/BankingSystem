@@ -10,8 +10,7 @@ namespace BankingSystem.API.Controllers
     public class PersonController(
         IPersonAuthService personAuthService,
         IAccountTransactionService transactionService,
-        IPersonService personService,
-        IEmailService emailService) : ControllerBase
+        IPersonService personService) : ControllerBase
     {
         [Authorize(Roles = "Person")]
         [HttpPost("transfer-money")]
