@@ -3,7 +3,7 @@ using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InternetBank.UI.Controllers
+namespace BankingSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

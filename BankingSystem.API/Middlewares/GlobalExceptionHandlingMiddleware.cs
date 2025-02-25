@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using BankingSystem.Core.DTO.Response;
 
-namespace InternetBank.UI.Middlewares;
+namespace BankingSystem.API.Middlewares;
 
 public class GlobalExceptionHandlingMiddleware
 {

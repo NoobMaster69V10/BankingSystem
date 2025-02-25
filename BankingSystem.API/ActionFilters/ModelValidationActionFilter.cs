@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace BankingSytem.API.ActionFilters;
+namespace BankingSystem.API.ActionFilters;
 
 public class ModelValidationActionFilter : IActionFilter
 {

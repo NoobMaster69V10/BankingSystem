@@ -1,11 +1,11 @@
 using System.Net.Mail;
+using BankingSystem.API.ActionFilters;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
 using DotNetEnv;
-using InternetBank.UI.Middlewares;
 using BankingSystem.Infrastructure.Data.DataSeeder;
-using BankingSytem.API.ActionFilters;
-using BankingSytem.API.Configure;
+using BankingSystem.API.Configure;
+using BankingSystem.API.Middlewares;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);

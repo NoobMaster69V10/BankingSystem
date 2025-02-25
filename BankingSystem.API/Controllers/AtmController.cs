@@ -2,7 +2,7 @@ using BankingSystem.Core.DTO;
 using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InternetBank.UI.Controllers;
+namespace BankingSystem.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class AtmController : ControllerBase

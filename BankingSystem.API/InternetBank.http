@@ -1,6 +1,0 @@
-@InternetBank_HostAddress = http://localhost:5200
-
-GET {{InternetBank_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
