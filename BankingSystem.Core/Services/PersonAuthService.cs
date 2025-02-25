@@ -10,8 +10,7 @@ using Microsoft.Extensions.Configuration;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Errors;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
+
 using ResetPasswordDto = BankingSystem.Core.DTO.ResetPasswordDto;
 
 namespace BankingSystem.Core.Services;
