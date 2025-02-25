@@ -3,7 +3,7 @@ using BankingSystem.Core.Services;
 using BankingSystem.Domain.RepositoryContracts;
 using BankingSystem.Infrastructure.Repository;
 
-namespace BankingSytem.API.Configure;
+namespace BankingSystem.API.Configure;
 
 public static class BankCardServiceRegistration
 {

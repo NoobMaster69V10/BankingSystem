@@ -1,7 +1,7 @@
 ﻿using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InternetBank.UI.Controllers;
+namespace BankingSystem.API.Controllers;
 
 public class ReportController(IReportService reportService) : ControllerBase
 {

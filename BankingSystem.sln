@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankingSystem.Core", "Banki
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankingSystem.Infrastructure", "BankingSystem.Infrastructure\BankingSystem.Infrastructure.csproj", "{B4815AE9-022F-4B14-B514-AEFEE3F8CF70}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankingSytem.API", "BankingSystem.API\BankingSytem.API.csproj", "{A039C24E-2153-4A83-9A02-69366BD23A7C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankingSystem.API", "BankingSystem.API\BankingSystem.API.csproj", "{A039C24E-2153-4A83-9A02-69366BD23A7C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankingSystem.Domain", "BankingSystem.Domain\BankingSystem.Domain.csproj", "{B8D4CCAF-707A-442B-9444-81C8814F71EF}"
 EndProject

@@ -3,14 +3,15 @@ using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BankingSytem.API.Controllers
+namespace BankingSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class PersonController(
         IPersonAuthService personAuthService,
         IAccountTransactionService transactionService,
-        IPersonService personService) : ControllerBase
+        IPersonService personService,
+        IEmailService emailService) : ControllerBase
     {
         [Authorize(Roles = "Person")]
         [HttpPost("transfer-money")]
