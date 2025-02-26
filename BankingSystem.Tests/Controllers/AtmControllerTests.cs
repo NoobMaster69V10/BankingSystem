@@ -43,7 +43,7 @@ public class AtmControllerTests
     public async Task AtmController_ShowBalance_ReturnBadRequest_WhenInvalidCard()
     {
         var cardDto = new CardAuthorizationDto { CardNumber = "123456789", PinCode = "1234" }; 
-        var expectedResult = CustomResult<BalanceResponseDto>.Failure(CustomError.RecordNotFound("Card number not found"));
+        var expectedResult = CustomResult<BalanceResponseDto>.Failure(CustomError.NotFound("Card number not found"));
         A.CallTo(() => _atmService.ShowBalanceAsync(cardDto))
             .Returns(Task.FromResult(expectedResult));
         
@@ -101,7 +101,7 @@ public class AtmControllerTests
             Amount = 50, 
             Currency = "USD" 
         };
-        var expectedResult = CustomResult<bool>.Failure(CustomError.RecordNotFound("Card number not found"));
+        var expectedResult = CustomResult<bool>.Failure(CustomError.NotFound("Card number not found"));
         A.CallTo(() => _accountTransactionService.WithdrawMoneyAsync(withdrawDto))
             .Returns(Task.FromResult(expectedResult));
     

@@ -31,7 +31,7 @@ builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddPersonServices();
 builder.Services.AddTransactionServices();
 builder.Services.AddHttpContextAccessor();
-
+builder.Services.AddProblemDetails();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

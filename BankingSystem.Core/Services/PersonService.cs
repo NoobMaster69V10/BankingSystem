@@ -16,7 +16,7 @@ public class PersonService(IUnitOfWork unitOfWork, ILoggerService loggerService)
 
             if (string.IsNullOrEmpty(personId) || person is null)
             {
-                return CustomResult<Person>.Failure(CustomError.RecordNotFound("User not found"));
+                return CustomResult<Person>.Failure(CustomError.NotFound("User not found"));
             }
            
             return CustomResult<Person>.Success(person);
@@ -24,7 +24,7 @@ public class PersonService(IUnitOfWork unitOfWork, ILoggerService loggerService)
         catch (Exception ex)
         {
             loggerService.LogErrorInConsole(ex.Message);
-            return CustomResult<Person>.Failure(CustomError.ServerError("Error occurred while getting person"));
+            return CustomResult<Person>.Failure(CustomError.Failure("Error occurred while getting person"));
         }
     }
 }

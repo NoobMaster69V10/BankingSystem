@@ -17,12 +17,12 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
             var cardExists = await unitOfWork.BankCardRepository.DoesCardExistAsync(cardNumber);
             if (!cardExists)
             {
-                return CustomResult<bool>.Failure(CustomError.RecordNotFound("Card number not found"));
+                return CustomResult<bool>.Failure(CustomError.NotFound("Card number not found"));
             }
 
             if (!await unitOfWork.BankCardRepository.CheckPinCodeAsync(cardNumber, pinCode))
             {
-                return CustomResult<bool>.Failure(new CustomError("INVALID_PIN", "Pin code does not match"));
+                return CustomResult<bool>.Failure(CustomError.NotFound("Pin code does not match"));
             }
 
             if (await unitOfWork.BankCardRepository.IsCardExpiredAsync(cardNumber))
@@ -35,7 +35,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
         catch (Exception ex)
         {
             loggerService.LogErrorInConsole(ex.Message);
-            return CustomResult<bool>.Failure(CustomError.ServerError("Error occurred while validating card"));
+            return CustomResult<bool>.Failure(CustomError.Failure("Error occurred while validating card"));
         }
     }
 
@@ -53,25 +53,25 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
             var person = await unitOfWork.PersonRepository.GetPersonByUsernameAsync(bankCardRegisterDto.Username);
             if (person == null)
             {
-                return CustomResult<BankCard>.Failure(CustomError.RecordNotFound("Person Not Found"));
+                return CustomResult<BankCard>.Failure(CustomError.NotFound("Person Not Found"));
             }
 
             var bankAccount =
                 await unitOfWork.BankAccountRepository.GetAccountByIdAsync(bankCardRegisterDto.BankAccountId);
             if (bankAccount == null)
             {
-                return CustomResult<BankCard>.Failure(CustomError.RecordNotFound("Bank account not found."));
+                return CustomResult<BankCard>.Failure(CustomError.NotFound("Bank account not found."));
             }
 
             if (!person.BankAccounts.Any())
             {
-                return CustomResult<BankCard>.Failure(CustomError.RecordNotFound($"'{bankCardRegisterDto.Username}' does not have accounts, please create accounts first!"));
+                return CustomResult<BankCard>.Failure(CustomError.NotFound($"'{bankCardRegisterDto.Username}' does not have accounts, please create accounts first!"));
             }
 
 
             if (person.BankAccounts.All(ba => ba.BankAccountId != bankCardRegisterDto.BankAccountId))
             {
-                return CustomResult<BankCard>.Failure(CustomError.RecordNotFound($"'{bankCardRegisterDto.Username}' does not have account with accountId - '{bankCardRegisterDto.BankAccountId}'!"));
+                return CustomResult<BankCard>.Failure(CustomError.NotFound($"'{bankCardRegisterDto.Username}' does not have account with accountId - '{bankCardRegisterDto.BankAccountId}'!"));
             }
 
             var (hashedPin, hashedCvv, salt) = HashingHelper.HashPinAndCvv(bankCardRegisterDto.PinCode, bankCardRegisterDto.Cvv);
@@ -96,7 +96,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
         {
             await unitOfWork.RollbackAsync();
             loggerService.LogErrorInConsole(ex.ToString());
-            return CustomResult<BankCard>.Failure(CustomError.ServerError("Bank card could not be created."));
+            return CustomResult<BankCard>.Failure(CustomError.Failure("Bank card could not be created."));
         }
     }
 }

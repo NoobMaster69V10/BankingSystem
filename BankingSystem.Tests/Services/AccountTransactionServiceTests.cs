@@ -1,15 +1,14 @@
-namespace BankingSystem.Tests;
-using System.Threading.Tasks;
-using Core.DTO;
-using Core.DTO.Result;
-using Core.ServiceContracts;
-using Core.Services;
-using Domain.Entities;
-using Domain.Errors;
-using Domain.ExternalApiContracts;
-using Domain.UnitOfWorkContracts;
+using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Result;
+using BankingSystem.Core.ServiceContracts;
+using BankingSystem.Core.Services;
+using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Errors;
+using BankingSystem.Domain.ExternalApiContracts;
+using BankingSystem.Domain.UnitOfWorkContracts;
 using Moq;
-using Xunit;
+
+namespace BankingSystem.Tests.Services;
 
 public class AccountTransactionServiceTests
 {
@@ -93,7 +92,7 @@ public class AccountTransactionServiceTests
 
         _bankCardServiceMock
             .Setup(b => b.ValidateCardAsync("1234", "0000"))
-            .ReturnsAsync(CustomResult<bool>.Failure(CustomError.ValidationError("Invalid Card")));
+            .ReturnsAsync(CustomResult<bool>.Failure(CustomError.Validation("Invalid Card")));
 
         var result = await _accountTransactionService.WithdrawMoneyAsync(withdrawDto);
 

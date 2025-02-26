@@ -1,7 +1,9 @@
 ﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Sprache;
 
 namespace BankingSystem.API.Controllers
 {
@@ -17,13 +19,13 @@ namespace BankingSystem.API.Controllers
         public async Task<IActionResult> TransferMoney(TransactionDto transactionDto)
         {
             var userId = User.FindFirst("personId")!.Value;
-            var response = await transactionService.TransactionBetweenAccountsAsync(transactionDto, userId);
+            var result = await transactionService.TransactionBetweenAccountsAsync(transactionDto, userId);
 
-            if (response.IsFailure)
+            if (result.IsFailure)
             {
-                return BadRequest(response.Error);
+                return result.ToProblemDetails();
             }
-            return Created("transfer-money", response.Value);
+            return Created("transfer-money", result.Value);
         }
 
         [Authorize(Roles = "Person")]
@@ -32,50 +34,50 @@ namespace BankingSystem.API.Controllers
         {
             var personId = User.FindFirst("personId")!.Value;
 
-            var response = await personService.GetPersonById(personId);
-            if (response.IsFailure)
+            var result = await personService.GetPersonById(personId);
+            if (result.IsFailure)
             {
-                return BadRequest(response);
+                return result.ToProblemDetails();
             }
 
-            return Ok(response.Value);
+            return Ok(result.Value);
         }
 
         [Authorize(Roles = "Operator")]
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] PersonRegisterDto registerModel)
         {
-            var response = await personAuthService.RegisterPersonAsync(registerModel);
-            if (response.IsFailure)
+            var result = await personAuthService.RegisterPersonAsync(registerModel);
+            if (result.IsFailure)
             {
-                return BadRequest(response);
+                return result.ToProblemDetails();
             }
 
-            return Created("register", response.Value);
+            return Created("register", result.Value);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] PersonLoginDto loginModel)
         {
-            var response = await personAuthService.AuthenticationPersonAsync(loginModel);
-            if (response.IsFailure)
+            var result = await personAuthService.AuthenticationPersonAsync(loginModel);
+            if (result.IsFailure)
             {
-                return BadRequest(response);
+                return result.ToProblemDetails();
             }
-            return Created("login", new { Token = response.Value });
+            return Created("login", new { Token = result.Value });
         }
         
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPassword)
         {
             var result = await personAuthService.ForgotPasswordAsync(forgotPassword);
-            return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
+            return result.IsSuccess ? Ok(result) : result.ToProblemDetails();
         }
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPassword)
         {
             var result = await personAuthService.ResetPasswordAsync(resetPassword);
-            return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
+            return result.IsSuccess ? Ok(result) : result.ToProblemDetails();
         }
     }
 }

@@ -49,7 +49,7 @@ namespace BankingSystem.Tests.Services
         public async Task AtmService_ShowBalanceAsync_InvalidCard_ReturnsFailure()
         {
             var cardDto = new CardAuthorizationDto { CardNumber = "invalid", PinCode = "wrong" };
-            var validationResult = CustomResult<bool>.Failure(CustomError.RecordNotFound("Card not found"));
+            var validationResult = CustomResult<bool>.Failure(CustomError.NotFound("Card not found"));
 
             A.CallTo(() => _bankCardService.ValidateCardAsync(cardDto.CardNumber, cardDto.PinCode))
                 .Returns(validationResult);

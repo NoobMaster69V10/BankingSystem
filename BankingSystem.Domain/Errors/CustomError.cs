@@ -1,26 +1,36 @@
+
+using System.Runtime.InteropServices.JavaScript;
+
 namespace BankingSystem.Domain.Errors
 {
-    public sealed record CustomError(string Code, string Message)
+    public sealed record CustomError(string Code, string Message,ErrorType ErrorType = ErrorType.Failure)
     {
         private const string RecordNotFoundCode = "RecordNotFound";
         private const string ValidationErrorCode = "ValidationError";
         private const string ServerErrorCode = "ServerError";
-
-        public static readonly CustomError None = new(string.Empty, string.Empty);
+        private const string ConflictErrorCode = "ConflictError";
+        private const string AccessDeniedErrorCode = "AccessDenied";
+        private const string AccessForbiddenErrorCode = "AccessForbidden";
         
-        public static CustomError RecordNotFound(string message)
-        {
-            return new CustomError(RecordNotFoundCode, message);
-        }
+        public static readonly CustomError None = new(string.Empty, string.Empty,ErrorType.Failure);
+        public static readonly CustomError NullValue = new("Error.NullValue","Null value was provided",ErrorType.Failure);
+        
+        public static CustomError Failure(string description) =>
+            new(ServerErrorCode, description, ErrorType.Failure);
 
-        public static CustomError ServerError(string message)
-        {
-            return new CustomError(ServerErrorCode, message);
-        }
+        public static CustomError NotFound(string description) =>
+            new(RecordNotFoundCode, description, ErrorType.NotFound);
 
-        public static CustomError ValidationError(string message)
-        {
-            return new CustomError(ValidationErrorCode, message);
-        }
+        public static CustomError Validation(string description) =>
+            new(ValidationErrorCode, description, ErrorType.Validation);
+
+        public static CustomError Conflict(string code, string description) =>
+            new(ConflictErrorCode, description, ErrorType.Conflict);
+
+        public static CustomError AccessUnAuthorized(string code, string description) =>
+            new(AccessDeniedErrorCode, description, ErrorType.AccessUnAuthorized);
+
+        public static CustomError AccessForbidden(string code, string description) =>
+            new(AccessForbiddenErrorCode, description, ErrorType.AccessForbidden);
     }
 }

@@ -96,7 +96,7 @@ public class PersonControllerTests
             ToAccountId = 2,
         };
     
-        var error = CustomError.ValidationError("Insufficient funds for transfer");
+        var error = CustomError.Validation("Insufficient funds for transfer");
         var failureResult = CustomResult<AccountTransaction>.Failure(error);
     
         A.CallTo(() => _transactionService.TransactionBetweenAccountsAsync(transactionDto, personId))
@@ -149,7 +149,7 @@ public class PersonControllerTests
         string personId = "999"; 
         SetupUserContext(personId);
     
-        var error = CustomError.RecordNotFound("Person not found");
+        var error = CustomError.NotFound("Person not found");
         var failureResult = CustomResult<Person>.Failure(error);
     
         A.CallTo(() => _personService.GetPersonById(personId))
@@ -207,7 +207,7 @@ public class PersonControllerTests
             Password = "Password123!",
         };
     
-        var error = CustomError.ValidationError("Username already exists");
+        var error = CustomError.Validation("Username already exists");
         var failureResult = CustomResult<PersonRegisterDto>.Failure(error);
     
         A.CallTo(() => _personAuthService.RegisterPersonAsync(registerModel))
@@ -258,7 +258,7 @@ public class PersonControllerTests
             Password = "Password123!"
         };
     
-        var error = CustomError.ServerError("Invalid username or password");
+        var error = CustomError.Failure("Invalid username or password");
         var failureResult = CustomResult<string>.Failure(error);
     
         A.CallTo(() => _personAuthService.AuthenticationPersonAsync(loginModel))
@@ -305,7 +305,7 @@ public class PersonControllerTests
             Email = "nonexistent@example.com"
         };
         
-        var error = CustomError.RecordNotFound("Email not found");
+        var error = CustomError.NotFound("Email not found");
         var failureResult = CustomResult<string>.Failure(error);
     
         A.CallTo(() => _personAuthService.ForgotPasswordAsync(forgotPasswordDto))
@@ -360,7 +360,7 @@ public class PersonControllerTests
             ConfirmPassword = "NewPassword123!"
         };
     
-        var error = CustomError.ValidationError("Invalid or expired token");
+        var error = CustomError.Validation("Invalid or expired token");
         var failureResult = CustomResult<bool>.Failure(error);
     
         A.CallTo(() => _personAuthService.ResetPasswordAsync(resetPasswordDto))

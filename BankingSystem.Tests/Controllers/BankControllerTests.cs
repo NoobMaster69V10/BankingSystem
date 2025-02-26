@@ -134,7 +134,7 @@ public class BankControllerTests
          };
          
          var expectedResult = CustomResult<BankCard>.Failure(
-             CustomError.RecordNotFound("Account not found"));
+             CustomError.NotFound("Account not found"));
          A.CallTo(() => _cardService.CreateBankCardAsync(cardRegisterDto))
              .Returns(Task.FromResult(expectedResult));
          

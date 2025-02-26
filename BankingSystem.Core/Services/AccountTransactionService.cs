@@ -19,7 +19,7 @@ public class AccountTransactionService(
         {
             if (transactionDto.FromAccountId == transactionDto.ToAccountId)
             {
-                return CustomResult<AccountTransaction>.Failure(CustomError.ValidationError("It is not possible to make a transaction between the same accounts."));
+                return CustomResult<AccountTransaction>.Failure(CustomError.Validation("It is not possible to make a transaction between the same accounts."));
             }
 
             await unitOfWork.BeginTransactionAsync();
@@ -29,17 +29,17 @@ public class AccountTransactionService(
 
             if (fromAccount is null)
             {
-                return CustomResult<AccountTransaction>.Failure(CustomError.ValidationError($"Bank account with id '{transactionDto.FromAccountId}' not found!"));
+                return CustomResult<AccountTransaction>.Failure(CustomError.Validation($"Bank account with id '{transactionDto.FromAccountId}' not found!"));
             }
 
             if (toAccount is null)
             {
-                return CustomResult<AccountTransaction>.Failure(CustomError.ValidationError($"Bank account with id '{transactionDto.ToAccountId}' not found!"));
+                return CustomResult<AccountTransaction>.Failure(CustomError.Validation($"Bank account with id '{transactionDto.ToAccountId}' not found!"));
             }
 
             if (fromAccount.PersonId != userId)
             {
-                return CustomResult<AccountTransaction>.Failure(CustomError.ValidationError("You don't have permission to make transactions from this account."));
+                return CustomResult<AccountTransaction>.Failure(CustomError.Validation("You don't have permission to make transactions from this account."));
             }
 
             decimal transactionFee = 0;
@@ -50,7 +50,7 @@ public class AccountTransactionService(
 
             if (transactionDto.Amount + transactionFee > fromAccount.Balance)
             {
-                return CustomResult<AccountTransaction>.Failure(CustomError.ValidationError("Insufficient balance for this transaction."));
+                return CustomResult<AccountTransaction>.Failure(CustomError.Validation("Insufficient balance for this transaction."));
             }
 
             var transaction = new AccountTransaction
@@ -79,7 +79,7 @@ public class AccountTransactionService(
             await unitOfWork.RollbackAsync();
             loggerService.LogErrorInConsole(ex.Message);
 
-            return CustomResult<AccountTransaction>.Failure(CustomError.ServerError("An error occurred during the transaction."));
+            return CustomResult<AccountTransaction>.Failure(CustomError.Failure("An error occurred during the transaction."));
         }
     }
 
@@ -106,7 +106,7 @@ public class AccountTransactionService(
 
             var bankAccount = await unitOfWork.BankCardRepository.GetAccountByCardAsync(withdrawMoneyDto.CardNumber);
             if (bankAccount == null){
-                return CustomResult<bool>.Failure(CustomError.RecordNotFound("Bank account not found."));
+                return CustomResult<bool>.Failure(CustomError.NotFound("Bank account not found."));
             }
             
             var newBalance = balance - withdrawMoneyDto.Amount;
@@ -128,7 +128,7 @@ public class AccountTransactionService(
         {
             await unitOfWork.RollbackAsync();
             loggerService.LogErrorInConsole($"Error in WithdrawMoneyAsync: {ex}");
-            return CustomResult<bool>.Failure(CustomError.ServerError("An error occurred during the transaction."));
+            return CustomResult<bool>.Failure(CustomError.Failure("An error occurred during the transaction."));
         }
     }
 

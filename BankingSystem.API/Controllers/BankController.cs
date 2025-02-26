@@ -1,4 +1,5 @@
 ﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,23 +13,23 @@ public class BankController(IBankAccountService accountService, IBankCardService
     [HttpPost("account")]
     public async Task<IActionResult> CreateBankAccount(BankAccountRegisterDto bankAccountRegisterDto)
     {   
-        var response = await accountService.CreateBankAccountAsync(bankAccountRegisterDto);
-        if(response.IsSuccess)
+        var result = await accountService.CreateBankAccountAsync(bankAccountRegisterDto);
+        if(result.IsSuccess)
         {
-            return Created("account", response.Value);
+            return Created("account", result.Value);
         }
-        return BadRequest(response);
+        return result.ToProblemDetails();
     }
 
     [Authorize(Roles = "Operator")]
     [HttpPost("card")]
     public async Task<IActionResult> CreateBankCard(BankCardRegisterDto cardRegisterDto)
     {
-        var response = await cardService.CreateBankCardAsync(cardRegisterDto);
-        if (response.IsSuccess)
+        var result = await cardService.CreateBankCardAsync(cardRegisterDto);
+        if (result.IsSuccess)
         {
-            return Created("card", response.Value);
+            return Created("card", result.Value);
         }
-        return BadRequest(response);
+        return result.ToProblemDetails();
     }
 }

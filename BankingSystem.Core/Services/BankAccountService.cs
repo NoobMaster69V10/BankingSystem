@@ -16,13 +16,13 @@ public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerSer
             var bankAccount = await unitOfWork.BankAccountRepository.GetAccountByIbanAsync(bankAccountRegisterDto.Iban);
             if (bankAccount != null)
             {
-                return CustomResult<BankAccount>.Failure(CustomError.ValidationError("Bank account already exists."));
+                return CustomResult<BankAccount>.Failure(CustomError.Validation("Bank account already exists."));
             }
 
             var person = await unitOfWork.PersonRepository.GetPersonByUsernameAsync(bankAccountRegisterDto.Username);
             if (person == null)
             {
-                return CustomResult<BankAccount>.Failure(CustomError.RecordNotFound("User not found."));
+                return CustomResult<BankAccount>.Failure(CustomError.NotFound("User not found."));
             }
 
             var account = new BankAccount
@@ -40,7 +40,7 @@ public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerSer
         catch (Exception ex)
         {
             loggerService.LogErrorInConsole($"Error in CreateBankAccountAsync: {ex}");
-            return CustomResult<BankAccount>.Failure(CustomError.ServerError("Account could not be created."));
+            return CustomResult<BankAccount>.Failure(CustomError.Failure("Account could not be created."));
         }
     }
 }

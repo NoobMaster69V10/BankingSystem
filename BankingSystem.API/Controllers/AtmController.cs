@@ -1,6 +1,9 @@
+using BankingSystem.Core;
 using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Mvc;
+using Sprache;
 
 namespace BankingSystem.API.Controllers;
 [ApiController]
@@ -20,20 +23,20 @@ public class AtmController : ControllerBase
     public async Task<IActionResult> ShowBalance(CardAuthorizationDto cardDto)
     {
         var result = await _atmService.ShowBalanceAsync(cardDto);
-        return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result) : result.ToProblemDetails();
     }
 
     [HttpPost("withdraw-money")]
     public async Task<IActionResult> WithdrawMoney([FromBody] WithdrawMoneyDto cardDto)
     {
         var result = await _accountTransactionService.WithdrawMoneyAsync(cardDto);
-        return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result) : result.ToProblemDetails();
     }
 
     [HttpPost("change-pin")]
     public async Task<IActionResult> ChangePin(ChangePinDto cardDto)
     {
-        var response = await _atmService.ChangePinAsync(cardDto);
-        return response.IsSuccess ? Ok(response) : BadRequest(response);
+        var result = await _atmService.ChangePinAsync(cardDto);
+        return result.IsSuccess ? Ok(result) : result.ToProblemDetails();
     }
 }
