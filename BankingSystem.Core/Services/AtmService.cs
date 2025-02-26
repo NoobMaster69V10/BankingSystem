@@ -27,7 +27,7 @@ public class AtmService : IAtmService
             var validationResult = await _bankCardService.ValidateCardAsync(cardNumber, pin);
             if (!validationResult.IsSuccess)
             {
-                return CustomResult<bool>.Failure(validationResult.Error);
+                if (validationResult.Error != null) return CustomResult<bool>.Failure(validationResult.Error);
             }
 
             return CustomResult<bool>.Success(true);
@@ -44,9 +44,9 @@ public class AtmService : IAtmService
         try
         {
             var authResult = await AuthorizeCardAsync(cardDto.CardNumber, cardDto.PinCode);
-            if (authResult.IsFailure)  
+            if (authResult.IsFailure)
             {
-                return CustomResult<BalanceResponseDto>.Failure(authResult.Error);
+                if (authResult.Error != null) return CustomResult<BalanceResponseDto>.Failure(authResult.Error);
             }
 
             var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardDto.CardNumber);
@@ -73,7 +73,7 @@ public class AtmService : IAtmService
             var authResult = await AuthorizeCardAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
             if (!authResult.IsSuccess)
             {
-                return CustomResult<bool>.Failure(authResult.Error);
+                if (authResult.Error != null) return CustomResult<bool>.Failure(authResult.Error);
             }
 
             await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
