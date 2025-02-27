@@ -22,7 +22,7 @@ public class AccountTransactionService(
                 return CustomResult<AccountTransaction>.Failure(CustomError.Validation("It is not possible to make a transaction between the same accounts."));
             }
 
-            await unitOfWork.BeginTransactionAsync();
+            await unitOfWork.CommitAsync();
 
             var fromAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.FromAccountId);
             var toAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.ToAccountId);
@@ -43,7 +43,7 @@ public class AccountTransactionService(
             }
 
             decimal transactionFee = 0;
-            if (fromAccount.PersonId != toAccount!.PersonId)
+            if (fromAccount.PersonId != toAccount.PersonId)
             {
                 transactionFee = transactionDto.Amount * 0.01m + 0.5m;
             }
@@ -76,7 +76,6 @@ public class AccountTransactionService(
         }
         catch (Exception ex)
         {
-            await unitOfWork.RollbackAsync();
             loggerService.LogErrorInConsole(ex.Message);
 
             return CustomResult<AccountTransaction>.Failure(CustomError.Failure("An error occurred during the transaction."));
@@ -88,30 +87,43 @@ public class AccountTransactionService(
     {
         try
         {
-            await unitOfWork.BeginTransactionAsync();
             if (withdrawMoneyDto.Amount <= 0)
             {
                 return CustomResult<bool>.Failure(new CustomError("AmountLessOrEqualZero", "Amount must be greater than 0."));
+            }
+
+            if (withdrawMoneyDto.Amount > 10000)
+            {
+                return CustomResult<bool>.Failure(new CustomError("AmountGreaterOrEqualZero", "Amount must be less or equal to 10000."));
             }
             var validated = await bankCardService.ValidateCardAsync(withdrawMoneyDto.CardNumber,withdrawMoneyDto.Pin);
             if (!validated.IsSuccess)
             {
                 return  CustomResult<bool>.Failure(validated.Error);
             }
-            var balance = await unitOfWork.BankCardRepository.GetBalanceAsync(withdrawMoneyDto.CardNumber);
-            if (balance < withdrawMoneyDto.Amount)
-            {
-                return CustomResult<bool>.Failure(new CustomError("NotEnoughBalance","Not enough balance."));
-            }
-
             var bankAccount = await unitOfWork.BankCardRepository.GetAccountByCardAsync(withdrawMoneyDto.CardNumber);
             if (bankAccount == null){
                 return CustomResult<bool>.Failure(CustomError.NotFound("Bank account not found."));
             }
+            var totalWithdrawnToday = await unitOfWork.TransactionRepository.GetTotalWithdrawnTodayAsync(bankAccount.BankAccountId);
+            if (totalWithdrawnToday + withdrawMoneyDto.Amount > 10000)
+            {
+                return CustomResult<bool>.Failure(new CustomError("DailyLimitExceeded", "You cannot withdraw more than $10,000 per day."));
+            }
+            var balance = await unitOfWork.BankCardRepository.GetBalanceAsync(withdrawMoneyDto.CardNumber);
             
-            var newBalance = balance - withdrawMoneyDto.Amount;
-            await unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, newBalance);
+            decimal fee = withdrawMoneyDto.Amount * 0.02m;
+            decimal totalDeduction = withdrawMoneyDto.Amount + fee;
 
+            if (balance < totalDeduction)
+            {
+                return CustomResult<bool>.Failure(new CustomError("NotEnoughBalance", "Not enough balance including the transaction fee."));
+            }
+            
+            var newBalance = balance - totalDeduction;
+            await unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, newBalance);
+            
+            
             var atmTransaction = new AtmTransaction
             {
                 Amount = withdrawMoneyDto.Amount,
@@ -126,7 +138,6 @@ public class AccountTransactionService(
         }
         catch (Exception ex)
         {
-            await unitOfWork.RollbackAsync();
             loggerService.LogErrorInConsole($"Error in WithdrawMoneyAsync: {ex}");
             return CustomResult<bool>.Failure(CustomError.Failure("An error occurred during the transaction."));
         }

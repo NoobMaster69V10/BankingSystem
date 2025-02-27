@@ -1,6 +1,3 @@
-
-using System.Runtime.InteropServices.JavaScript;
-
 namespace BankingSystem.Domain.Errors
 {
     public sealed record CustomError(string Code, string Message,ErrorType ErrorType = ErrorType.Failure)

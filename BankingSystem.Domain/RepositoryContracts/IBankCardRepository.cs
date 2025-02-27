@@ -3,8 +3,7 @@ using BankingSystem.Domain.Entities;
 
 namespace BankingSystem.Domain.RepositoryContracts;
 
-public interface IBankCardRepository : ITransaction
-{
+public interface IBankCardRepository {
     Task CreateCardAsync(BankCard card);
     Task UpdatePinAsync(string cardNumber, string pinCode);
     Task<decimal> GetBalanceAsync(string cardNumber);

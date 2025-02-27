@@ -43,7 +43,6 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
     {
         try
         {
-            await unitOfWork.BeginTransactionAsync();
             var existingCard = await unitOfWork.BankCardRepository.GetCardAsync(bankCardRegisterDto.CardNumber);
             if (existingCard != null)
             {
@@ -94,7 +93,6 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
         }
         catch (Exception ex)
         {
-            await unitOfWork.RollbackAsync();
             loggerService.LogErrorInConsole(ex.ToString());
             return CustomResult<BankCard>.Failure(CustomError.Failure("Bank card could not be created."));
         }

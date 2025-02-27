@@ -2,13 +2,14 @@
 using System.Data;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
+using Microsoft.Data.SqlClient;
 
 namespace BankingSystem.Infrastructure.Repository;
 
 public class ReportRepository : IReportRepository
 {
-    private readonly IDbConnection _connection;
-    public ReportRepository(IDbConnection connection)
+    private readonly SqlConnection _connection;
+    public ReportRepository(SqlConnection connection)
     {
         _connection = connection;
     }

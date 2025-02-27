@@ -2,7 +2,7 @@
 
 namespace BankingSystem.Domain.RepositoryContracts;
 
-public interface IPersonRepository : ITransaction
+public interface IPersonRepository 
 {
     Task<Person?> GetPersonByUsernameAsync(string username);
     Task<Person?> GetPersonByIdAsync(string id);

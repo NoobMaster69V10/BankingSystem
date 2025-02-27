@@ -2,23 +2,20 @@
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
 using Dapper;
+using Microsoft.Data.SqlClient;
 
 namespace BankingSystem.Infrastructure.Repository;
 
 public class BankAccountRepository : IBankAccountRepository
 {
-    private readonly IDbConnection _connection;
-    private IDbTransaction _transaction = null!;
+    private readonly SqlConnection _connection;
+    private IDbTransaction _transaction;
 
-    public BankAccountRepository(IDbConnection connection)
+    public BankAccountRepository(SqlConnection connection,IDbTransaction transaction)
     {
         _connection = connection;
-    }
-    public void SetTransaction(IDbTransaction transaction)
-    {
         _transaction = transaction;
     }
-
     public async Task CreateAccountAsync(BankAccount account)
     {
         const string query = "INSERT INTO BankAccounts(IBAN, Balance, Currency, PersonId) VALUES (@IBAN, @Balance, @Currency, @PersonId)";
@@ -37,7 +34,7 @@ public class BankAccountRepository : IBankAccountRepository
     {
         const string query = "SELECT Id AS BankAccountId, IBAN, Balance, Currency, PersonId FROM BankAccounts WHERE Id = @Id";
 
-        return await _connection.QueryFirstOrDefaultAsync<BankAccount>(query, new { Id = id }, _transaction);
+        return await _connection.QueryFirstOrDefaultAsync<BankAccount>(query, new { Id = id });
     }
     
     public Task UpdateBalanceAsync(BankAccount? account, decimal balance)

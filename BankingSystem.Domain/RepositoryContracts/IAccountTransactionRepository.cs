@@ -1,7 +1,7 @@
 ﻿using BankingSystem.Domain.Entities;
 namespace BankingSystem.Domain.RepositoryContracts;
 
-public interface IAccountTransactionRepository : ITransaction
+public interface IAccountTransactionRepository 
 {
     Task AddAccountTransactionAsync(AccountTransaction accountTransaction);
     Task AddAtmTransactionAsync(AtmTransaction atmTransaction);

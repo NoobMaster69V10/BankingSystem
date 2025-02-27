@@ -2,17 +2,19 @@
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
 using Dapper;
+using Microsoft.Data.SqlClient;
 
 namespace BankingSystem.Infrastructure.Repository;
 
 public class TransactionRepository : IAccountTransactionRepository
 {
-    private readonly IDbConnection _connection;
-    private IDbTransaction _transaction = null!;
+    private readonly SqlConnection _connection;
+    private IDbTransaction _transaction;
 
-    public TransactionRepository(IDbConnection connection)
+    public TransactionRepository(SqlConnection connection,IDbTransaction transaction)
     {
         _connection = connection;
+        _transaction = transaction;
     }
     public void SetTransaction(IDbTransaction transaction)
     {

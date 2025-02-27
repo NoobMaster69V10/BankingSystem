@@ -57,9 +57,13 @@ public static class ApplicationServiceRegistration
             });
         });
         var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-
-        services.AddScoped<IDbConnection>(_ =>
-            new SqlConnection(connectionString));
+        services.AddScoped((s) => new SqlConnection(connectionString));
+        services.AddScoped<IDbTransaction>(s =>
+        {
+            SqlConnection conn = s.GetRequiredService<SqlConnection>();
+            conn.Open();
+            return conn.BeginTransaction();
+        });
 
         services.AddDbContext<BankingSystemDbContext>(options =>
             options.UseSqlServer(connectionString));
