@@ -32,6 +32,7 @@ builder.Services.AddPersonServices();
 builder.Services.AddTransactionServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -48,7 +49,7 @@ using (var scope = app.Services.CreateScope())
     await seeder.Seed();
 }
 
-app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+app.UseMiddleware<GlobalExceptionHandler>();
 
 app.UseAuthentication();
 
