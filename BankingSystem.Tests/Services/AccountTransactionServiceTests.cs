@@ -77,7 +77,7 @@ public class AccountTransactionServiceTests
     [Fact]
     public async Task WithdrawMoneyAsync_ShouldReturnFailure_WhenAmountIsZeroOrNegative()
     {
-        var withdrawDto = new WithdrawMoneyDto { Amount = 0, CardNumber = "1234", Pin = "0000" };
+        var withdrawDto = new WithdrawMoneyDto { Amount = 0, CardNumber = "1234", PinCode = "0000" };
 
         var result = await _accountTransactionService.WithdrawMoneyAsync(withdrawDto);
 
@@ -88,7 +88,7 @@ public class AccountTransactionServiceTests
     [Fact]
     public async Task WithdrawMoneyAsync_ShouldReturnFailure_WhenCardValidationFails()
     {
-        var withdrawDto = new WithdrawMoneyDto { Amount = 100, CardNumber = "1234", Pin = "0000" };
+        var withdrawDto = new WithdrawMoneyDto { Amount = 100, CardNumber = "1234", PinCode = "0000" };
 
         _bankCardServiceMock
             .Setup(b => b.ValidateCardAsync("1234", "0000"))
@@ -103,7 +103,7 @@ public class AccountTransactionServiceTests
     [Fact]
     public async Task WithdrawMoneyAsync_ShouldReturnFailure_WhenNotEnoughBalance()
     {
-        var withdrawDto = new WithdrawMoneyDto { Amount = 200, CardNumber = "1234", Pin = "0000" };
+        var withdrawDto = new WithdrawMoneyDto { Amount = 200, CardNumber = "1234", PinCode = "0000" };
 
         _bankCardServiceMock
             .Setup(b => b.ValidateCardAsync("1234", "0000"))
@@ -120,7 +120,7 @@ public class AccountTransactionServiceTests
     [Fact]
     public async Task WithdrawMoneyAsync_ShouldReturnSuccess_WhenValid()
     {
-        var withdrawDto = new WithdrawMoneyDto { Amount = 100, CardNumber = "1234", Pin = "0000", Currency = "USD" };
+        var withdrawDto = new WithdrawMoneyDto { Amount = 100, CardNumber = "1234", PinCode = "0000", Currency = "USD" };
         var bankAccount = new BankAccount { BankAccountId = 123, Balance = 500 };
 
         _bankCardServiceMock

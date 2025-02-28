@@ -3,7 +3,9 @@ using System.ComponentModel.DataAnnotations;
 namespace BankingSystem.Core.DTO;
 
 
-public record ForgotPasswordDto(
+public record ForgotPasswordDto
+{
     [Required]
-    [EmailAddress] string Email
-);
+    [EmailAddress]
+    public string Email { get; init; } = string.Empty;
+}

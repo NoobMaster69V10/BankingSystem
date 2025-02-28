@@ -98,7 +98,7 @@ public class AccountTransactionService(
             {
                 return CustomResult<bool>.Failure(new CustomError("AmountGreaterOrEqualZero", "Amount must be less or equal to 10000."));
             }
-            var validated = await bankCardService.ValidateCardAsync(withdrawMoneyDto.CardNumber,withdrawMoneyDto.Pin);
+            var validated = await bankCardService.ValidateCardAsync(withdrawMoneyDto.CardNumber,withdrawMoneyDto.PinCode);
             if (!validated.IsSuccess)
             {
                 return  CustomResult<bool>.Failure(validated.Error);

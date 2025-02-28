@@ -57,7 +57,7 @@ public class AtmControllerTests
     [Fact]
     public async Task AtmController_WithDrawMoney_ReturnOk()
     {
-        var withdrawDto = new WithdrawMoneyDto {CardNumber = "5127 8809 9999 9990",Pin = "1234",Amount = 500,Currency = "USD"};
+        var withdrawDto = new WithdrawMoneyDto {CardNumber = "5127 8809 9999 9990",PinCode = "1234",Amount = 500,Currency = "USD"};
         var expectedResult = CustomResult<bool>.Success(true);
         A.CallTo(() => _accountTransactionService.WithdrawMoneyAsync(withdrawDto))
             .Returns(Task.FromResult(expectedResult));
@@ -75,7 +75,7 @@ public class AtmControllerTests
         var withdrawDto = new WithdrawMoneyDto 
         { 
             CardNumber = "123456789", 
-            Pin = "1234", 
+            PinCode = "1234", 
             Amount = 10000, 
             Currency = "USD" 
         };
@@ -97,7 +97,7 @@ public class AtmControllerTests
         var withdrawDto = new WithdrawMoneyDto 
         { 
             CardNumber = "invalid", 
-            Pin = "wrong", 
+            PinCode = "wrong", 
             Amount = 50, 
             Currency = "USD" 
         };
