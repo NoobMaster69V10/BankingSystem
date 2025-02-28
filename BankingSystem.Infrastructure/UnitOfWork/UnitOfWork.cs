@@ -1,68 +1,89 @@
 ﻿using System.Data;
 using BankingSystem.Domain.RepositoryContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
-using Microsoft.Extensions.Logging;
 
-namespace BankingSystem.Infrastructure.UnitOfWork
+namespace BankingSystem.Infrastructure.UnitOfWork;
+
+public class UnitOfWork : IUnitOfWork
 {
-    public class UnitOfWork : IUnitOfWork
+    private readonly IDbConnection _connection;
+    private IDbTransaction? _transaction;
+    private bool _disposed;
+
+    public IPersonRepository PersonRepository { get; }
+    public IAccountTransactionRepository TransactionRepository { get; }
+    public IBankCardRepository BankCardRepository { get; }
+    public IBankAccountRepository BankAccountRepository { get; }
+    public IReportRepository ReportRepository { get; }
+
+    public UnitOfWork(IDbConnection connection, IPersonRepository personRepository,
+        IAccountTransactionRepository transactionRepository, IBankCardRepository bankCardRepository,
+        IBankAccountRepository bankAccountRepository, IReportRepository reportRepository)
     {
-        private IDbTransaction _dbTransaction;
-        private readonly ILogger<UnitOfWork> _logger;
+        _connection = connection ?? throw new ArgumentNullException(nameof(connection));
+        PersonRepository = personRepository ?? throw new ArgumentNullException(nameof(personRepository));
+        TransactionRepository = transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
+        BankCardRepository = bankCardRepository ?? throw new ArgumentNullException(nameof(bankCardRepository));
+        BankAccountRepository = bankAccountRepository ?? throw new ArgumentNullException(nameof(bankAccountRepository));
+        ReportRepository = reportRepository ?? throw new ArgumentNullException(nameof(reportRepository));
+        _connection.Open();
+    }
 
-        public IPersonRepository PersonRepository { get; }
-        public IAccountTransactionRepository TransactionRepository { get; }
-        public IBankCardRepository BankCardRepository { get; }
-        public IBankAccountRepository BankAccountRepository { get; }
-        public IReportRepository ReportRepository { get; }
-
-        public UnitOfWork(IDbTransaction dbTransaction, 
-            IPersonRepository personRepository,
-            IAccountTransactionRepository transactionRepository, 
-            IBankCardRepository bankCardRepository,
-            IBankAccountRepository bankAccountRepository, 
-            IReportRepository reportRepository,
-            ILogger<UnitOfWork> logger)
+    public Task BeginTransactionAsync()
+    {
+        if (_transaction == null)
         {
-            PersonRepository = personRepository;
-            TransactionRepository = transactionRepository;
-            BankCardRepository = bankCardRepository;
-            BankAccountRepository = bankAccountRepository;
-            ReportRepository = reportRepository;
-            _dbTransaction = dbTransaction;
-            _logger = logger;
-        }
-        public async Task CommitAsync()
-        {
-            try
-            {
-                await Task.Run(() => _dbTransaction.Commit());
-                _dbTransaction.Connection.BeginTransaction();  
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error committing transaction.");
-                await RollbackAsync();  
-                throw;  
-            }
+            _transaction = _connection.BeginTransaction();
+            PersonRepository.SetTransaction(_transaction);
+            TransactionRepository.SetTransaction(_transaction);
+            BankCardRepository.SetTransaction(_transaction);
+            BankAccountRepository.SetTransaction(_transaction);
         }
 
-        public async Task RollbackAsync()
+        return Task.CompletedTask;
+    }
+
+    public Task CommitAsync()
+    {
+        if (_transaction != null)
         {
-            try
-            {
-                await Task.Run(() => _dbTransaction.Rollback());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error rolling back transaction.");
-            }
+            _transaction.Commit();
+            return DisposeTransactionAsync();
         }
-        public void Dispose()
+
+        return Task.CompletedTask;
+    }
+
+    public Task RollbackAsync()
+    {
+        if (_transaction != null)
         {
-            _dbTransaction.Connection?.Close();
-            _dbTransaction.Connection?.Dispose();
-            _dbTransaction.Dispose();
+            _transaction.Rollback();
+            return DisposeTransactionAsync();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task DisposeTransactionAsync()
+    {
+        _transaction?.Dispose();
+        _transaction = null;
+        return Task.CompletedTask;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (!_disposed)
+        {
+            if (_transaction != null)
+            {
+                await RollbackAsync();
+            }
+
+            _connection.Close();
+            _connection.Dispose();
+            _disposed = true;
         }
     }
 }

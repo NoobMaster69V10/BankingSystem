@@ -2,19 +2,21 @@
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
 using Dapper;
-using Microsoft.Data.SqlClient;
 
 namespace BankingSystem.Infrastructure.Repository;
 
 public class PersonRepository : IPersonRepository
 {
 
-    private readonly SqlConnection _connection;
-    private IDbTransaction _transaction;
+    private readonly IDbConnection _connection;
+    private IDbTransaction _transaction = null!;
 
-    public PersonRepository(SqlConnection connection,IDbTransaction transaction)
+    public PersonRepository(IDbConnection connection)
     {
         _connection = connection;
+    }
+    public void SetTransaction(IDbTransaction transaction)
+    {
         _transaction = transaction;
     }
     public async Task<Person?> GetPersonByIdAsync(string id)

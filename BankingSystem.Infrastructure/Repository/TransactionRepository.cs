@@ -2,19 +2,17 @@
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
 using Dapper;
-using Microsoft.Data.SqlClient;
 
 namespace BankingSystem.Infrastructure.Repository;
 
 public class TransactionRepository : IAccountTransactionRepository
 {
-    private readonly SqlConnection _connection;
-    private IDbTransaction _transaction;
+    private readonly IDbConnection _connection;
+    private IDbTransaction _transaction = null!;
 
-    public TransactionRepository(SqlConnection connection,IDbTransaction transaction)
+    public TransactionRepository(IDbConnection connection)
     {
         _connection = connection;
-        _transaction = transaction;
     }
     public void SetTransaction(IDbTransaction transaction)
     {
@@ -45,5 +43,4 @@ public class TransactionRepository : IAccountTransactionRepository
     
         return await _connection.QueryFirstOrDefaultAsync<int>(query, new { AccountId = accountId },_transaction);
     }
-
 }

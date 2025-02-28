@@ -13,7 +13,7 @@ public class AccountTransactionService(
     IExchangeRateApi exchangeRateApi,
     ILoggerService loggerService,IBankCardService bankCardService) : IAccountTransactionService
 {
-    public async Task<CustomResult<AccountTransaction>> TransactionBetweenAccountsAsync(TransactionDto transactionDto, string userId)
+   public async Task<CustomResult<AccountTransaction>> TransactionBetweenAccountsAsync(TransactionDto transactionDto, string userId)
     {
         try
         {
@@ -22,7 +22,7 @@ public class AccountTransactionService(
                 return CustomResult<AccountTransaction>.Failure(CustomError.Validation("It is not possible to make a transaction between the same accounts."));
             }
 
-            await unitOfWork.CommitAsync();
+            await unitOfWork.BeginTransactionAsync();
 
             var fromAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.FromAccountId);
             var toAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.ToAccountId);
@@ -43,7 +43,7 @@ public class AccountTransactionService(
             }
 
             decimal transactionFee = 0;
-            if (fromAccount.PersonId != toAccount.PersonId)
+            if (fromAccount.PersonId != toAccount!.PersonId)
             {
                 transactionFee = transactionDto.Amount * 0.01m + 0.5m;
             }
@@ -76,11 +76,13 @@ public class AccountTransactionService(
         }
         catch (Exception ex)
         {
+            await unitOfWork.RollbackAsync();
             loggerService.LogErrorInConsole(ex.Message);
 
             return CustomResult<AccountTransaction>.Failure(CustomError.Failure("An error occurred during the transaction."));
         }
     }
+
 
 
     public async Task<CustomResult<bool>> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto)

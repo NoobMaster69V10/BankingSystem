@@ -57,7 +57,7 @@ public static class ApplicationServiceRegistration
             });
         });
         var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-        services.AddScoped((s) => new SqlConnection(connectionString));
+        services.AddScoped<IDbConnection>((s) => new SqlConnection(connectionString));
         services.AddScoped<IDbTransaction>(s =>
         {
             SqlConnection conn = s.GetRequiredService<SqlConnection>();

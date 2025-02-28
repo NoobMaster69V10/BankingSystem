@@ -92,7 +92,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                 AccountId = bankAccount.BankAccountId
             };
 
-            await unitOfWork.BankCardRepository.CreateCardAsync(newCard);
+            await unitOfWork.BankCardRepository.CreateCardAsync(newCard); 
             await unitOfWork.CommitAsync();
             return CustomResult<BankCard>.Success(newCard);
         }
