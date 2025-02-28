@@ -1,6 +1,7 @@
-﻿using BankingSystem.Core.DTO.Response;
+﻿using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.UnitOfWorkContracts;
 using Microsoft.IdentityModel.Tokens;
 
@@ -8,57 +9,57 @@ namespace BankingSystem.Core.Services;
 
 public class ReportService(IUnitOfWork unitOfWork) : IReportService
 {
-    public async Task<AdvancedApiResponse<int>> GetRegisteredUsersCountAsync(string? year, string? month)
+    public async Task<CustomResult<int>> GetRegisteredUsersCountAsync(string? year, string? month)
     {
         switch (year)
         {
             case "current":
             {
                 var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersThisYearAsync();
-                return AdvancedApiResponse<int>.SuccessResponse(count);
+                return CustomResult<int>.Success(count);
             }
             case "previous":
             {
                 var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersForLastYearAsync();
-                return AdvancedApiResponse<int>.SuccessResponse(count);
+                return CustomResult<int>.Success(count);
             }
         }
 
         if (month == "previous")
         {
             var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersForLastMonthAsync();
-            return AdvancedApiResponse<int>.SuccessResponse(count);
+            return CustomResult<int>.Success(count);
         }
 
-        return AdvancedApiResponse<int>.ErrorResponse("Invalid query parameters. Use ?year=current, ?year=previous, or ?month=previous");
+        return CustomResult<int>.Failure(new CustomError("InvalidParams","Invalid Parameters"));
     }
 
-    public async Task<AdvancedApiResponse<int>> GetTransactionsCountAsync(string? year, string? month)
+    public async Task<CustomResult<int>> GetTransactionsCountAsync(string? year, string? month)
     {
          switch (year)
          {
              case "previous":
              {
                  var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastYearAsync();
-                 return AdvancedApiResponse<int>.SuccessResponse(count);
+                 return CustomResult<int>.Success(count);
              }
              case "half":
              {
                  var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastHalfYearAsync();
-                 return AdvancedApiResponse<int>.SuccessResponse(count);
+                 return CustomResult<int>.Success(count);
              }
          }
 
          if (month == "previous")
          { 
              var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastMonthAsync();
-             return AdvancedApiResponse<int>.SuccessResponse(count);
+             return CustomResult<int>.Success(count);
          }
 
-         return AdvancedApiResponse<int>.ErrorResponse("Invalid query parameters. Use ?year=previous, ?year=half, or ?month=previous");
+         return CustomResult<int>.Failure(new CustomError("InvalidParams","Invalid Parameters"));
     }
 
-    public async Task<AdvancedApiResponse<decimal>> GetTransactionsIncomeSumAsync(string? year, string? month, string currency)
+    public async Task<CustomResult<decimal>> GetTransactionsIncomeSumAsync(string? year, string? month, string currency)
     {
         switch (year)
         {
@@ -67,18 +68,18 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
                 var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastYearAsync(currency);
                 if (income is null)
                 {
-                    return AdvancedApiResponse<decimal>.ErrorResponse("Cannot find records with these params!");
+                    return CustomResult<decimal>.Failure(CustomError.NotFound("Income not found"));
                 }
-                return AdvancedApiResponse<decimal>.SuccessResponse((decimal)income);
+                return CustomResult<decimal>.Success((decimal)income);
             }
             case "half":
             {
                 var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastHalfYearAsync(currency);
                 if (income is null)
                 {
-                    return AdvancedApiResponse<decimal>.ErrorResponse("Cannot find records with these params!");
+                    return CustomResult<decimal>.Failure(CustomError.NotFound("Income not found"));
                 }
-                return AdvancedApiResponse<decimal>.SuccessResponse((decimal)income);
+                return CustomResult<decimal>.Success((decimal)income);
             }
         }
 
@@ -87,34 +88,34 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
             var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastMonthAsync(currency);
             if (income is null)
             {
-                return AdvancedApiResponse<decimal>.ErrorResponse("Cannot find records with these params!");
+                return CustomResult<decimal>.Failure(CustomError.NotFound("Income not found"));
             }
-            return AdvancedApiResponse<decimal>.SuccessResponse((decimal)income);
+            return CustomResult<decimal>.Success((decimal)income);
         }
 
-        return AdvancedApiResponse<decimal>.ErrorResponse("Invalid query parameters. Use ?year=previous, ?year=half, or ?month=previous, ?currency=GEL,USD,EUR");
-
+        return CustomResult<decimal>.Failure(new CustomError("InvalidParams","Invalid Parameters"));
     }
 
-    public async Task<AdvancedApiResponse<decimal>> GetAverageTransactionsIncomeAsync(string currency)
+    public async Task<CustomResult<decimal>> GetAverageTransactionsIncomeAsync(string currency)
     {
         var averageIncome = await unitOfWork.ReportRepository.GetAverageTransactionsIncomeByCurrencyAsync(currency);
         if (averageIncome is null)
         {
-            return AdvancedApiResponse<decimal>.ErrorResponse("Cannot find records with these params!");
+            return CustomResult<decimal>.Failure(CustomError.NotFound("Income not found"));
         }
 
-        return AdvancedApiResponse<decimal>.SuccessResponse((decimal)averageIncome);
+        return CustomResult<decimal>.Success((decimal)averageIncome);
     }
 
-    public async Task<AdvancedApiResponse<IEnumerable<DailyTransactions>>> GetTransactionsChartForLastMonthAsync()
+    public async Task<CustomResult<IEnumerable<DailyTransactions>>> GetTransactionsChartForLastMonthAsync()
     {
         var transactions = await unitOfWork.ReportRepository.GetTransactionsChartForLastMonthAsync();
 
         if (transactions.IsNullOrEmpty())
         {
-            return AdvancedApiResponse<IEnumerable<DailyTransactions>>.ErrorResponse("There is not transaction");
+            return CustomResult<IEnumerable<DailyTransactions>>.Failure(CustomError.NotFound("No transactions found"));
         }
-        return AdvancedApiResponse<IEnumerable<DailyTransactions>>.SuccessResponse(transactions);
+        
+        return CustomResult<IEnumerable<DailyTransactions>>.Success(transactions);
     }
 }

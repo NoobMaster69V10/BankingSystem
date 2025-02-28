@@ -27,7 +27,7 @@ namespace BankingSystem.Tests.Services
         #region ShowBalanceAsync Tests
 
         [Fact]
-        public async Task AtmService_ShowBalanceAsync_ValidCard_ReturnsBalance()
+        public async Task ShowBalanceAsync_ValidCard_ReturnsBalance()
         {
             var cardDto = new CardAuthorizationDto { CardNumber = "123456789", PinCode = "1234" };
             var validationResult = CustomResult<bool>.Success(true);
@@ -46,7 +46,7 @@ namespace BankingSystem.Tests.Services
         }
 
         [Fact]
-        public async Task AtmService_ShowBalanceAsync_InvalidCard_ReturnsFailure()
+        public async Task ShowBalanceAsync_InvalidCard_ReturnsFailure()
         {
             var cardDto = new CardAuthorizationDto { CardNumber = "invalid", PinCode = "wrong" };
             var validationResult = CustomResult<bool>.Failure(CustomError.NotFound("Card not found"));
@@ -62,7 +62,7 @@ namespace BankingSystem.Tests.Services
         }
 
         [Fact]
-        public async Task ShowBalanceAsync_ExceptionThrown_ReturnsFailure()
+        public async Task ShowBalanceAsync_WhenExceptionThrown_ReturnsFailure()
         {
             var cardDto = new CardAuthorizationDto { CardNumber = "123456789", PinCode = "1234" };
             var validationResult = CustomResult<bool>.Success(true);
