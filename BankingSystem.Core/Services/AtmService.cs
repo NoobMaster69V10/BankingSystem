@@ -20,24 +20,6 @@ public class AtmService : IAtmService
         _loggerService = loggerService;
     }
 
-    private async Task<CustomResult<bool>> AuthorizeCardAsync(string cardNumber, string pin)
-    {
-        try
-        {
-            var validationResult = await _bankCardService.ValidateCardAsync(cardNumber, pin);
-            if (!validationResult.IsSuccess)
-            {
-                if (validationResult.Error != null) return CustomResult<bool>.Failure(validationResult.Error);
-            }
-
-            return CustomResult<bool>.Success(true);
-        }
-        catch (Exception ex)
-        {
-            _loggerService.LogErrorInConsole($"Error in AuthorizeCardAsync: {ex}");
-            return CustomResult<bool>.Failure(new CustomError("AUTH_ERROR", "Error occurred while authorizing"));
-        }
-    }
 
     public async Task<CustomResult<BalanceResponseDto>> ShowBalanceAsync(CardAuthorizationDto cardDto)
     {
@@ -54,7 +36,7 @@ public class AtmService : IAtmService
                 balance: balance,
                 cardNumber: cardDto.CardNumber
             );
-        
+
             return CustomResult<BalanceResponseDto>.Success(response);
         }
         catch (Exception ex)
@@ -85,6 +67,25 @@ public class AtmService : IAtmService
             return CustomResult<bool>.Failure(
                 new CustomError("PIN_CHANGE_ERROR", "An error occurred while changing the PIN")
             );
+        }
+    }
+
+    private async Task<CustomResult<bool>> AuthorizeCardAsync(string cardNumber, string pin)
+    {
+        try
+        {
+            var validationResult = await _bankCardService.ValidateCardAsync(cardNumber, pin);
+            if (!validationResult.IsSuccess)
+            {
+                if (validationResult.Error != null) return CustomResult<bool>.Failure(validationResult.Error);
+            }
+
+            return CustomResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogErrorInConsole($"Error in AuthorizeCardAsync: {ex}");
+            return CustomResult<bool>.Failure(new CustomError("AUTH_ERROR", "Error occurred while authorizing"));
         }
     }
 }

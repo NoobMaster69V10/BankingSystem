@@ -14,18 +14,19 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
     {
         try
         {
-            var cardExists = await unitOfWork.BankCardRepository.DoesCardExistAsync(cardNumber);
-            if (!cardExists)
+            var card = await unitOfWork.BankCardRepository.GetCardDetailsAsync(cardNumber);
+
+            if (card == null)
             {
                 return CustomResult<bool>.Failure(CustomError.NotFound("Card number not found"));
             }
 
-            if (!await unitOfWork.BankCardRepository.CheckPinCodeAsync(cardNumber, pinCode))
+            if (!HashingHelper.VerifyHash(pinCode, card.Value.PinCode, card.Value.Salt))
             {
                 return CustomResult<bool>.Failure(CustomError.NotFound("Pin code does not match"));
             }
 
-            if (await unitOfWork.BankCardRepository.IsCardExpiredAsync(cardNumber))
+            if (card.Value.ExpiryDate < DateTime.UtcNow)
             {
                 return CustomResult<bool>.Failure(new CustomError("CARD_EXPIRED", "Card is expired"));
             }
@@ -39,6 +40,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
         }
     }
 
+    
     public async Task<CustomResult<BankCard>> CreateBankCardAsync(BankCardRegisterDto bankCardRegisterDto)
     {
         try
@@ -64,16 +66,19 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
 
             if (!person.BankAccounts.Any())
             {
-                return CustomResult<BankCard>.Failure(CustomError.NotFound($"'{bankCardRegisterDto.Username}' does not have accounts, please create accounts first!"));
+                return CustomResult<BankCard>.Failure(CustomError.NotFound(
+                    $"'{bankCardRegisterDto.Username}' does not have accounts, please create accounts first!"));
             }
 
 
             if (person.BankAccounts.All(ba => ba.BankAccountId != bankCardRegisterDto.BankAccountId))
             {
-                return CustomResult<BankCard>.Failure(CustomError.NotFound($"'{bankCardRegisterDto.Username}' does not have account with accountId - '{bankCardRegisterDto.BankAccountId}'!"));
+                return CustomResult<BankCard>.Failure(CustomError.NotFound(
+                    $"'{bankCardRegisterDto.Username}' does not have account with accountId - '{bankCardRegisterDto.BankAccountId}'!"));
             }
 
-            var (hashedPin, hashedCvv, salt) = HashingHelper.HashPinAndCvv(bankCardRegisterDto.PinCode, bankCardRegisterDto.Cvv);
+            var (hashedPin, hashedCvv, salt) =
+                HashingHelper.HashPinAndCvv(bankCardRegisterDto.PinCode, bankCardRegisterDto.Cvv);
 
             var newCard = new BankCard
             {

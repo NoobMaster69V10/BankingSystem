@@ -8,7 +8,7 @@ namespace BankingSystem.Core.Services;
 
 public class ReportService(IUnitOfWork unitOfWork) : IReportService
 {
-    public async Task<AdvancedApiResponse<int>> GetRegisteredUsersCount(string? year, string? month)
+    public async Task<AdvancedApiResponse<int>> GetRegisteredUsersCountAsync(string? year, string? month)
     {
         switch (year)
         {
@@ -33,7 +33,7 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
         return AdvancedApiResponse<int>.ErrorResponse("Invalid query parameters. Use ?year=current, ?year=previous, or ?month=previous");
     }
 
-    public async Task<AdvancedApiResponse<int>> GetTransactionsCount(string? year, string? month)
+    public async Task<AdvancedApiResponse<int>> GetTransactionsCountAsync(string? year, string? month)
     {
          switch (year)
          {
@@ -58,7 +58,7 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
          return AdvancedApiResponse<int>.ErrorResponse("Invalid query parameters. Use ?year=previous, ?year=half, or ?month=previous");
     }
 
-    public async Task<AdvancedApiResponse<decimal>> GetTransactionsIncomeSum(string? year, string? month, string currency)
+    public async Task<AdvancedApiResponse<decimal>> GetTransactionsIncomeSumAsync(string? year, string? month, string currency)
     {
         switch (year)
         {
@@ -96,7 +96,7 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
 
     }
 
-    public async Task<AdvancedApiResponse<decimal>> GetAverageTransactionsIncome(string currency)
+    public async Task<AdvancedApiResponse<decimal>> GetAverageTransactionsIncomeAsync(string currency)
     {
         var averageIncome = await unitOfWork.ReportRepository.GetAverageTransactionsIncomeByCurrency(currency);
         if (averageIncome is null)
@@ -107,7 +107,7 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
         return AdvancedApiResponse<decimal>.SuccessResponse((decimal)averageIncome);
     }
 
-    public async Task<AdvancedApiResponse<IEnumerable<DailyTransactions>>> GetTransactionsChartForLastMonth()
+    public async Task<AdvancedApiResponse<IEnumerable<DailyTransactions>>> GetTransactionsChartForLastMonthAsync()
     {
         var transactions = await unitOfWork.ReportRepository.GetTransactionsChartForLastMonth();
 

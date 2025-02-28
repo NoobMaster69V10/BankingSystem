@@ -8,7 +8,7 @@ public class ReportController(IReportService reportService) : ControllerBase
     [HttpGet("registered-count")]
     public async Task<IActionResult> GetRegisteredUsersCount([FromQuery] string? year, [FromQuery] string? month)
     {
-        var response = await reportService.GetRegisteredUsersCount(year, month);
+        var response = await reportService.GetRegisteredUsersCountAsync(year, month);
 
         if (!response.Success)
         {
@@ -21,7 +21,7 @@ public class ReportController(IReportService reportService) : ControllerBase
     [HttpGet("transactions-count")]
     public async Task<IActionResult> GetTransactionsCount([FromQuery] string? year, [FromQuery] string? month)
     {
-        var response = await reportService.GetTransactionsCount(year, month);
+        var response = await reportService.GetTransactionsCountAsync(year, month);
 
         if (!response.Success)
         {
@@ -34,7 +34,7 @@ public class ReportController(IReportService reportService) : ControllerBase
     [HttpGet("transactions-income")]
     public async Task<IActionResult> GetTransactionsIncomeSum([FromQuery] string? year, [FromQuery] string? month, [FromQuery] string currency)
     {
-        var response = await reportService.GetTransactionsIncomeSum(year, month, currency);
+        var response = await reportService.GetTransactionsIncomeSumAsync(year, month, currency);
 
         if (!response.Success)
         {
@@ -47,7 +47,7 @@ public class ReportController(IReportService reportService) : ControllerBase
     [HttpGet("transactions-average-income")]
     public async Task<IActionResult> GetAverageTransactionsIncomeSum([FromQuery] string currency)
     {
-        var response = await reportService.GetAverageTransactionsIncome(currency);
+        var response = await reportService.GetAverageTransactionsIncomeAsync(currency);
 
         if (!response.Success)
         {
@@ -60,7 +60,7 @@ public class ReportController(IReportService reportService) : ControllerBase
     [HttpGet("transactions-chart")]
     public async Task<IActionResult> GetTransactionsChartForLastMonth()
     {
-        var response = await reportService.GetTransactionsChartForLastMonth();
+        var response = await reportService.GetTransactionsChartForLastMonthAsync();
 
         if (!response.Success)
         {

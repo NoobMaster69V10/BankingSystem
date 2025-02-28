@@ -5,13 +5,13 @@ namespace BankingSystem.Core.ServiceContracts;
 
 public interface IReportService
 {
-    Task<AdvancedApiResponse<int>> GetRegisteredUsersCount(string? year, string? month);
+    Task<AdvancedApiResponse<int>> GetRegisteredUsersCountAsync(string? year, string? month);
 
-    Task<AdvancedApiResponse<int>> GetTransactionsCount(string? year, string? month);
+    Task<AdvancedApiResponse<int>> GetTransactionsCountAsync(string? year, string? month);
 
-    Task<AdvancedApiResponse<decimal>> GetTransactionsIncomeSum(string? year, string? month, string currency);
+    Task<AdvancedApiResponse<decimal>> GetTransactionsIncomeSumAsync(string? year, string? month, string currency);
 
-    Task<AdvancedApiResponse<decimal>> GetAverageTransactionsIncome(string currency);
+    Task<AdvancedApiResponse<decimal>> GetAverageTransactionsIncomeAsync(string currency);
 
-    Task<AdvancedApiResponse<IEnumerable<DailyTransactions>>> GetTransactionsChartForLastMonth();
+    Task<AdvancedApiResponse<IEnumerable<DailyTransactions>>> GetTransactionsChartForLastMonthAsync();
 }

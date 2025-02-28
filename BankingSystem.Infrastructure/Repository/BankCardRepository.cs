@@ -30,13 +30,13 @@ public class BankCardRepository : IBankCardRepository
     {
         return await _connection.QueryFirstOrDefaultAsync<BankCard>(
             "select * from BankCards where CardNumber = @CardNumber", 
-            new { CardNumber = cardNumber });
+            new { CardNumber = cardNumber },_transaction);
     }
 
     public async Task<bool> DoesCardExistAsync(string cardNumber)
     {
         string query = "SELECT CASE WHEN EXISTS (SELECT 1 FROM BankCards WHERE CardNumber = @CardNumber) THEN 1 ELSE 0 END";
-        return await _connection.ExecuteScalarAsync<bool>(query, new { CardNumber = cardNumber });
+        return await _connection.ExecuteScalarAsync<bool>(query, new { CardNumber = cardNumber },_transaction);
     }
 
     public async Task<bool> IsCardExpiredAsync(string cardNumber)
@@ -44,7 +44,7 @@ public class BankCardRepository : IBankCardRepository
         string query =
             "SELECT CASE WHEN ExpirationDate < GETDATE() THEN 1 ELSE 0 END FROM BankCards WHERE CardNumber = @CardNumber";
 
-        return await _connection.ExecuteScalarAsync<bool>(query, new { CardNumber = cardNumber });
+        return await _connection.ExecuteScalarAsync<bool>(query, new { CardNumber = cardNumber },_transaction);
     }
 
     public async Task<bool> CheckPinCodeAsync(string cardNumber, string pinCode)
@@ -52,10 +52,23 @@ public class BankCardRepository : IBankCardRepository
         string query =
             "SELECT PinCode, Salt FROM BankCards WHERE CardNumber = @CardNumber";
 
-        var result = await _connection.QuerySingleOrDefaultAsync<(string PinCode, string Salt)>(query, new { CardNumber = cardNumber });
+        var result = await _connection.QuerySingleOrDefaultAsync<(string PinCode, string Salt)>(query, new { CardNumber = cardNumber },_transaction);
 
         return HashingHelper.VerifyHash(pinCode, result.PinCode, result.Salt);
     }
+
+    public async Task<(string PinCode, string Salt, DateTime ExpiryDate, string Cvv)?> GetCardDetailsAsync(string cardNumber)
+    {
+        const string query = @"
+        SELECT PinCode, Salt, ExpirationDate, CVV
+        FROM BankCards
+        WHERE CardNumber = @CardNumber";
+
+        return await _connection.QuerySingleOrDefaultAsync<(string, string, DateTime, string)>(
+            query, new { CardNumber = cardNumber }, _transaction);
+    }
+
+
 
     public async Task UpdatePinAsync(string cardNumber, string pinCode)
     { 
@@ -83,6 +96,6 @@ public class BankCardRepository : IBankCardRepository
     {
         return await _connection.QuerySingleOrDefaultAsync<BankAccount>(
             "SELECT b.Id as BankAccountId FROM BankCards bc INNER JOIN BankAccounts b ON bc.AccountId = b.Id WHERE bc.CardNumber = @CardNumber",
-            new { CardNumber = cardNumber });
+            new { CardNumber = cardNumber },_transaction);
     }
 }

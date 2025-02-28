@@ -32,7 +32,6 @@ namespace BankingSystem.Infrastructure.UnitOfWork
             _dbTransaction = dbTransaction;
             _logger = logger;
         }
-
         public async Task CommitAsync()
         {
             try

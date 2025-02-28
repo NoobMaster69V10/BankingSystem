@@ -1,5 +1,4 @@
-﻿using System.Reflection.Metadata;
-using BankingSystem.Domain.Entities;
+﻿using BankingSystem.Domain.Entities;
 
 namespace BankingSystem.Domain.RepositoryContracts;
 
@@ -12,5 +11,5 @@ public interface IBankCardRepository {
     Task<bool> DoesCardExistAsync(string cardNumber);
     Task<bool> IsCardExpiredAsync(string cardNumber);
     Task<bool> CheckPinCodeAsync(string cardNumber, string pinCode);
-    
+    Task<(string PinCode, string Salt, DateTime ExpiryDate, string Cvv)?> GetCardDetailsAsync(string cardNumber);
 }
