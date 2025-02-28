@@ -3,32 +3,24 @@ using System.Text.Json.Serialization;
 
 namespace BankingSystem.Core.DTO;
 
-public class PersonRegisterDto
-{
-    [Required(ErrorMessage = "Name is required.")]
-    public string Name { get; set; }
-
-    [Required(ErrorMessage = "Lastname is required.")]
-    public string Lastname { get; set; }
-
+public record PersonRegisterDto(
+    [Required(ErrorMessage = "Name is required.")] string Name,
+    
+    [Required(ErrorMessage = "Lastname is required.")] string Lastname,
+    
     [Required(ErrorMessage = "ID number is required.")]
-    [StringLength(11, MinimumLength = 11, ErrorMessage = "ID number must be exactly 11 characters.")]
-    public string IdNumber { get; set; }
-
+    [StringLength(11, MinimumLength = 11, ErrorMessage = "ID number must be exactly 11 characters.")] string IdNumber,
+    
     [Required(ErrorMessage = "Birth date is required.")]
-    [DataType(DataType.Date, ErrorMessage = "Invalid birth date format.")]
-    public DateTime BirthDate { get; set; }
-
+    [DataType(DataType.Date, ErrorMessage = "Invalid birth date format.")] DateTime BirthDate,
+    
     [Required(ErrorMessage = "Email is required.")]
-    [EmailAddress(ErrorMessage = "Invalid email format.")]
-    public string Email { get; set; }
-
+    [EmailAddress(ErrorMessage = "Invalid email format.")] string Email,
+    
     [Required(ErrorMessage = "Password is required.")]
-    [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
-    [JsonIgnore]
-    public string Password { get; set; }
-
-    [AllowedValues("Operator", "Person", ErrorMessage = "Role must be either 'Operator' or 'Person'.")]
+    [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")] string Password
+)
+{
     [JsonIgnore]
     public string Role { get; set; } = "Person";
 }

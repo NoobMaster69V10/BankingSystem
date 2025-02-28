@@ -1,13 +1,11 @@
-using BankingSystem.Domain.CustomValidationAttributes;
 using System.ComponentModel.DataAnnotations;
+using BankingSystem.Domain.CustomValidationAttributes;
 
 namespace BankingSystem.Core.DTO;
 
-public class CardAuthorizationDto
-{
-    [Required(ErrorMessage = "Card number is required")]
-    public  string CardNumber { get; set; }
+public record CardAuthorizationDto(
+    [Required(ErrorMessage = "Card number is required")] string CardNumber,
+    
     [Required(ErrorMessage = "Pin Codes is required")]
-    [StringLengthFixedValidation(4, ErrorMessage = "Pin code must be exactly 4 characters.")]
-    public  string PinCode { get; set; }
-}
+    [StringLengthFixedValidation(4, ErrorMessage = "Pin code must be exactly 4 characters.")] string PinCode
+);

@@ -3,30 +3,22 @@ using BankingSystem.Domain.CustomValidationAttributes;
 
 namespace BankingSystem.Core.DTO;
 
-public class BankCardRegisterDto
-{ 
-    [Required(ErrorMessage = "Username is required.")]
-    public string Username { get; set; }
-
+public record BankCardRegisterDto(
+    [Required(ErrorMessage = "Username is required.")] string Username,
+    
     [Required(ErrorMessage = "Card number is required.")]
-    [Length(13, 19)]
-    public string CardNumber { get; set; }
-
-    [Required(ErrorMessage = "Firstname is required.")]
-    public string Firstname { get; set; }
-
-    [Required(ErrorMessage = "Lastname is required.")]
-    public string Lastname { get; set; }
-
+    [Length(13, 19)] string CardNumber,
+    
+    [Required(ErrorMessage = "Firstname is required.")] string Firstname,
+    
+    [Required(ErrorMessage = "Lastname is required.")] string Lastname,
+    
     [Required(ErrorMessage = "Expiration date is required.")]
-    [CheckExpirationDateValidation]
-    public DateTime ExpirationDate { get; set; }
-
-    [StringLengthFixedValidation(3, ErrorMessage = "CVV must be exactly 3 characters.")]
-    public string Cvv { get; set; }
-
-    [StringLengthFixedValidation(4, ErrorMessage = "Pin code must be exactly 4 characters.")]
-    public string PinCode { get; set; }
-    [Required(ErrorMessage = "BankAccountId is required.")]
-    public int BankAccountId { get; set; }
-}
+    [CheckExpirationDateValidation] DateTime ExpirationDate,
+    
+    [StringLengthFixedValidation(3, ErrorMessage = "CVV must be exactly 3 characters.")] string Cvv,
+    
+    [StringLengthFixedValidation(4, ErrorMessage = "Pin code must be exactly 4 characters.")] string PinCode,
+    
+    [Required(ErrorMessage = "BankAccountId is required.")] int BankAccountId
+);

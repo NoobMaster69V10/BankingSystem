@@ -2,16 +2,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BankingSystem.Core.DTO;
 
-public class WithdrawMoneyDto
-{
-    [Required(ErrorMessage = "Card number is required.")]
-    public string CardNumber { get; set; }
+public record WithdrawMoneyDto(
+    [Required(ErrorMessage = "Card number is required.")] string CardNumber,
     
-    [Required(ErrorMessage = "Pin is required.")]
-    public string Pin { get; set; }
+    [Required(ErrorMessage = "Pin is required.")] string Pin,
     
-    [Required(ErrorMessage = "Amount is required.")]
-    public int Amount { get; set; }
+    [Required(ErrorMessage = "Amount is required.")] int Amount,
     
-    public string Currency { get; set; }
-}
+    string Currency
+);

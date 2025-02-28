@@ -2,15 +2,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BankingSystem.Core.DTO;
 
-public class ResetPasswordDto
+public record ResetPasswordDto(
+    [Required] string Email,
+
+    [Required] string Token,
+
+    [Required] string NewPassword)
 {
     [Required]
-    public string Email { get; set; }
-    [Required]
-    public string Token { get; set; }
-    [Required]
-    public string NewPassword { get; set; }
-    [Required]
-    [Compare("NewPassword")]
-    public string ConfirmPassword { get; set; }
+    [Compare("NewPassword", ErrorMessage = "Passwords do not match.")]
+    public string ConfirmPassword { get; init; } = string.Empty;
 }
