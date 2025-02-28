@@ -14,19 +14,19 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
         {
             case "current":
             {
-                var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersThisYear();
+                var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersThisYearAsync();
                 return AdvancedApiResponse<int>.SuccessResponse(count);
             }
             case "previous":
             {
-                var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersForLastYear();
+                var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersForLastYearAsync();
                 return AdvancedApiResponse<int>.SuccessResponse(count);
             }
         }
 
         if (month == "previous")
         {
-            var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersForLastMonth();
+            var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersForLastMonthAsync();
             return AdvancedApiResponse<int>.SuccessResponse(count);
         }
 
@@ -39,19 +39,19 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
          {
              case "previous":
              {
-                 var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastYear();
+                 var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastYearAsync();
                  return AdvancedApiResponse<int>.SuccessResponse(count);
              }
              case "half":
              {
-                 var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastHalfYear();
+                 var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastHalfYearAsync();
                  return AdvancedApiResponse<int>.SuccessResponse(count);
              }
          }
 
          if (month == "previous")
          { 
-             var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastMonth();
+             var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastMonthAsync();
              return AdvancedApiResponse<int>.SuccessResponse(count);
          }
 
@@ -64,7 +64,7 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
         {
             case "previous":
             {
-                var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastYear(currency);
+                var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastYearAsync(currency);
                 if (income is null)
                 {
                     return AdvancedApiResponse<decimal>.ErrorResponse("Cannot find records with these params!");
@@ -73,7 +73,7 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
             }
             case "half":
             {
-                var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastHalfYear(currency);
+                var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastHalfYearAsync(currency);
                 if (income is null)
                 {
                     return AdvancedApiResponse<decimal>.ErrorResponse("Cannot find records with these params!");
@@ -84,7 +84,7 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
 
         if (month == "previous")
         {
-            var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastMonth(currency);
+            var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastMonthAsync(currency);
             if (income is null)
             {
                 return AdvancedApiResponse<decimal>.ErrorResponse("Cannot find records with these params!");
@@ -98,7 +98,7 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
 
     public async Task<AdvancedApiResponse<decimal>> GetAverageTransactionsIncomeAsync(string currency)
     {
-        var averageIncome = await unitOfWork.ReportRepository.GetAverageTransactionsIncomeByCurrency(currency);
+        var averageIncome = await unitOfWork.ReportRepository.GetAverageTransactionsIncomeByCurrencyAsync(currency);
         if (averageIncome is null)
         {
             return AdvancedApiResponse<decimal>.ErrorResponse("Cannot find records with these params!");
@@ -109,7 +109,7 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
 
     public async Task<AdvancedApiResponse<IEnumerable<DailyTransactions>>> GetTransactionsChartForLastMonthAsync()
     {
-        var transactions = await unitOfWork.ReportRepository.GetTransactionsChartForLastMonth();
+        var transactions = await unitOfWork.ReportRepository.GetTransactionsChartForLastMonthAsync();
 
         if (transactions.IsNullOrEmpty())
         {

@@ -59,7 +59,6 @@ public static class ApplicationServiceRegistration
         var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
         services.AddScoped<IDbConnection>(_ =>
             new SqlConnection(connectionString));
-        
         services.AddDbContext<BankingSystemDbContext>(options =>
             options.UseSqlServer(connectionString));
     }
