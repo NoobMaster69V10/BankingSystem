@@ -5,7 +5,7 @@ using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.UnitOfWorkContracts;
 using Moq;
 
-namespace BankingSystem.Tests;
+namespace BankingSystem.Tests.Services;
 
 public class BankAccountServiceTests
 {

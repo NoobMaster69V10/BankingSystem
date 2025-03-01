@@ -1,18 +1,13 @@
 ﻿using BankingSystem.Core.DTO;
-using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
-using BankingSystem.Domain.Errors;
-using BankingSystem.Domain.UnitOfWorkContracts;
-using FluentEmail.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Moq;
-using IConfiguration = Castle.Core.Configuration.IConfiguration;
 
-namespace BankingSystem.Tests;
+namespace BankingSystem.Tests.Services;
 
 public class PersonAuthServiceTests
 {

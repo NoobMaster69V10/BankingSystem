@@ -1,4 +1,5 @@
-﻿using BankingSystem.Core.ServiceContracts;
+﻿using BankingSystem.Core.DTO.Result;
+using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankingSystem.API.Controllers;
@@ -8,65 +9,65 @@ public class ReportController(IReportService reportService) : ControllerBase
     [HttpGet("registered-count")]
     public async Task<IActionResult> GetRegisteredUsersCount([FromQuery] string? year, [FromQuery] string? month)
     {
-        var response = await reportService.GetRegisteredUsersCountAsync(year, month);
+        var result = await reportService.GetRegisteredUsersCountAsync(year, month);
 
-        if (!response.Success)
+        if (!result.IsSuccess)
         {
-            return BadRequest(new { ErrorMessage = response.Message });
+            return result.ToProblemDetails();
         }
 
-        return Ok(new { Count = response.Data });
+        return Ok(result.Value);
     }
 
     [HttpGet("transactions-count")]
     public async Task<IActionResult> GetTransactionsCount([FromQuery] string? year, [FromQuery] string? month)
     {
-        var response = await reportService.GetTransactionsCountAsync(year, month);
+        var result = await reportService.GetTransactionsCountAsync(year, month);
 
-        if (!response.Success)
+        if (!result.IsSuccess)
         {
-            return BadRequest(new { ErrorMessage = response.Message });
+            return result.ToProblemDetails();
         }
           
-        return Ok(new { Count = response.Data });
+        return Ok(result.Value);
     }
 
     [HttpGet("transactions-income")]
     public async Task<IActionResult> GetTransactionsIncomeSum([FromQuery] string? year, [FromQuery] string? month, [FromQuery] string currency)
     {
-        var response = await reportService.GetTransactionsIncomeSumAsync(year, month, currency);
+        var result = await reportService.GetTransactionsIncomeSumAsync(year, month, currency);
 
-        if (!response.Success)
+        if (!result.IsSuccess)
         {
-            return BadRequest(new { ErrorMessage = response.Message });
+            return result.ToProblemDetails();
         }
 
-        return Ok(new { Income = response.Data });
+        return Ok(result.Value);
     }
 
     [HttpGet("transactions-average-income")]
     public async Task<IActionResult> GetAverageTransactionsIncomeSum([FromQuery] string currency)
     {
-        var response = await reportService.GetAverageTransactionsIncomeAsync(currency);
+        var result = await reportService.GetAverageTransactionsIncomeAsync(currency);
 
-        if (!response.Success)
+        if (!result.IsSuccess)
         {
-            return BadRequest(new { ErrorMessage = response.Message });
+            return result.ToProblemDetails();
         }
 
-        return Ok(new { AverageIncome = response.Data });
+        return Ok(result.Value);
     }
 
     [HttpGet("transactions-chart")]
     public async Task<IActionResult> GetTransactionsChartForLastMonth()
     {
-        var response = await reportService.GetTransactionsChartForLastMonthAsync();
+        var result = await reportService.GetTransactionsChartForLastMonthAsync();
 
-        if (!response.Success)
+        if (!result.IsSuccess)
         {
-            return BadRequest(new { ErrorMessage = response.Message });
+            return result.ToProblemDetails();
         }
 
-        return Ok(response.Data);
+        return Ok(result.Value);
     }
 }
