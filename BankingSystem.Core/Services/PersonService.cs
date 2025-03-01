@@ -12,7 +12,7 @@ public class PersonService(IUnitOfWork unitOfWork, ILoggerService loggerService)
     {
         try
         {
-            var person = await unitOfWork.PersonRepository.GetPersonByIdAsync(personId);
+            var person = await unitOfWork.PersonRepository.GetByIdAsync(personId);
 
             if (string.IsNullOrEmpty(personId) || person is null)
             {

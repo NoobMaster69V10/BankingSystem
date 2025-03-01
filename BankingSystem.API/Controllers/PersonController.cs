@@ -3,7 +3,6 @@ using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Sprache;
 
 namespace BankingSystem.API.Controllers
 {
@@ -11,7 +10,7 @@ namespace BankingSystem.API.Controllers
     [Route("api/[controller]")]
     public class PersonController(
         IPersonAuthService personAuthService,
-        IAccountTransactionService transactionService,
+        IAccountTransactionService accountTransactionService,
         IPersonService personService) : ControllerBase
     {
         [Authorize(Roles = "Person")]
@@ -19,7 +18,7 @@ namespace BankingSystem.API.Controllers
         public async Task<IActionResult> TransferMoney(TransactionDto transactionDto)
         {
             var userId = User.FindFirst("personId")!.Value;
-            var result = await transactionService.TransactionBetweenAccountsAsync(transactionDto, userId);
+            var result = await accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, userId);
 
             if (result.IsFailure)
             {
@@ -57,7 +56,7 @@ namespace BankingSystem.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] PersonLoginDto loginModel)
+        public async Task<IActionResult> LoginPerson([FromBody] PersonLoginDto loginModel)
         {
             var result = await personAuthService.AuthenticationPersonAsync(loginModel);
             if (result.IsFailure)

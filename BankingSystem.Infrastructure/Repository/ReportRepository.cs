@@ -8,8 +8,8 @@ namespace BankingSystem.Infrastructure.Repository;
 
 public class ReportRepository : IReportRepository
 {
-    private readonly SqlConnection _connection;
-    public ReportRepository(SqlConnection connection)
+    private readonly IDbConnection _connection;
+    public ReportRepository(IDbConnection connection)
     {
         _connection = connection;
     }

@@ -6,7 +6,6 @@ namespace BankingSystem.Domain.Entities;
 
 public class BankAccount
 {
-    [JsonIgnore]
     public int BankAccountId { get; set; }
 
     [Required(ErrorMessage = "IBAN is required.")]

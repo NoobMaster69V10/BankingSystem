@@ -1,5 +1,4 @@
-﻿using BankingSystem.Core.DTO;
-using BankingSystem.Core.Helpers;
+﻿using BankingSystem.Core.Helpers;
 using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
@@ -81,7 +80,7 @@ public class ApplicationDataSeeder(
 
             await userManager.AddToRoleAsync(user, role);
 
-            var person = await personRepository.GetPersonByUsernameAsync(email);
+            var person = await personRepository.GetByUsernameAsync(email);
 
             var bankAccount = new BankAccount
             {
@@ -91,9 +90,9 @@ public class ApplicationDataSeeder(
                 IBAN = GenerateIban()
             };
 
-            await bankAccountRepository.CreateAccountAsync(bankAccount);
+            await bankAccountRepository.AddAsync(bankAccount);
 
-            var personFullInfo = await personRepository.GetPersonByIdAsync(person.PersonId);
+            var personFullInfo = await personRepository.GetByIdAsync(person.PersonId);
 
             var personAccountId = personFullInfo!.BankAccounts.First().BankAccountId;
 
@@ -111,7 +110,7 @@ public class ApplicationDataSeeder(
                 AccountId = personAccountId
             };
 
-            await bankCardRepository.CreateCardAsync(card);
+            await bankCardRepository.AddAsync(card);
         }
     }
 

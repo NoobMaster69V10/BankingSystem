@@ -58,7 +58,7 @@ public class AtmService : IAtmService
                 if (authResult.Error != null) return CustomResult<bool>.Failure(authResult.Error);
             }
 
-            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
+            //await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
             return CustomResult<bool>.Success(true);
         }
         catch (Exception ex)

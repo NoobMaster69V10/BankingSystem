@@ -51,14 +51,13 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                 return CustomResult<BankCard>.Failure(new CustomError("CardAlreadyExists", "Card already exists"));
             }
 
-            var person = await unitOfWork.PersonRepository.GetPersonByUsernameAsync(bankCardRegisterDto.Username);
+            var person = await unitOfWork.PersonRepository.GetByUsernameAsync(bankCardRegisterDto.Username);
             if (person == null)
             {
                 return CustomResult<BankCard>.Failure(CustomError.NotFound("Person Not Found"));
             }
 
-            var bankAccount =
-                await unitOfWork.BankAccountRepository.GetAccountByIdAsync(bankCardRegisterDto.BankAccountId);
+            var bankAccount = await unitOfWork.BankAccountRepository.GetByIdAsync(bankCardRegisterDto.BankAccountId);
             if (bankAccount == null)
             {
                 return CustomResult<BankCard>.Failure(CustomError.NotFound("Bank account not found."));
@@ -92,7 +91,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                 AccountId = bankAccount.BankAccountId
             };
 
-            await unitOfWork.BankCardRepository.CreateCardAsync(newCard); 
+            await unitOfWork.BankCardRepository.AddAsync(newCard);
             await unitOfWork.CommitAsync();
             return CustomResult<BankCard>.Success(newCard);
         }

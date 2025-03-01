@@ -5,34 +5,23 @@ using Dapper;
 
 namespace BankingSystem.Infrastructure.Repository;
 
-public class PersonRepository : IPersonRepository
+public class PersonRepository : GenericRepository<Person>, IPersonRepository
 {
-
-    private readonly IDbConnection _connection;
-    private IDbTransaction _transaction = null!;
-
-    public PersonRepository(IDbConnection connection)
-    {
-        _connection = connection;
-    }
-    public void SetTransaction(IDbTransaction transaction)
-    {
-        _transaction = transaction;
-    }
-    public async Task<Person?> GetPersonByIdAsync(string id)
+    public PersonRepository(IDbConnection connection) : base(connection, "AspNetUsers") { }
+    public async Task<Person?> GetByIdAsync(string id)
     {
         const string query = @"
                          SELECT u.Id as PersonID, u.FirstName, u.LastName, u.Email, u.IdNumber, u.BirthDate,
-                            b.Id as BankAccountID, b.IBAN, b.Balance, b.Currency, b.PersonId,
-                            bc.Id as BankCardID, bc.Firstname, bc.Lastname, bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.AccountId
+                            b.BankAccountId, b.IBAN, b.Balance, b.Currency, b.PersonId,
+                            bc.BankCardId, bc.Firstname, bc.Lastname, bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.AccountId
                             FROM AspNetUsers u
                             LEFT JOIN BankAccounts b ON u.Id = b.PersonId
-                            LEFT JOIN BankCards bc ON b.Id = bc.AccountId
+                            LEFT JOIN BankCards bc ON b.BankAccountId = bc.AccountId
                          WHERE u.Id = @ID";
 
         var userDictionary = new Dictionary<string, Person>();
 
-        var users = await _connection.QueryAsync<Person, BankAccount, BankCard, Person>(
+        var users = await Connection.QueryAsync<Person, BankAccount, BankCard, Person>(
             query,
             (person, bankAccount, bankCard) =>
             {
@@ -49,35 +38,29 @@ public class PersonRepository : IPersonRepository
 
                 if (bankCard?.BankCardId != null && currentUser.Cards!.All(c => c.BankCardId != bankCard.BankCardId))
                     currentUser.Cards.Add(bankCard);
-
+                
                 return currentUser;
             },
             new { ID = id },
-            splitOn: "BankAccountID,BankCardID",
-            transaction: _transaction);
+            splitOn: "BankAccountId,BankCardId",
+            transaction: Transaction);
 
         return users.FirstOrDefault();
     }
-    public async Task<Person?> GetPersonByUsernameAsync(string username)
+    public async Task<Person?> GetByUsernameAsync(string username)
     {
-        //const string query = @"SELECT Id AS PersonId,FirstName,Lastname,IdNumber,Email,BirthDate FROM AspNetUsers WHERE Username = @Username";
-
-        //var result = await _connection.QueryFirstOrDefaultAsync<Person>(query, new { Username = username }, _transaction);
-
-        //return result;
-
         const string query = @"
                          SELECT u.Id as PersonID, u.FirstName, u.LastName, u.Email, u.IdNumber, u.BirthDate,
-                            b.Id as BankAccountID, b.IBAN, b.Balance, b.Currency, b.PersonId,
-                            bc.Id as BankCardID, bc.Firstname, bc.Lastname, bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.AccountId
+                            b.BankAccountId, b.IBAN, b.Balance, b.Currency, b.PersonId,
+                            bc.BankCardId, bc.Firstname, bc.Lastname, bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.AccountId
                             FROM AspNetUsers u
                             LEFT JOIN BankAccounts b ON u.Id = b.PersonId
-                            LEFT JOIN BankCards bc ON b.Id = bc.AccountId
+                            LEFT JOIN BankCards bc ON b.BankAccountId = bc.AccountId
                          WHERE u.Username = @Username";
 
         var userDictionary = new Dictionary<string, Person>();
 
-        var users = await _connection.QueryAsync<Person, BankAccount, BankCard, Person>(
+        var users = await Connection.QueryAsync<Person, BankAccount, BankCard, Person>(
             query,
             (person, bankAccount, bankCard) =>
             {
@@ -98,8 +81,8 @@ public class PersonRepository : IPersonRepository
                 return currentUser;
             },
             new { Username = username },
-            splitOn: "BankAccountID,BankCardID",
-            transaction: _transaction);
+            splitOn: "BankAccountId,BankCardId",
+            transaction: Transaction);
 
         return users.FirstOrDefault();
     }

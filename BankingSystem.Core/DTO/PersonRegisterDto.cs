@@ -25,7 +25,6 @@ public record PersonRegisterDto
 
     [Required(ErrorMessage = "Password is required.")]
     [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
-    [JsonIgnore]
     public string Password { get; init; }
 
     [AllowedValues("Operator", "Person", ErrorMessage = "Role must be either 'Operator' or 'Person'.")]

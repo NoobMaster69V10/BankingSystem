@@ -19,7 +19,7 @@ public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerSer
                 return CustomResult<BankAccount>.Failure(CustomError.Validation("Bank account already exists."));
             }
 
-            var person = await unitOfWork.PersonRepository.GetPersonByUsernameAsync(bankAccountRegisterDto.Username);
+            var person = await unitOfWork.PersonRepository.GetByUsernameAsync(bankAccountRegisterDto.Username);
             if (person == null)
             {
                 return CustomResult<BankAccount>.Failure(CustomError.NotFound("User not found."));
@@ -33,7 +33,7 @@ public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerSer
                 Currency = bankAccountRegisterDto.Currency
             };
 
-            await unitOfWork.BankAccountRepository.CreateAccountAsync(account);
+            await unitOfWork.BankAccountRepository.AddAsync(account);
 
             return CustomResult<BankAccount>.Success(account);
         }

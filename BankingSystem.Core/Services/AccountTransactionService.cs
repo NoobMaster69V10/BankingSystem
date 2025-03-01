@@ -24,8 +24,8 @@ public class AccountTransactionService(
 
             await unitOfWork.BeginTransactionAsync();
 
-            var fromAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.FromAccountId);
-            var toAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.ToAccountId);
+            var fromAccount = await unitOfWork.BankAccountRepository.GetByIdAsync(transactionDto.FromAccountId);
+            var toAccount = await unitOfWork.BankAccountRepository.GetByIdAsync(transactionDto.ToAccountId);
 
             if (fromAccount is null)
             {
@@ -43,7 +43,7 @@ public class AccountTransactionService(
             }
 
             decimal transactionFee = 0;
-            if (fromAccount.PersonId != toAccount!.PersonId)
+            if (fromAccount.PersonId != toAccount.PersonId)
             {
                 transactionFee = transactionDto.Amount * 0.01m + 0.5m;
             }
@@ -67,9 +67,9 @@ public class AccountTransactionService(
 
             toAccount.Balance += await ConvertCurrencyAsync(transactionDto.Amount, fromAccount.Currency, toAccount.Currency);
 
-            await unitOfWork.BankAccountRepository.UpdateAccountAsync(fromAccount);
-            await unitOfWork.BankAccountRepository.UpdateAccountAsync(toAccount);
-            await unitOfWork.TransactionRepository.AddAccountTransactionAsync(transaction);
+            await unitOfWork.BankAccountRepository.UpdateAsync(fromAccount);
+            await unitOfWork.BankAccountRepository.UpdateAsync(toAccount);
+            await unitOfWork.TransactionRepository.AddAsync(transaction);
             await unitOfWork.CommitAsync();
 
             return CustomResult<AccountTransaction>.Success(transaction);
@@ -98,13 +98,14 @@ public class AccountTransactionService(
             {
                 return CustomResult<bool>.Failure(new CustomError("AmountGreaterOrEqualZero", "Amount must be less or equal to 10000."));
             }
-            var validated = await bankCardService.ValidateCardAsync(withdrawMoneyDto.CardNumber,withdrawMoneyDto.PinCode);
+            var validated = await bankCardService.ValidateCardAsync(withdrawMoneyDto.CardNumber, withdrawMoneyDto.PinCode);
             if (!validated.IsSuccess)
             {
-                return  CustomResult<bool>.Failure(validated.Error);
+                return CustomResult<bool>.Failure(validated.Error);
             }
             var bankAccount = await unitOfWork.BankCardRepository.GetAccountByCardAsync(withdrawMoneyDto.CardNumber);
-            if (bankAccount == null){
+            if (bankAccount == null)
+            {
                 return CustomResult<bool>.Failure(CustomError.NotFound("Bank account not found."));
             }
             var totalWithdrawnToday = await unitOfWork.TransactionRepository.GetTotalWithdrawnTodayAsync(bankAccount.BankAccountId);
@@ -113,7 +114,7 @@ public class AccountTransactionService(
                 return CustomResult<bool>.Failure(new CustomError("DailyLimitExceeded", "You cannot withdraw more than $10,000 per day."));
             }
             var balance = await unitOfWork.BankCardRepository.GetBalanceAsync(withdrawMoneyDto.CardNumber);
-            
+
             decimal fee = withdrawMoneyDto.Amount * 0.02m;
             decimal totalDeduction = withdrawMoneyDto.Amount + fee;
 
@@ -121,11 +122,11 @@ public class AccountTransactionService(
             {
                 return CustomResult<bool>.Failure(new CustomError("NotEnoughBalance", "Not enough balance including the transaction fee."));
             }
-            
+
             var newBalance = balance - totalDeduction;
             await unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, newBalance);
-            
-            
+
+
             var atmTransaction = new AtmTransaction
             {
                 Amount = withdrawMoneyDto.Amount,
@@ -136,7 +137,7 @@ public class AccountTransactionService(
 
             await unitOfWork.TransactionRepository.AddAtmTransactionAsync(atmTransaction);
             await unitOfWork.CommitAsync();
-            return CustomResult<bool>.Success(true);  
+            return CustomResult<bool>.Success(true);
         }
         catch (Exception ex)
         {

@@ -1,11 +1,11 @@
 using System.Net.Mail;
 using BankingSystem.API.ActionFilters;
-using BankingSystem.Core.ServiceContracts;
-using BankingSystem.Core.Services;
+using BankingSystem.API.Configuration;
 using DotNetEnv;
 using BankingSystem.Infrastructure.Data.DataSeeder;
-using BankingSystem.API.Configure;
 using BankingSystem.API.Middlewares;
+using BankingSystem.Core.Configuration;
+using BankingSystem.Infrastructure.Configure;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -23,15 +23,12 @@ builder.Services.AddFluentEmail("bankingsystemcredo@gmail.com")
         EnableSsl = true
     });
 
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddApplicationServices();
-builder.Services.AddBankAccountServices();
-builder.Services.AddBankCardServices();
-builder.Services.AddIdentityServices(builder.Configuration);
-builder.Services.AddPersonServices();
-builder.Services.AddTransactionServices();
+builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddCoreServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

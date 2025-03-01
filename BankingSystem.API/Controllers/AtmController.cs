@@ -1,9 +1,7 @@
-using BankingSystem.Core;
 using BankingSystem.Core.DTO;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Mvc;
-using Sprache;
 
 namespace BankingSystem.API.Controllers;
 [ApiController]
