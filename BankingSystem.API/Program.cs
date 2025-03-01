@@ -28,11 +28,7 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddCoreServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddProblemDetails();
-<<<<<<< HEAD
-
-=======
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
->>>>>>> 63a4bbc1bdea3f87a411ddd0d9672104b9005d2a
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

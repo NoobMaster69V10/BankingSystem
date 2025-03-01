@@ -10,7 +10,7 @@ public abstract class GenericRepository<T> : IGenericRepository<T> where T : cla
     protected IDbTransaction? Transaction;
     private readonly string _tableName;
 
-    public GenericRepository(IDbConnection connection, string tableName)
+    protected GenericRepository(IDbConnection connection, string tableName)
     {
         Connection = connection;
         _tableName = tableName;

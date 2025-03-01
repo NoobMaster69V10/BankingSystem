@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using BankingSystem.Domain.CustomValidationAttributes;
 
-namespace BankingSystem.Core.DTO;
+namespace BankingSystem.Core.DTO.BankAccount;
 
 public record BankAccountRegisterDto
 {

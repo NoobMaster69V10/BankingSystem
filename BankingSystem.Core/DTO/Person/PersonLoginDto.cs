@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BankingSystem.Core.DTO;
+namespace BankingSystem.Core.DTO.Person;
 
 public record PersonLoginDto
 {

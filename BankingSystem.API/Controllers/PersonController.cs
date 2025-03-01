@@ -1,4 +1,5 @@
-﻿using BankingSystem.Core.DTO;
+﻿using BankingSystem.Core.DTO.AccountTransaction;
+using BankingSystem.Core.DTO.Person;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +16,7 @@ namespace BankingSystem.API.Controllers
     {
         [Authorize(Roles = "Person")]
         [HttpPost("transfer-money")]
-        public async Task<IActionResult> TransferMoney(TransactionDto transactionDto)
+        public async Task<IActionResult> TransferMoney(AccountTransactionDto transactionDto)
         {
             var userId = User.FindFirst("personId")!.Value;
             var result = await accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, userId);

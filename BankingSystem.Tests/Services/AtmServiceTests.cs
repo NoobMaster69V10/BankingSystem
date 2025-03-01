@@ -27,10 +27,10 @@ namespace BankingSystem.Tests.Services
         #region ShowBalanceAsync Tests
 
         [Fact]
-        public async Task ShowBalanceAsync_ValidCard_ReturnsBalance()
+        public async Task AtmService_ShowBalanceAsync_ValidCard_ReturnsBalance()
         {
             var cardDto = new CardAuthorizationDto { CardNumber = "123456789", PinCode = "1234" };
-            var validationResult = CustomResult<bool>.Success(true);
+            var validationResult = Result<bool>.Success(true);
             decimal expectedBalance = 1000.50m;
 
             A.CallTo(() => _bankCardService.ValidateCardAsync(cardDto.CardNumber, cardDto.PinCode))
@@ -46,10 +46,10 @@ namespace BankingSystem.Tests.Services
         }
 
         [Fact]
-        public async Task ShowBalanceAsync_InvalidCard_ReturnsFailure()
+        public async Task AtmService_ShowBalanceAsync_InvalidCard_ReturnsFailure()
         {
             var cardDto = new CardAuthorizationDto { CardNumber = "invalid", PinCode = "wrong" };
-            var validationResult = CustomResult<bool>.Failure(CustomError.NotFound("Card not found"));
+            var validationResult = Result<bool>.Failure(CustomError.NotFound("Card not found"));
 
             A.CallTo(() => _bankCardService.ValidateCardAsync(cardDto.CardNumber, cardDto.PinCode))
                 .Returns(validationResult);
@@ -62,10 +62,10 @@ namespace BankingSystem.Tests.Services
         }
 
         [Fact]
-        public async Task ShowBalanceAsync_WhenExceptionThrown_ReturnsFailure()
+        public async Task ShowBalanceAsync_ExceptionThrown_ReturnsFailure()
         {
             var cardDto = new CardAuthorizationDto { CardNumber = "123456789", PinCode = "1234" };
-            var validationResult = CustomResult<bool>.Success(true);
+            var validationResult = Result<bool>.Success(true);
 
             A.CallTo(() => _bankCardService.ValidateCardAsync(cardDto.CardNumber, cardDto.PinCode))
                 .Returns(validationResult);
@@ -87,7 +87,7 @@ namespace BankingSystem.Tests.Services
         public async Task ChangePinAsync_ValidCard_ReturnsSuccess()
         {
             var changePinDto = new ChangePinDto { CardNumber = "123456789", CurrentPin = "1234", NewPin = "5678" };
-            var validationResult = CustomResult<bool>.Success(true);
+            var validationResult = Result<bool>.Success(true);
 
             A.CallTo(() => _bankCardService.ValidateCardAsync(changePinDto.CardNumber, changePinDto.CurrentPin))
                 .Returns(validationResult);
@@ -107,7 +107,7 @@ namespace BankingSystem.Tests.Services
         {
             var changePinDto = new ChangePinDto { CardNumber = "invalid", CurrentPin = "wrong", NewPin = "5678" };
             var customError = new CustomError("INVALID_CARD", "Card validation failed");
-            var validationResult = CustomResult<bool>.Failure(customError);
+            var validationResult = Result<bool>.Failure(customError);
 
             A.CallTo(() => _bankCardService.ValidateCardAsync(changePinDto.CardNumber, changePinDto.CurrentPin))
                 .Returns(validationResult);
@@ -123,7 +123,7 @@ namespace BankingSystem.Tests.Services
         public async Task ChangePinAsync_ExceptionThrown_ReturnsFailure()
         {
             var changePinDto = new ChangePinDto { CardNumber = "123456789", CurrentPin = "1234", NewPin = "5678" };
-            var validationResult = CustomResult<bool>.Success(true);
+            var validationResult = Result<bool>.Success(true);
 
             A.CallTo(() => _bankCardService.ValidateCardAsync(changePinDto.CardNumber, changePinDto.CurrentPin))
                 .Returns(validationResult);
@@ -146,7 +146,7 @@ namespace BankingSystem.Tests.Services
         {
             string cardNumber = "123456789";
             string pin = "1234";
-            var validationResult = CustomResult<bool>.Success(true);
+            var validationResult = Result<bool>.Success(true);
 
             A.CallTo(() => _bankCardService.ValidateCardAsync(cardNumber, pin))
                 .Returns(validationResult);
@@ -154,7 +154,7 @@ namespace BankingSystem.Tests.Services
             var method = typeof(AtmService).GetMethod("AuthorizeCardAsync", 
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             
-            var result = await (Task<CustomResult<bool>>)method.Invoke(_atmService, new object[] { cardNumber, pin });
+            var result = await (Task<Result<bool>>)method.Invoke(_atmService, new object[] { cardNumber, pin });
 
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().BeTrue();
@@ -166,7 +166,7 @@ namespace BankingSystem.Tests.Services
             string cardNumber = "invalid";
             string pin = "wrong";
             var customError = new CustomError("INVALID_CARD", "Card validation failed");
-            var validationResult = CustomResult<bool>.Failure(customError);
+            var validationResult = Result<bool>.Failure(customError);
 
             A.CallTo(() => _bankCardService.ValidateCardAsync(cardNumber, pin))
                 .Returns(validationResult);
@@ -174,7 +174,7 @@ namespace BankingSystem.Tests.Services
             var method = typeof(AtmService).GetMethod("AuthorizeCardAsync", 
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             
-            var result = await (Task<CustomResult<bool>>)method.Invoke(_atmService, new object[] { cardNumber, pin });
+            var result = await (Task<Result<bool>>)method.Invoke(_atmService, new object[] { cardNumber, pin });
 
             result.IsFailure.Should().BeTrue();
             result.Error.Should().BeEquivalentTo(customError);
@@ -192,7 +192,7 @@ namespace BankingSystem.Tests.Services
             var method = typeof(AtmService).GetMethod("AuthorizeCardAsync", 
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             
-            var result = await (Task<CustomResult<bool>>)method.Invoke(_atmService, new object[] { cardNumber, pin });
+            var result = await (Task<Result<bool>>)method.Invoke(_atmService, new object[] { cardNumber, pin });
 
             result.IsFailure.Should().BeTrue();
             result.Error.Code.Should().Be("AUTH_ERROR");

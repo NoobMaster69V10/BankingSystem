@@ -1,5 +1,6 @@
 ﻿using System.Security.AccessControl;
-using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.AccountTransaction;
+using BankingSystem.Core.DTO.AtmTransaction;
 using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Domain.Entities;
@@ -8,6 +9,6 @@ namespace BankingSystem.Core.ServiceContracts;
 
 public interface IAccountTransactionService
 {
-    Task<CustomResult<AccountTransaction>> TransactionBetweenAccountsAsync(TransactionDto transactionDto, string userId);
-    Task<CustomResult<bool>> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto);
+    Task<Result<AccountTransaction>> TransactionBetweenAccountsAsync(AccountTransactionDto transactionDto, string userId);
+    Task<Result<bool>> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto);
 }

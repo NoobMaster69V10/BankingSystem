@@ -3,18 +3,18 @@ using BankingSystem.Domain.Errors;
 
 namespace BankingSystem.Core.DTO.Result;
 
-public class CustomResult<T>
+public class Result<T>
 {
     private readonly T? _value;
 
-    private CustomResult(T value)
+    private Result(T value)
     {
         _value = value;
         IsSuccess = true;
         Error = CustomError.None;
     }
 
-    private CustomResult(CustomError error)
+    private Result(CustomError error)
     {
         if (error == CustomError.None)
         {
@@ -36,9 +36,9 @@ public class CustomResult<T>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public CustomError? Error { get; }
 
-    public static CustomResult<T> Success(T value) => new(value);
+    public static Result<T> Success(T value) => new(value);
 
-    public static CustomResult<T> Failure(CustomError error) => new(error);
+    public static Result<T> Failure(CustomError error) => new(error);
 
     public bool TryGetValue(out T? value)
     {

@@ -1,8 +1,7 @@
 ﻿using Dapper;
 using System.Data;
-using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
-using Microsoft.Data.SqlClient;
+using BankingSystem.Domain.Entities;
 
 namespace BankingSystem.Infrastructure.Repository;
 
@@ -96,7 +95,7 @@ public class ReportRepository : IReportRepository
         return await _connection.QuerySingleOrDefaultAsync<decimal?>(query, new { Currency = currency });
     }
 
-    public async Task<IEnumerable<DailyTransactions>> GetTransactionsChartForLastMonthAsync()
+    public async Task<IEnumerable<DailyTransaction>?> GetTransactionsChartForLastMonthAsync()
     {
         const string query = @"SELECT 
                                    TransactionDate,
@@ -106,6 +105,6 @@ public class ReportRepository : IReportRepository
                                GROUP BY TransactionDate
                                ORDER BY TransactionDate DESC;";
 
-        return await _connection.QueryAsync<DailyTransactions>(query);
+        return await _connection.QueryAsync<DailyTransaction>(query);
     }
 }

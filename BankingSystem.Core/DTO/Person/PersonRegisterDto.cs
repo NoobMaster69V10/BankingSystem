@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace BankingSystem.Core.DTO;
+namespace BankingSystem.Core.DTO.Person;
 
 public record PersonRegisterDto
 {

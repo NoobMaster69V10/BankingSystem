@@ -1,4 +1,5 @@
-﻿using BankingSystem.Core.DTO;
+﻿using BankingSystem.Core.DTO.BankAccount;
+using BankingSystem.Core.DTO.BankCard;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Authorization;

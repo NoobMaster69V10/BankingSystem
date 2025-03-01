@@ -10,14 +10,6 @@ public class BankCardRepository : GenericRepository<BankCard>, IBankCardReposito
 {
     public BankCardRepository(IDbConnection connection) : base(connection, "BankCards") { }
 
-    //public async Task CreateCardAsync(BankCard card)
-    //{
-    //    const string query =
-    //        "INSERT INTO BankCards(FirstName, Lastname, CardNumber, ExpirationDate, CVV, PinCode, Salt, AccountId) VALUES (@FirstName, @Lastname, @CardNumber, @ExpirationDate, @CVV, @PinCode, @Salt, @AccountId)";
-
-    //    await _connection.ExecuteAsync(query, card, _transaction);
-    //}
-
     public async Task<BankCard?> GetCardAsync(string cardNumber)
     {
         return await Connection.QueryFirstOrDefaultAsync<BankCard>(
@@ -76,7 +68,7 @@ public class BankCardRepository : GenericRepository<BankCard>, IBankCardReposito
         const string query = """
                                      SELECT ba.Balance 
                                      FROM BankAccounts ba
-                                     INNER JOIN BankCards bc ON bc.AccountId = ba.Id
+                                     INNER JOIN BankCards bc ON bc.AccountId = ba.BankAccountId
                                      WHERE bc.CardNumber = @CardNumber
                              """;
 
@@ -86,7 +78,7 @@ public class BankCardRepository : GenericRepository<BankCard>, IBankCardReposito
     public async Task<BankAccount?> GetAccountByCardAsync(string cardNumber)
     {
         return await Connection.QuerySingleOrDefaultAsync<BankAccount>(
-            "SELECT b.Id as BankAccountId FROM BankCards bc INNER JOIN BankAccounts b ON bc.AccountId = b.Id WHERE bc.CardNumber = @CardNumber",
+            "SELECT b.BankAccountId FROM BankCards bc INNER JOIN BankAccounts b ON bc.AccountId = b.BankAccountId WHERE bc.CardNumber = @CardNumber",
             new { CardNumber = cardNumber }, Transaction);
     }
 }

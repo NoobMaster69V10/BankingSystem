@@ -8,7 +8,7 @@ namespace BankingSystem.Core.Services;
 
 public class PersonService(IUnitOfWork unitOfWork, ILoggerService loggerService) : IPersonService
 {
-    public async Task<CustomResult<Person>> GetPersonById(string personId)
+    public async Task<Result<Person>> GetPersonById(string personId)
     {
         try
         {
@@ -16,15 +16,15 @@ public class PersonService(IUnitOfWork unitOfWork, ILoggerService loggerService)
 
             if (string.IsNullOrEmpty(personId) || person is null)
             {
-                return CustomResult<Person>.Failure(CustomError.NotFound("User not found"));
+                return Result<Person>.Failure(CustomError.NotFound("User not found"));
             }
            
-            return CustomResult<Person>.Success(person);
+            return Result<Person>.Success(person);
         }
         catch (Exception ex)
         {
             loggerService.LogErrorInConsole(ex.Message);
-            return CustomResult<Person>.Failure(CustomError.Failure("Error occurred while getting person"));
+            return Result<Person>.Failure(CustomError.Failure("Error occurred while getting person"));
         }
     }
 }

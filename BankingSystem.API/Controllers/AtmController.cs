@@ -1,6 +1,8 @@
-using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.AtmTransaction;
 using BankingSystem.Core.DTO.Result;
+using BankingSystem.Core.Helpers;
 using BankingSystem.Core.ServiceContracts;
+using BankingSystem.Domain.UnitOfWorkContracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankingSystem.API.Controllers;
@@ -9,10 +11,12 @@ namespace BankingSystem.API.Controllers;
 public class AtmController : ControllerBase
 {
     private readonly IAtmService _atmService;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IAccountTransactionService _accountTransactionService;
 
-    public AtmController(IAtmService atmService, IAccountTransactionService accountTransactionService)
+    public AtmController(IUnitOfWork unitOfWork, IAtmService atmService, IAccountTransactionService accountTransactionService)
     {
+        _unitOfWork = unitOfWork;
         _atmService = atmService;
         _accountTransactionService = accountTransactionService;
     }

@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Security.Claims;
-using BankingSystem.Core.DTO;
 using BankingSystem.Core.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -11,7 +10,8 @@ using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Errors;
 using Microsoft.AspNetCore.Http;
 
-using ResetPasswordDto = BankingSystem.Core.DTO.ResetPasswordDto;
+using ResetPasswordDto = BankingSystem.Core.DTO.Person.ResetPasswordDto;
+using BankingSystem.Core.DTO.Person;
 
 namespace BankingSystem.Core.Services;
 
@@ -23,28 +23,28 @@ public class PersonAuthService(
     IHttpContextAccessor httpContextAccessor,
     IEmailService emailService) : IPersonAuthService
 {
-    public async Task<CustomResult<string>> AuthenticationPersonAsync(PersonLoginDto loginDto)
+    public async Task<Result<string>> AuthenticationPersonAsync(PersonLoginDto loginDto)
     {
         try
         {
             var user = await userManager.FindByEmailAsync(loginDto.Email);
             if (user == null || !await userManager.CheckPasswordAsync(user, loginDto.Password))
             {
-                return CustomResult<string>.Failure(CustomError.NotFound("Invalid email or password"));
+                return Result<string>.Failure(CustomError.NotFound("Invalid email or password"));
             }
 
             var token = await GenerateJwtToken(user);
-            return CustomResult<string>.Success(token);
+            return Result<string>.Success(token);
         }
         catch (Exception ex)
         {
             loggerService.LogErrorInConsole(ex.Message);
-            return CustomResult<string>.Failure(CustomError.Failure("Error occurred while authenticating person"));
+            return Result<string>.Failure(CustomError.Failure("Error occurred while authenticating person"));
         }
     }
 
 
-    public async Task<CustomResult<PersonRegisterDto>> RegisterPersonAsync(PersonRegisterDto registerDto)
+    public async Task<Result<PersonRegisterDto>> RegisterPersonAsync(PersonRegisterDto registerDto)
     {
         try
         {
@@ -62,7 +62,7 @@ public class PersonAuthService(
 
             if (!result.Succeeded)
             {
-                return CustomResult<PersonRegisterDto>.Failure(new CustomError("UNEXPECTED_ERROR",
+                return Result<PersonRegisterDto>.Failure(new CustomError("UNEXPECTED_ERROR",
                     string.Join(" ", result.Errors.Select(e => e.Description))));
             }
 
@@ -71,18 +71,18 @@ public class PersonAuthService(
 
             if (!await roleManager.RoleExistsAsync(registerDto.Role))
             {
-                return CustomResult<PersonRegisterDto>.Failure(
+                return Result<PersonRegisterDto>.Failure(
                     CustomError.NotFound($"The role '{registerDto.Role}' does not exist."));
             }
 
             await userManager.AddToRoleAsync(person, registerDto.Role);
 
-            return CustomResult<PersonRegisterDto>.Success(registerDto);
+            return Result<PersonRegisterDto>.Success(registerDto);
         }
         catch (Exception ex)
         {
             loggerService.LogErrorInConsole(ex.Message);
-            return CustomResult<PersonRegisterDto>.Failure(
+            return Result<PersonRegisterDto>.Failure(
                 CustomError.Failure("Error occurred while authenticating person"));
         }
     }
@@ -129,12 +129,12 @@ public class PersonAuthService(
         return token;
     }
 
-    public async Task<CustomResult<string>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
+    public async Task<Result<string>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
     {
         var user = await userManager.FindByEmailAsync(forgotPasswordDto.Email);
         if (user == null)
         {
-            return CustomResult<string>.Failure(CustomError.NotFound("Invalid email"));
+            return Result<string>.Failure(CustomError.NotFound("Invalid email"));
         }
 
         var token = await userManager.GeneratePasswordResetTokenAsync(user);
@@ -145,7 +145,7 @@ public class PersonAuthService(
         string email = user.Email?.Trim();
         if (string.IsNullOrWhiteSpace(email))
         {
-            return CustomResult<string>.Failure(CustomError.Validation("User has no valid email address"));
+            return Result<string>.Failure(CustomError.Validation("User has no valid email address"));
         }
 
         string emailBody = $@"
@@ -164,20 +164,20 @@ public class PersonAuthService(
 </div>";
 
         await emailService.SendEmailAsync(email, "Reset Your Password", emailBody);
-        return CustomResult<string>.Success(token);
+        return Result<string>.Success(token);
     }
-    public async Task<CustomResult<bool>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
+    public async Task<Result<bool>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
     {
         var user = await userManager.FindByEmailAsync(resetPasswordDto.Email);
         if (user == null)
         {
-            return CustomResult<bool>.Failure(CustomError.NotFound("User not found"));
+            return Result<bool>.Failure(CustomError.NotFound("User not found"));
         }
         var resetPasswordResult = await userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.NewPassword);
         if (!resetPasswordResult.Succeeded)
         {
-            return CustomResult<bool>.Failure(CustomError.NotFound("Invalid or expired token"));
+            return Result<bool>.Failure(CustomError.NotFound("Invalid or expired token"));
         }
-        return CustomResult<bool>.Success(true);
+        return Result<bool>.Success(true);
     }
 }

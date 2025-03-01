@@ -14,5 +14,4 @@ public class AtmTransaction
     public int AccountId { get; set; }
     [Required]
     public decimal TransactionFee { get; set; }
-    
 }

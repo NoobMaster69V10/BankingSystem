@@ -11,7 +11,7 @@ public class BankAccountRepository : GenericRepository<BankAccount>, IBankAccoun
 
     public Task UpdateBalanceAsync(BankAccount? account, decimal balance)
     {
-        const string query = "UPDATE BankAccounts SET Balance = @Balance WHERE Id = @Id";
+        const string query = "UPDATE BankAccounts SET Balance = @Balance WHERE BankAccountId = @Id";
         return Connection.ExecuteAsync(query, new { Id = account.BankAccountId, Balance = balance }, Transaction);
     }
 

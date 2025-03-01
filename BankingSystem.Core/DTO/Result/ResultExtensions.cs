@@ -6,7 +6,7 @@ namespace BankingSystem.Core.DTO.Result;
 
 public static class ResultExtensions
 {
-    public static IActionResult ToProblemDetails<T>(this CustomResult<T> result)
+    public static IActionResult ToProblemDetails<T>(this Result<T> result)
     {
         if (result.IsSuccess)
         {

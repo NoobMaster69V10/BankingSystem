@@ -1,4 +1,4 @@
-using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.AtmTransaction;
 using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
@@ -21,14 +21,14 @@ public class AtmService : IAtmService
     }
 
 
-    public async Task<CustomResult<BalanceResponseDto>> ShowBalanceAsync(CardAuthorizationDto cardDto)
+    public async Task<Result<BalanceResponseDto>> ShowBalanceAsync(CardAuthorizationDto cardDto)
     {
         try
         {
             var authResult = await AuthorizeCardAsync(cardDto.CardNumber, cardDto.PinCode);
             if (authResult.IsFailure)
             {
-                if (authResult.Error != null) return CustomResult<BalanceResponseDto>.Failure(authResult.Error);
+                if (authResult.Error != null) return Result<BalanceResponseDto>.Failure(authResult.Error);
             }
 
             var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardDto.CardNumber);
@@ -37,55 +37,55 @@ public class AtmService : IAtmService
                 cardNumber: cardDto.CardNumber
             );
 
-            return CustomResult<BalanceResponseDto>.Success(response);
+            return Result<BalanceResponseDto>.Success(response);
         }
         catch (Exception ex)
         {
             _loggerService.LogErrorInConsole($"Error in ShowBalanceAsync: {ex}");
-            return CustomResult<BalanceResponseDto>.Failure(
+            return Result<BalanceResponseDto>.Failure(
                 new CustomError("BALANCE_ERROR", "An error occurred while retrieving the balance")
             );
         }
     }
 
-    public async Task<CustomResult<bool>> ChangePinAsync(ChangePinDto changePinDto)
+    public async Task<Result<bool>> ChangePinAsync(ChangePinDto changePinDto)
     {
         try
         {
             var authResult = await AuthorizeCardAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
             if (!authResult.IsSuccess)
             {
-                if (authResult.Error != null) return CustomResult<bool>.Failure(authResult.Error);
+                if (authResult.Error != null) return Result<bool>.Failure(authResult.Error);
             }
 
-            //await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
-            return CustomResult<bool>.Success(true);
+            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
+            return Result<bool>.Success(true);
         }
         catch (Exception ex)
         {
             _loggerService.LogErrorInConsole($"Error in ChangePinAsync: {ex}");
-            return CustomResult<bool>.Failure(
+            return Result<bool>.Failure(
                 new CustomError("PIN_CHANGE_ERROR", "An error occurred while changing the PIN")
             );
         }
     }
 
-    private async Task<CustomResult<bool>> AuthorizeCardAsync(string cardNumber, string pin)
+    private async Task<Result<bool>> AuthorizeCardAsync(string cardNumber, string pin)
     {
         try
         {
             var validationResult = await _bankCardService.ValidateCardAsync(cardNumber, pin);
             if (!validationResult.IsSuccess)
             {
-                if (validationResult.Error != null) return CustomResult<bool>.Failure(validationResult.Error);
+                if (validationResult.Error != null) return Result<bool>.Failure(validationResult.Error);
             }
 
-            return CustomResult<bool>.Success(true);
+            return Result<bool>.Success(true);
         }
         catch (Exception ex)
         {
             _loggerService.LogErrorInConsole($"Error in AuthorizeCardAsync: {ex}");
-            return CustomResult<bool>.Failure(new CustomError("AUTH_ERROR", "Error occurred while authorizing"));
+            return Result<bool>.Failure(new CustomError("AUTH_ERROR", "Error occurred while authorizing"));
         }
     }
 }

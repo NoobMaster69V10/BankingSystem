@@ -36,7 +36,7 @@ public class AccountTransactionServiceTests
     [Fact]
     public async Task TransactionBetweenAccountsAsync_ShouldReturnFailure_WhenSameAccount()
     {
-        var transactionDto = new TransactionDto { FromAccountId = 123, ToAccountId = 123, Amount = 100 };
+        var transactionDto = new AccountTransactionDto { FromAccountId = 123, ToAccountId = 123, Amount = 100 };
 
         var result = await _accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, "user1");
 
@@ -49,7 +49,7 @@ public class AccountTransactionServiceTests
     {
         _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123)).ReturnsAsync((BankAccount)null);
 
-        var transactionDto = new TransactionDto { FromAccountId = 123, ToAccountId = 456, Amount = 100 };
+        var transactionDto = new AccountTransactionDto { FromAccountId = 123, ToAccountId = 456, Amount = 100 };
 
         var result = await _accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, "user1");
 
@@ -66,7 +66,7 @@ public class AccountTransactionServiceTests
         _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123)).ReturnsAsync(fromAccount);
         _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(456)).ReturnsAsync(toAccount);
 
-        var transactionDto = new TransactionDto { FromAccountId = 123, ToAccountId = 456, Amount = 100 };
+        var transactionDto = new AccountTransactionDto { FromAccountId = 123, ToAccountId = 456, Amount = 100 };
 
         var result = await _accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, "user1");
 
@@ -91,8 +91,8 @@ public class AccountTransactionServiceTests
         var withdrawDto = new WithdrawMoneyDto { Amount = 100, CardNumber = "1234", PinCode = "0000" };
 
         _bankCardServiceMock
-            .Setup(b => b.ValidateCardAsync("1234", "0000"))
-            .ReturnsAsync(CustomResult<bool>.Failure(CustomError.Validation("Invalid Card")));
+            .Setup((System.Linq.Expressions.Expression<Func<IBankCardService, Task<Core.DTO.Result.CustomResult<bool>>>>)(b => (Task<Core.DTO.Result.CustomResult<bool>>)b.ValidateCardAsync("1234", "0000")))
+            .ReturnsAsync((Core.DTO.Result.CustomResult<bool>)Result<bool>.Failure(CustomError.Validation("Invalid Card")));
 
         var result = await _accountTransactionService.WithdrawMoneyAsync(withdrawDto);
 
@@ -106,8 +106,8 @@ public class AccountTransactionServiceTests
         var withdrawDto = new WithdrawMoneyDto { Amount = 200, CardNumber = "1234", PinCode = "0000" };
 
         _bankCardServiceMock
-            .Setup(b => b.ValidateCardAsync("1234", "0000"))
-            .ReturnsAsync(CustomResult<bool>.Success(true));
+            .Setup((System.Linq.Expressions.Expression<Func<IBankCardService, Task<Core.DTO.Result.CustomResult<bool>>>>)(b => (Task<Core.DTO.Result.CustomResult<bool>>)b.ValidateCardAsync("1234", "0000")))
+            .ReturnsAsync((Core.DTO.Result.CustomResult<bool>)Result<bool>.Success(true));
 
         _unitOfWorkMock.Setup(u => u.BankCardRepository.GetBalanceAsync("1234")).ReturnsAsync(100);
 
@@ -124,8 +124,8 @@ public class AccountTransactionServiceTests
         var bankAccount = new BankAccount { BankAccountId = 123, Balance = 500 };
 
         _bankCardServiceMock
-            .Setup(b => b.ValidateCardAsync("1234", "0000"))
-            .ReturnsAsync(CustomResult<bool>.Success(true));
+            .Setup((System.Linq.Expressions.Expression<Func<IBankCardService, Task<Core.DTO.Result.CustomResult<bool>>>>)(b => (Task<Core.DTO.Result.CustomResult<bool>>)b.ValidateCardAsync("1234", "0000")))
+            .ReturnsAsync((Core.DTO.Result.CustomResult<bool>)Result<bool>.Success(true));
 
         _unitOfWorkMock.Setup(u => u.BankCardRepository.GetBalanceAsync("1234")).ReturnsAsync(200);
         _unitOfWorkMock.Setup(u => u.BankCardRepository.GetAccountByCardAsync("1234")).ReturnsAsync(bankAccount);

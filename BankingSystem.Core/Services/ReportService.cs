@@ -9,57 +9,57 @@ namespace BankingSystem.Core.Services;
 
 public class ReportService(IUnitOfWork unitOfWork) : IReportService
 {
-    public async Task<CustomResult<int>> GetRegisteredUsersCountAsync(string? year, string? month)
+    public async Task<Result<int>> GetRegisteredUsersCountAsync(string? year, string? month)
     {
         switch (year)
         {
             case "current":
             {
                 var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersThisYearAsync();
-                return CustomResult<int>.Success(count);
+                return Result<int>.Success(count);
             }
             case "previous":
             {
                 var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersForLastYearAsync();
-                return CustomResult<int>.Success(count);
-            }
+                return Result<int>.Success(count);
+                }
         }
 
         if (month == "previous")
         {
             var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersForLastMonthAsync();
-            return CustomResult<int>.Success(count);
+            return Result<int>.Success(count);
         }
 
-        return CustomResult<int>.Failure(new CustomError("InvalidParams","Invalid Parameters"));
+        return Result<int>.Failure(CustomError.Validation("Invalid query parameters. Use ?year=current, ?year=previous, or ?month=previous"));
     }
 
-    public async Task<CustomResult<int>> GetTransactionsCountAsync(string? year, string? month)
+    public async Task<Result<int>> GetTransactionsCountAsync(string? year, string? month)
     {
          switch (year)
          {
              case "previous":
              {
                  var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastYearAsync();
-                 return CustomResult<int>.Success(count);
-             }
+                 return Result<int>.Success(count);
+                }
              case "half":
              {
                  var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastHalfYearAsync();
-                 return CustomResult<int>.Success(count);
-             }
+                 return Result<int>.Success(count);
+                }
          }
 
          if (month == "previous")
          { 
              var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastMonthAsync();
-             return CustomResult<int>.Success(count);
+             return Result<int>.Success(count);
          }
 
-         return CustomResult<int>.Failure(new CustomError("InvalidParams","Invalid Parameters"));
+         return Result<int>.Failure(CustomError.Validation("Invalid query parameters. Use ?year=previous, ?year=half, or ?month=previous"));
     }
 
-    public async Task<CustomResult<decimal>> GetTransactionsIncomeSumAsync(string? year, string? month, string currency)
+    public async Task<Result<decimal>> GetTransactionsIncomeSumAsync(string? year, string? month, string currency)
     {
         switch (year)
         {
@@ -68,19 +68,19 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
                 var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastYearAsync(currency);
                 if (income is null)
                 {
-                    return CustomResult<decimal>.Failure(CustomError.NotFound("Income not found"));
+                    return Result<decimal>.Failure(CustomError.NotFound("Cannot find records with these params!"));
                 }
-                return CustomResult<decimal>.Success((decimal)income);
+                return Result<decimal>.Success((decimal)income);
             }
             case "half":
             {
                 var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastHalfYearAsync(currency);
                 if (income is null)
                 {
-                    return CustomResult<decimal>.Failure(CustomError.NotFound("Income not found"));
+                    return Result<decimal>.Failure(CustomError.NotFound("Cannot find records with these params!"));
                 }
-                return CustomResult<decimal>.Success((decimal)income);
-            }
+                return Result<decimal>.Success((decimal)income);
+                }
         }
 
         if (month == "previous")
@@ -88,34 +88,37 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
             var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastMonthAsync(currency);
             if (income is null)
             {
-                return CustomResult<decimal>.Failure(CustomError.NotFound("Income not found"));
+                return Result<decimal>.Failure(CustomError.NotFound("Cannot find records with these params!"));
             }
-            return CustomResult<decimal>.Success((decimal)income);
+            return Result<decimal>.Success((decimal)income);
         }
 
-        return CustomResult<decimal>.Failure(new CustomError("InvalidParams","Invalid Parameters"));
+        return Result<decimal>.Failure(CustomError.Validation("Invalid query parameters. Use ?year=previous, ?year=half, or ?month=previous, ?currency=GEL,USD,EUR"));
+
     }
 
-    public async Task<CustomResult<decimal>> GetAverageTransactionsIncomeAsync(string currency)
+    public async Task<Result<decimal>> GetAverageTransactionsIncomeAsync(string currency)
     {
         var averageIncome = await unitOfWork.ReportRepository.GetAverageTransactionsIncomeByCurrencyAsync(currency);
         if (averageIncome is null)
         {
-            return CustomResult<decimal>.Failure(CustomError.NotFound("Income not found"));
+            return Result<decimal>.Failure(CustomError.NotFound("Cannot find records with these params!"));
         }
 
-        return CustomResult<decimal>.Success((decimal)averageIncome);
+        return Result<decimal>.Success((decimal)averageIncome);
     }
 
-    public async Task<CustomResult<IEnumerable<DailyTransactions>>> GetTransactionsChartForLastMonthAsync()
+    public async Task<Result<IEnumerable<DailyTransaction>>> GetTransactionsChartForLastMonthAsync()
     {
         var transactions = await unitOfWork.ReportRepository.GetTransactionsChartForLastMonthAsync();
 
-        if (transactions.IsNullOrEmpty())
+        var dailyTransactions = transactions!.ToList();
+
+        if (dailyTransactions.IsNullOrEmpty())
         {
-            return CustomResult<IEnumerable<DailyTransactions>>.Failure(CustomError.NotFound("No transactions found"));
+            return Result<IEnumerable<DailyTransaction>>.Failure(CustomError.NotFound("There is not transactions"));
         }
-        
-        return CustomResult<IEnumerable<DailyTransactions>>.Success(transactions);
+
+        return Result<IEnumerable<DailyTransaction>>.Success(dailyTransactions);
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using BankingSystem.Domain.CustomValidationAttributes;
 
-namespace BankingSystem.Core.DTO;
+namespace BankingSystem.Core.DTO.AccountTransaction;
 
-public record TransactionDto
+public record AccountTransactionDto
 {
     [NegativeNumberValidation(ErrorMessage = "Amount cannot be negative.")]
     public decimal Amount { get; init; }

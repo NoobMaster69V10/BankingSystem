@@ -43,7 +43,7 @@ public class BankControllerTests
             Currency = "EUR"
         };
         
-        var successResult = CustomResult<BankAccount>.Success(createdAccount);
+        var successResult = Result<BankAccount>.Success(createdAccount);
         
         A.CallTo(() => _accountService.CreateBankAccountAsync(bankAccountDto))
             .Returns(Task.FromResult(successResult));
@@ -69,7 +69,7 @@ public class BankControllerTests
              Currency = "EUR"
          };
          var customError = new CustomError("ValidationError", "Invalid account details provided");
-         var expectedResult = CustomResult<BankAccount>.Failure(customError);
+         var expectedResult = Result<BankAccount>.Failure(customError);
          
          A.CallTo(() => _accountService.CreateBankAccountAsync(bankAccountDto))
              .Returns(Task.FromResult(expectedResult));
@@ -106,7 +106,7 @@ public class BankControllerTests
              PinCode = cardRegisterDto.PinCode,
              AccountId = cardRegisterDto.BankAccountId
          };
-         var expectedResult = CustomResult<BankCard>.Success(expectedResponse);
+         var expectedResult = Result<BankCard>.Success(expectedResponse);
          A.CallTo(() => _cardService.CreateBankCardAsync(cardRegisterDto))
              .Returns(Task.FromResult(expectedResult));
          
@@ -133,7 +133,7 @@ public class BankControllerTests
              BankAccountId = 1
          };
          
-         var expectedResult = CustomResult<BankCard>.Failure(
+         var expectedResult = Result<BankCard>.Failure(
              CustomError.NotFound("Account not found"));
          A.CallTo(() => _cardService.CreateBankCardAsync(cardRegisterDto))
              .Returns(Task.FromResult(expectedResult));
@@ -160,7 +160,7 @@ public class BankControllerTests
              BankAccountId = 1
          };
          var customError = new CustomError("ValidationError", "Invalid card details provided");
-         var expectedResult = CustomResult<BankCard>.Failure(customError);
+         var expectedResult = Result<BankCard>.Failure(customError);
          A.CallTo(() => _cardService.CreateBankCardAsync(cardRegisterDto))
              .Returns(Task.FromResult(expectedResult));
          

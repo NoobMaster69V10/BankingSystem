@@ -14,5 +14,5 @@ public interface IReportRepository
     Task<decimal?> GetTransactionsIncomeByCurrencyLastHalfYearAsync(string currency);
     Task<decimal?> GetTransactionsIncomeByCurrencyLastMonthAsync(string currency);
     Task<decimal?> GetAverageTransactionsIncomeByCurrencyAsync(string currency);
-    Task<IEnumerable<DailyTransactions>> GetTransactionsChartForLastMonthAsync();
+    Task<IEnumerable<DailyTransaction>?> GetTransactionsChartForLastMonthAsync();
 }

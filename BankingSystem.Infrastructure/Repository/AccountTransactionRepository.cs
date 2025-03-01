@@ -9,14 +9,6 @@ public class AccountTransactionRepository : GenericRepository<AccountTransaction
 {
     public AccountTransactionRepository(IDbConnection connection) : base(connection, "AccountTransactions") { }
 
-    //public async Task AddAccountTransactionAsync(AccountTransaction transactionObj)
-    //{
-    //    const string query =
-    //        "INSERT INTO AccountTransactions(Amount, Currency, TransactionDate, FromAccountId, ToAccountId, TransactionFee) VALUES (@Amount, @Currency, @TransactionDate, @FromAccountId, @ToAccountId, @TransactionFee)";
-
-    //    await Connection.ExecuteAsync(query, transactionObj, _transaction);
-    //}
-
     public async Task AddAtmTransactionAsync(AtmTransaction atmTransaction)
     {
         const string query =

@@ -1,5 +1,6 @@
 using BankingSystem.API.Controllers;
 using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Person;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
@@ -55,7 +56,7 @@ public class PersonControllerTests
         string personId = "123";
         SetupUserContext(personId);
 
-        var transactionDto = new TransactionDto
+        var transactionDto = new AccountTransactionDto
         {
             Amount = 100,
             FromAccountId = 1,
@@ -69,7 +70,7 @@ public class PersonControllerTests
             ToAccountId = transactionDto.ToAccountId,
         };
 
-        var successResult = CustomResult<AccountTransaction>.Success(transactionResult);
+        var successResult = Result<AccountTransaction>.Success(transactionResult);
 
         A.CallTo(() => _transactionService.TransactionBetweenAccountsAsync(transactionDto, personId))
             .Returns(Task.FromResult(successResult));
@@ -89,7 +90,7 @@ public class PersonControllerTests
         string personId = "123";
         SetupUserContext(personId);
     
-        var transactionDto = new TransactionDto
+        var transactionDto = new AccountTransactionDto
         {
             Amount = 100,
             FromAccountId = 1,
@@ -97,7 +98,7 @@ public class PersonControllerTests
         };
     
         var error = CustomError.Validation("Insufficient funds for transfer");
-        var failureResult = CustomResult<AccountTransaction>.Failure(error);
+        var failureResult = Result<AccountTransaction>.Failure(error);
     
         A.CallTo(() => _transactionService.TransactionBetweenAccountsAsync(transactionDto, personId))
             .Returns(Task.FromResult(failureResult));
@@ -130,7 +131,7 @@ public class PersonControllerTests
             BirthDate = DateTime.Now,
         };
     
-        var successResult = CustomResult<Person>.Success(person);
+        var successResult = Result<Person>.Success(person);
     
         A.CallTo(() => _personService.GetPersonById(personId))
             .Returns(Task.FromResult(successResult));
@@ -150,7 +151,7 @@ public class PersonControllerTests
         SetupUserContext(personId);
     
         var error = CustomError.NotFound("Person not found");
-        var failureResult = CustomResult<Person>.Failure(error);
+        var failureResult = Result<Person>.Failure(error);
     
         A.CallTo(() => _personService.GetPersonById(personId))
             .Returns(Task.FromResult(failureResult));
@@ -180,7 +181,7 @@ public class PersonControllerTests
             Password = "Password123!",
         };
     
-        var successResult = CustomResult<PersonRegisterDto>.Success(registerModel);
+        var successResult = Result<PersonRegisterDto>.Success(registerModel);
     
         A.CallTo(() => _personAuthService.RegisterPersonAsync(registerModel))
             .Returns(Task.FromResult(successResult));
@@ -208,7 +209,7 @@ public class PersonControllerTests
         };
     
         var error = CustomError.Validation("Username already exists");
-        var failureResult = CustomResult<PersonRegisterDto>.Failure(error);
+        var failureResult = Result<PersonRegisterDto>.Failure(error);
     
         A.CallTo(() => _personAuthService.RegisterPersonAsync(registerModel))
             .Returns(Task.FromResult(failureResult));
@@ -235,7 +236,7 @@ public class PersonControllerTests
         };
     
         var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
-        var successResult = CustomResult<string>.Success(token);
+        var successResult = Result<string>.Success(token);
     
         A.CallTo(() => _personAuthService.AuthenticationPersonAsync(loginModel))
             .Returns(Task.FromResult(successResult));
@@ -259,7 +260,7 @@ public class PersonControllerTests
         };
     
         var error = CustomError.Failure("Invalid username or password");
-        var failureResult = CustomResult<string>.Failure(error);
+        var failureResult = Result<string>.Failure(error);
     
         A.CallTo(() => _personAuthService.AuthenticationPersonAsync(loginModel))
             .Returns(Task.FromResult(failureResult));
@@ -284,7 +285,7 @@ public class PersonControllerTests
             Email = "john.doe@example.com"
         };
         var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
-        var successResult = CustomResult<string>.Success(token);
+        var successResult = Result<string>.Success(token);
     
         A.CallTo(() => _personAuthService.ForgotPasswordAsync(forgotPasswordDto))
             .Returns(Task.FromResult(successResult));
@@ -306,7 +307,7 @@ public class PersonControllerTests
         };
         
         var error = CustomError.NotFound("Email not found");
-        var failureResult = CustomResult<string>.Failure(error);
+        var failureResult = Result<string>.Failure(error);
     
         A.CallTo(() => _personAuthService.ForgotPasswordAsync(forgotPasswordDto))
             .Returns(Task.FromResult(failureResult));
@@ -335,7 +336,7 @@ public class PersonControllerTests
             ConfirmPassword = "NewPassword123!"
         };
     
-        var successResult = CustomResult<bool>.Success(true);
+        var successResult = Result<bool>.Success(true);
     
         A.CallTo(() => _personAuthService.ResetPasswordAsync(resetPasswordDto))
             .Returns(Task.FromResult(successResult));
@@ -361,7 +362,7 @@ public class PersonControllerTests
         };
     
         var error = CustomError.Validation("Invalid or expired token");
-        var failureResult = CustomResult<bool>.Failure(error);
+        var failureResult = Result<bool>.Failure(error);
     
         A.CallTo(() => _personAuthService.ResetPasswordAsync(resetPasswordDto))
             .Returns(Task.FromResult(failureResult));

@@ -8,7 +8,7 @@ public static class HashingHelper
     private const int KeySize = 32;
     private const int Iterations = 100000;
 
-    public static (string hashedPin, string hashedCvv, string salt) HashPinAndCvv(string pin, string cvv)
+    public static (string hashedPin, string salt) HashPinAndCvv(string pin)
     {
         var saltBytes = new byte[SaltSize];
         using (var rng = RandomNumberGenerator.Create())
@@ -20,10 +20,7 @@ public static class HashingHelper
         var pbkdf2Pin = new Rfc2898DeriveBytes(pin, saltBytes, Iterations, HashAlgorithmName.SHA256);
         var hashedPin = Convert.ToBase64String(pbkdf2Pin.GetBytes(KeySize));
 
-        var pbkdf2Cvv = new Rfc2898DeriveBytes(cvv, saltBytes, Iterations, HashAlgorithmName.SHA256);
-        var hashedCvv = Convert.ToBase64String(pbkdf2Cvv.GetBytes(KeySize));
-
-        return (hashedPin, hashedCvv, salt);
+        return (hashedPin, salt);
     }
 
     public static bool VerifyHash(string input, string storedHash, string storedSalt)

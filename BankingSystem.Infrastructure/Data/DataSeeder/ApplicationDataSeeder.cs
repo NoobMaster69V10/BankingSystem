@@ -1,4 +1,5 @@
-﻿using BankingSystem.Core.Helpers;
+﻿using BankingSystem.Core.DTO.BankCard;
+using BankingSystem.Core.Helpers;
 using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
@@ -41,7 +42,7 @@ public class ApplicationDataSeeder(
 
     private async Task SeedRoles()
     {
-        var roles = new[] { "Operator", "Person" };
+        var roles = new[] { "Operator", "Person", "Manager" };
 
         foreach (var role in roles)
         {
@@ -55,11 +56,13 @@ public class ApplicationDataSeeder(
         if (context.IdentityPersons.Any()) return;
 
         var operatorPassword = configuration["Seeder:OperatorPassword"] ?? "Password1#";
+        var managerPassword = configuration["Seeder:ManagerPassword"] ?? "Password1#";
         var personPassword = configuration["Seeder:PersonPassword"] ?? "Password1#";
 
         var users = new List<(string email, string role)>
         {
-            ("test@gmail.com", "Operator"),
+            ("testOperator@gmail.com", "Operator"),
+            ("testManager@gmail.com", "Manager"),
             ("testperson1@gmail.com", "Person"),
             ("testperson2@gmail.com", "Person")
         };
@@ -70,15 +73,30 @@ public class ApplicationDataSeeder(
             {
                 UserName = email,
                 Email = email,
-                FirstName = email.Split('@')[0],
-                Lastname = "User",
+                FirstName = email.Split("@")[0],
+                Lastname = "",
                 BirthDate = DateTime.UtcNow.AddYears(-30),
                 IdNumber = "01010034023"
             };
 
-            await userManager.CreateAsync(user, role == "Operator" ? operatorPassword : personPassword);
-
-            await userManager.AddToRoleAsync(user, role);
+            switch (role)
+            {
+                case "Operator":
+                    await userManager.CreateAsync(user, operatorPassword);
+                    await userManager.AddToRoleAsync(user, role);
+                    user.Lastname = "Operator";
+                    break;
+                case "Manager":
+                    await userManager.CreateAsync(user, managerPassword);
+                    await userManager.AddToRoleAsync(user, role);
+                    user.Lastname = "Manager";
+                    break;
+                case "Person":
+                    await userManager.CreateAsync(user, personPassword);
+                    await userManager.AddToRoleAsync(user, role);
+                    user.Lastname = "Person";
+                    break;
+            }
 
             var person = await personRepository.GetByUsernameAsync(email);
 
@@ -96,12 +114,17 @@ public class ApplicationDataSeeder(
 
             var personAccountId = personFullInfo!.BankAccounts.First().BankAccountId;
 
-            var (hashedPin, hashedCvv, salt) = HashingHelper.HashPinAndCvv(GeneratePinCode(), GenerateCvv());
+            
+            var (hashedPin, salt) =
+                HashingHelper.HashPinAndCvv(GeneratePinCode());
+
+
+            var encryptedCvv = EncryptionHelper.Encrypt(GenerateCvv());
 
             var card = new BankCard
             {
                 CardNumber = GenerateCardNumber(),
-                Cvv = hashedCvv,
+                Cvv = encryptedCvv,
                 PinCode = hashedPin,
                 Salt = salt,
                 ExpirationDate = DateTime.UtcNow.AddYears(5),

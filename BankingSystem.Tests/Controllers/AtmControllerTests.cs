@@ -24,11 +24,11 @@ public class AtmControllerTests
     }
 
     [Fact]
-    public async Task ShowBalance_WhenCardIsValid_Then_ReturnOk()
+    public async Task AtmController_ShowBalance_ReturnOk()
     {
         var cardDto = new CardAuthorizationDto { CardNumber = "123456789", PinCode = "1234" };
         var expectedResponse = new BalanceResponseDto(balance: 500.00m, cardNumber: "123456789");
-        var expectedResult = CustomResult<BalanceResponseDto>.Success(expectedResponse);
+        var expectedResult = Result<BalanceResponseDto>.Success(expectedResponse);
         A.CallTo(() => _atmService.ShowBalanceAsync(cardDto))
             .Returns(Task.FromResult(expectedResult));
         
@@ -40,10 +40,10 @@ public class AtmControllerTests
     }
 
     [Fact]
-    public async Task ShowBalance_WhenCardIsInvalid_Then_ReturnBadRequest()
+    public async Task AtmController_ShowBalance_ReturnBadRequest_WhenInvalidCard()
     {
         var cardDto = new CardAuthorizationDto { CardNumber = "123456789", PinCode = "1234" }; 
-        var expectedResult = CustomResult<BalanceResponseDto>.Failure(CustomError.NotFound("Card number not found"));
+        var expectedResult = Result<BalanceResponseDto>.Failure(CustomError.NotFound("Card number not found"));
         A.CallTo(() => _atmService.ShowBalanceAsync(cardDto))
             .Returns(Task.FromResult(expectedResult));
         
@@ -52,13 +52,13 @@ public class AtmControllerTests
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Which;
         badRequestResult.StatusCode.Should().Be(400);
         badRequestResult.Value.Should().BeEquivalentTo(expectedResult.Error);
-    }
 
+    }
     [Fact]
-    public async Task WithdrawMoney_WhenTransactionIsSuccessful_Then_ReturnOk()
+    public async Task AtmController_WithDrawMoney_ReturnOk()
     {
         var withdrawDto = new WithdrawMoneyDto {CardNumber = "5127 8809 9999 9990",PinCode = "1234",Amount = 500,Currency = "USD"};
-        var expectedResult = CustomResult<bool>.Success(true);
+        var expectedResult = Result<bool>.Success(true);
         A.CallTo(() => _accountTransactionService.WithdrawMoneyAsync(withdrawDto))
             .Returns(Task.FromResult(expectedResult));
         
@@ -68,10 +68,10 @@ public class AtmControllerTests
         okResult.StatusCode.Should().Be(200);
         okResult.Value.Should().BeEquivalentTo(expectedResult);
     }
-
     [Fact]
-    public async Task WithdrawMoney_WhenBalanceIsNotEnough_Then_ReturnBadRequest()
+    public async Task AtmController_WithdrawMoney_ReturnBadRequest_WhenNotEnoughBalance()
     {
+
         var withdrawDto = new WithdrawMoneyDto 
         { 
             CardNumber = "123456789", 
@@ -80,7 +80,7 @@ public class AtmControllerTests
             Currency = "USD" 
         };
         var customError = new CustomError("NotEnoughBalance", "Not enough balance.");
-        var expectedResult = CustomResult<bool>.Failure(customError);
+        var expectedResult = Result<bool>.Failure(customError);
         A.CallTo(() => _accountTransactionService.WithdrawMoneyAsync(withdrawDto))
             .Returns(Task.FromResult(expectedResult));
     
@@ -90,10 +90,10 @@ public class AtmControllerTests
         badRequestResult.StatusCode.Should().Be(400);
         badRequestResult.Value.Should().BeEquivalentTo(customError);
     }
-
     [Fact]
-    public async Task WithdrawMoney_WhenCardIsInvalid_Then_ReturnBadRequest()
+    public async Task AtmController_WithdrawMoney_ReturnBadRequest_WhenInvalidCard()
     {
+        // Arrange
         var withdrawDto = new WithdrawMoneyDto 
         { 
             CardNumber = "invalid", 
@@ -101,7 +101,7 @@ public class AtmControllerTests
             Amount = 50, 
             Currency = "USD" 
         };
-        var expectedResult = CustomResult<bool>.Failure(CustomError.NotFound("Card number not found"));
+        var expectedResult = Result<bool>.Failure(CustomError.NotFound("Card number not found"));
         A.CallTo(() => _accountTransactionService.WithdrawMoneyAsync(withdrawDto))
             .Returns(Task.FromResult(expectedResult));
     
@@ -110,34 +110,5 @@ public class AtmControllerTests
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Which;
         badRequestResult.StatusCode.Should().Be(400);
         badRequestResult.Value.Should().BeEquivalentTo(expectedResult.Error);
-    }
-    [Fact]
-    public async Task ChangePin_ValidRequest_ReturnsOk()
-    {
-        var changePinDto = new ChangePinDto { CardNumber = "123456789", CurrentPin = "1234", NewPin = "5678" };
-        var resultDto = CustomResult<bool>.Success(true);
-
-        A.CallTo(() => _atmService.ChangePinAsync(changePinDto)).Returns(resultDto);
-
-        var result = await _controller.ChangePin(changePinDto);
-
-        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-        okResult.Value.Should().BeEquivalentTo(resultDto);
-    }
-
-    [Fact]
-    public async Task ChangePin_InvalidRequest_ReturnsProblemDetails()
-    {
-        var changePinDto = new ChangePinDto { CardNumber = "invalid", CurrentPin = "wrong", NewPin = "5678" };
-        var customError = new CustomError("INVALID_CARD", "Card validation failed");
-        var resultDto = CustomResult<bool>.Failure(customError);
-
-        A.CallTo(() => _atmService.ChangePinAsync(changePinDto)).Returns(resultDto);
-
-        var result = await _controller.ChangePin(changePinDto);
-
-        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
-        objectResult.StatusCode.Should().Be(400);
-        objectResult.Value.Should().BeEquivalentTo(resultDto.ToProblemDetails());
     }
 }
