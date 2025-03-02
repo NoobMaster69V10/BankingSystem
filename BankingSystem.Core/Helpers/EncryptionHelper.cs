@@ -5,11 +5,11 @@ namespace BankingSystem.Core.Helpers;
 
 public static class EncryptionHelper
 {
-    private static readonly string EncryptionKey = "rQP1XMQXY3IZt27Y"; 
+    private static readonly string EncryptionKey = "rQP1XMQXY3IZt27Y";
 
     public static string Encrypt(string plainText)
     {
-        using (Aes aes = Aes.Create())
+        using (var aes = Aes.Create())
         {
             aes.Key = Encoding.UTF8.GetBytes(EncryptionKey.PadRight(32));
             aes.IV = new byte[16];
@@ -29,7 +29,7 @@ public static class EncryptionHelper
 
     public static string Decrypt(string cipherText)
     {
-        using Aes aes = Aes.Create();
+        using var aes = Aes.Create();
         aes.Key = Encoding.UTF8.GetBytes(EncryptionKey.PadRight(32));
         aes.IV = new byte[16];
 
