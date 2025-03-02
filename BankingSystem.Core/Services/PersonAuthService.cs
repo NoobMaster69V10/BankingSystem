@@ -28,9 +28,14 @@ public class PersonAuthService(
         try
         {
             var user = await userManager.FindByEmailAsync(loginDto.Email);
-            if (user == null || !await userManager.CheckPasswordAsync(user, loginDto.Password))
+            if (user == null)
             {
-                return Result<string>.Failure(CustomError.NotFound("Invalid email or password"));
+                return Result<string>.Failure(CustomError.NotFound("Invalid email"));
+
+            }
+            if (await userManager.CheckPasswordAsync(user, loginDto.Password))
+            {
+                return Result<string>.Failure(CustomError.NotFound("Invalid password"));
             }
 
             var token = await GenerateJwtToken(user);

@@ -14,12 +14,14 @@ public class AtmService : IAtmService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IBankCardService _bankCardService;
     private readonly ILoggerService _loggerService;
+    private readonly IHasherService _hasherService;
 
-    public AtmService(IUnitOfWork unitOfWork, IBankCardService bankCardService, ILoggerService loggerService)
+    public AtmService(IUnitOfWork unitOfWork, IBankCardService bankCardService, ILoggerService loggerService, IHasherService hasherService)
     {
         _unitOfWork = unitOfWork;
         _bankCardService = bankCardService;
         _loggerService = loggerService;
+        _hasherService = hasherService;
     }
 
 
@@ -64,9 +66,9 @@ public class AtmService : IAtmService
                 if (authResult.Error != null) return Result<bool>.Failure(authResult.Error);
             }
             
-            var (hashedPin, salt) = HashingHelper.HashPinAndCvv(changePinDto.NewPin);
+            var pinHash = _hasherService.Hash(changePinDto.NewPin);
          
-            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, hashedPin,salt);
+            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber,pinHash);
             return Result<bool>.Success(true);
         }
         catch (Exception ex)
