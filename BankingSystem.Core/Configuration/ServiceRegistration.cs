@@ -1,4 +1,5 @@
-﻿using BankingSystem.Core.ServiceContracts;
+﻿using BankingSystem.Core.Helpers;
+using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,5 +18,6 @@ public static class ServiceRegistration
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<ILoggerService, LoggerService>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IHasherService, HashingServer>();
     }
 }

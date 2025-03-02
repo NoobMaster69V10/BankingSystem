@@ -21,8 +21,6 @@ public class BankCard
     public DateTime ExpirationDate { get; set; }
     public  string Cvv { get; set; }
     public string PinCode { get; set; }
-    [JsonIgnore]
-    public string Salt { get; set; }
 
     [Required(ErrorMessage = "Account ID is required.")]
     public int AccountId { get; set; }

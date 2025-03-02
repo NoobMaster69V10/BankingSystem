@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using BankingSystem.Core.Helpers;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
 using Dapper;
@@ -32,35 +31,25 @@ public class BankCardRepository : GenericRepository<BankCard>, IBankCardReposito
         return await Connection.ExecuteScalarAsync<bool>(query, new { CardNumber = cardNumber }, Transaction);
     }
 
-    public async Task<bool> CheckPinCodeAsync(string cardNumber, string pinCode)
-    {
-        string query =
-            "SELECT PinCode, Salt FROM BankCards WHERE CardNumber = @CardNumber";
-
-        var result = await Connection.QuerySingleOrDefaultAsync<(string PinCode, string Salt)>(query, new { CardNumber = cardNumber }, Transaction);
-
-        return HashingHelper.VerifyHash(pinCode, result.PinCode, result.Salt);
-    }
-
-    public async Task<(string PinCode, string Salt, DateTime ExpiryDate, string Cvv)?> GetCardDetailsAsync(string cardNumber)
+    public async Task<(string PinCode,DateTime ExpiryDate, string Cvv)?> GetCardDetailsAsync(string cardNumber)
     {
         const string query = @"
-        SELECT PinCode, Salt, ExpirationDate, CVV
+        SELECT PinCode,ExpirationDate, CVV
         FROM BankCards
         WHERE CardNumber = @CardNumber";
 
-        return await Connection.QuerySingleOrDefaultAsync<(string, string, DateTime, string)>(
+        return await Connection.QuerySingleOrDefaultAsync<(string, DateTime, string)>(
             query, new { CardNumber = cardNumber }, Transaction);
     }
 
-    public async Task UpdatePinAsync(string cardNumber, string pinCode,string salt)
+    public async Task UpdatePinAsync(string cardNumber, string pinCode)
     {
         const string query = @"
         UPDATE BankCards 
-        SET PinCode = @PinCode,Salt = @Salt
+        SET PinCode = @PinCode
         WHERE CardNumber = @CardNumber";
 
-        await Connection.ExecuteAsync(query, new { PinCode = pinCode, CardNumber = cardNumber,Salt = salt}, Transaction);
+        await Connection.ExecuteAsync(query, new { PinCode = pinCode, CardNumber = cardNumber}, Transaction);
     }
 
     public async Task<decimal> GetBalanceAsync(string cardNumber)

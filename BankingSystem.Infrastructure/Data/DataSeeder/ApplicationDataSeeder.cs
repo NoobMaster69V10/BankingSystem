@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 namespace BankingSystem.Infrastructure.Data.DataSeeder;
 
 public class ApplicationDataSeeder(
+    IHasherService hasherService,
     BankingSystemDbContext context,
     UserManager<IdentityPerson> userManager,
     RoleManager<IdentityRole> roleManager,
@@ -115,8 +116,8 @@ public class ApplicationDataSeeder(
             var personAccountId = personFullInfo!.BankAccounts.First().BankAccountId;
 
             
-            var (hashedPin, salt) =
-                HashingHelper.HashPinAndCvv(GeneratePinCode());
+            var pinHash =
+                hasherService.Hash(GeneratePinCode());
 
 
             var encryptedCvv = EncryptionHelper.Encrypt(GenerateCvv());
@@ -125,8 +126,7 @@ public class ApplicationDataSeeder(
             {
                 CardNumber = GenerateCardNumber(),
                 Cvv = encryptedCvv,
-                PinCode = hashedPin,
-                Salt = salt,
+                PinCode = pinHash,
                 ExpirationDate = DateTime.UtcNow.AddYears(5),
                 Firstname = user.FirstName,
                 Lastname = user.Lastname,

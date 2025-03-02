@@ -8,7 +8,7 @@ using BankingSystem.Domain.UnitOfWorkContracts;
 
 namespace BankingSystem.Core.Services;
 
-public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerService) : IBankCardService
+public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerService,IHasherService hasherService) : IBankCardService
 {
     public async Task<Result<bool>> ValidateCardAsync(string cardNumber, string pinCode)
     {
@@ -21,7 +21,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                 return Result<bool>.Failure(CustomError.NotFound("Card number not found"));
             }
 
-            if (!HashingHelper.VerifyHash(pinCode, card.Value.PinCode, card.Value.Salt))
+            if (!hasherService.Verify(pinCode, card.Value.PinCode))
             {
                 return Result<bool>.Failure(CustomError.Validation("Pin code does not match"));
             }
@@ -67,15 +67,14 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
             return Result<BankCard>.Failure(CustomError.NotFound("This bank account is not associated with your profile. Please use a valid account."));
         }
 
-        var (hashedPin, salt) = HashingHelper.HashPinAndCvv(bankCardRegisterDto.PinCode);
+        var pinHash = hasherService.Hash(bankCardRegisterDto.PinCode);
         var encryptedCvv = EncryptionHelper.Encrypt(bankCardRegisterDto.Cvv);
 
         var newCard = new BankCard
         {
             CardNumber = bankCardRegisterDto.CardNumber,
             Cvv = encryptedCvv,
-            PinCode = hashedPin,
-            Salt = salt,
+            PinCode = pinHash,
             ExpirationDate = bankCardRegisterDto.ExpirationDate,
             Firstname = bankCardRegisterDto.Firstname,
             Lastname = bankCardRegisterDto.Lastname,
