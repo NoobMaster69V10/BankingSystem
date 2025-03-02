@@ -12,78 +12,71 @@ public class ReportRepository : IReportRepository
     {
         _connection = connection;
     }
-    public async Task<int> GetNumberOfRegisteredUsersThisYearAsync()
+    public async Task<int> GetNumberOfRegisteredUsersAsync(string dateFilter)
     {
-        const string query = @"SELECT COUNT(*)
-                               FROM AspNetUsers 
-                               WHERE YEAR(RegistrationDate) = YEAR(GETDATE());";
+        
+
+        if (dateFilter == "current-year")
+        {
+            dateFilter = "YEAR(RegistrationDate) = YEAR(GETDATE())";
+        }
+
+        if (dateFilter == "last-year")
+        {
+            dateFilter = "RegistrationDate >= DATEADD(YEAR, -1, GETDATE())";
+        }
+
+        if (dateFilter == "last-month")
+        {
+            dateFilter = "RegistrationDate >= DATEADD(MONTH, -1, GETDATE())";
+        }
+
+        var query = $"SELECT COUNT(*) FROM AspNetUsers WHERE {dateFilter}";
+
+
+        return await _connection.QuerySingleOrDefaultAsync<int>(query);
+
+    }
+    public async Task<int> GetNumberOfTransactionsAsync(string dateFilter)
+    {
+        if (dateFilter == "last-year")
+        {
+            dateFilter = "TransactionDate >= DATEADD(YEAR, -1, GETDATE())";
+        }
+
+        if (dateFilter == "half-year")
+        {
+            dateFilter = "TransactionDate >= DATEADD(MONTH, -6, GETDATE())";
+        }
+
+        if (dateFilter == "last-month")
+        {
+            dateFilter = "TransactionDate >= DATEADD(MONTH, -1, GETDATE())";
+        }
+
+        var query = $"SELECT COUNT(*) FROM AccountTransactions WHERE {dateFilter};";
 
         return await _connection.QuerySingleOrDefaultAsync<int>(query);
     }
 
-    public async Task<int> GetNumberOfRegisteredUsersForLastYearAsync()
+    public async Task<decimal?> GetTransactionsIncomeByCurrencyAsync(string dateFilter, string currency)
     {
-        const string query = @"SELECT COUNT(*) 
-                               FROM AspNetUsers
-                               WHERE RegistrationDate >= DATEADD(YEAR, -1, GETDATE());";
+        if (dateFilter == "last-year")
+        {
+            dateFilter = "TransactionDate >= DATEADD(YEAR, -1, GETDATE())";
+        }
 
-        return await _connection.QuerySingleOrDefaultAsync<int>(query);
-    }
+        if (dateFilter == "half-year")
+        {
+            dateFilter = "TransactionDate >= DATEADD(MONTH, -6, GETDATE())";
+        }
 
-    public async Task<int> GetNumberOfRegisteredUsersForLastMonthAsync()
-    {
-        const string query = @"SELECT COUNT(*) as NumberOfUserRegisteredForLastMonth
-                               FROM AspNetUsers
-                               WHERE RegistrationDate >= DATEADD(MONTH, -1, GETDATE());";
+        if (dateFilter == "last-month")
+        {
+            dateFilter = "TransactionDate >= DATEADD(MONTH, -1, GETDATE())";
+        }
 
-        return await _connection.QuerySingleOrDefaultAsync<int>(query);
-    }
-
-    public async Task<int> GetNumberOfTransactionsForLastYearAsync()
-    {
-        const string query = @"SELECT COUNT(*) as NumberOfTransactionsForLastYear
-                               FROM AccountTransactions
-                               WHERE TransactionDate >= DATEADD(YEAR, -1, GETDATE());";
-
-        return await _connection.QuerySingleOrDefaultAsync<int>(query);
-    }
-
-    public async Task<int> GetNumberOfTransactionsForLastHalfYearAsync()
-    {
-        const string query = @"SELECT COUNT(*) as NumberOfTransactionsForLastHalfYear
-                               FROM AccountTransactions
-                               WHERE TransactionDate >= DATEADD(MONTH, -6, GETDATE());";
-
-        return await _connection.QuerySingleOrDefaultAsync<int>(query);
-    }
-
-    public async Task<int> GetNumberOfTransactionsForLastMonthAsync()
-    {
-        const string query = @"SELECT COUNT(*) as NumberOfTransactionsForLastMonth
-                               FROM AccountTransactions
-                               WHERE TransactionDate >= DATEADD(MONTH, -1, GETDATE());";
-
-        return await _connection.QuerySingleOrDefaultAsync<int>(query);
-    }
-
-    public async Task<decimal?> GetTransactionsIncomeByCurrencyLastYearAsync(string currency)
-    {
-        const string query = @"SELECT SUM(TransactionFee) FROM AccountTransactions 
-                               WHERE Currency = @Currency AND TransactionDate >= DATEADD(YEAR, -1, GETDATE());";
-
-        return await _connection.QuerySingleOrDefaultAsync<decimal?>(query, new { Currency = currency });
-    }
-    public async Task<decimal?> GetTransactionsIncomeByCurrencyLastHalfYearAsync(string currency)
-    {
-        const string query = @"SELECT SUM(TransactionFee) FROM AccountTransactions 
-                               WHERE Currency = @Currency AND TransactionDate >= DATEADD(MONTH, -6, GETDATE());";
-
-        return await _connection.QuerySingleOrDefaultAsync<decimal?>(query, new { Currency = currency });
-    }
-    public async Task<decimal?> GetTransactionsIncomeByCurrencyLastMonthAsync(string currency)
-    {
-        const string query = @"SELECT SUM(TransactionFee) FROM AccountTransactions 
-                               WHERE Currency = @Currency AND TransactionDate >= DATEADD(MONTH, -1, GETDATE());";
+        var query = $"SELECT SUM(TransactionFee) FROM AccountTransactions WHERE Currency = @Currency AND {dateFilter};";
 
         return await _connection.QuerySingleOrDefaultAsync<decimal?>(query, new { Currency = currency });
     }

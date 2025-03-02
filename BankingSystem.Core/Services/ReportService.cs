@@ -9,92 +9,40 @@ namespace BankingSystem.Core.Services;
 
 public class ReportService(IUnitOfWork unitOfWork) : IReportService
 {
-    public async Task<Result<int>> GetRegisteredUsersCountAsync(string? year, string? month)
+    public async Task<Result<int>> GetRegisteredUsersCountAsync(string? dateFilter)
     {
-        switch (year)
+        if (dateFilter is "current-year" or "last-year" or "last-month")
         {
-            case "current":
-            {
-                var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersThisYearAsync();
-                return Result<int>.Success(count);
-            }
-            case "previous":
-            {
-                var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersForLastYearAsync();
-                return Result<int>.Success(count);
-                }
-        }
-
-        if (month == "previous")
-        {
-            var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersForLastMonthAsync();
+            var count = await unitOfWork.ReportRepository.GetNumberOfRegisteredUsersAsync(dateFilter);
             return Result<int>.Success(count);
         }
 
-        return Result<int>.Failure(CustomError.Validation("Invalid query parameters. Use ?year=current, ?year=previous, or ?month=previous"));
+        return Result<int>.Failure(CustomError.Validation("Invalid query parameters. Use ?dateFilter=current-year, ?dateFilter=last-year, or ?dateFilter=last-month"));
     }
 
-    public async Task<Result<int>> GetTransactionsCountAsync(string? year, string? month)
+    public async Task<Result<int>> GetTransactionsCountAsync(string? dateFilter)
     {
-         switch (year)
-         {
-             case "previous":
-             {
-                 var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastYearAsync();
-                 return Result<int>.Success(count);
-                }
-             case "half":
-             {
-                 var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastHalfYearAsync();
-                 return Result<int>.Success(count);
-                }
-         }
-
-         if (month == "previous")
-         { 
-             var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsForLastMonthAsync();
-             return Result<int>.Success(count);
-         }
-
-         return Result<int>.Failure(CustomError.Validation("Invalid query parameters. Use ?year=previous, ?year=half, or ?month=previous"));
-    }
-
-    public async Task<Result<decimal>> GetTransactionsIncomeSumAsync(string? year, string? month, string currency)
-    {
-        switch (year)
+        if (dateFilter is "last-year" or "half-year" or "last-month")
         {
-            case "previous":
-            {
-                var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastYearAsync(currency);
-                if (income is null)
-                {
-                    return Result<decimal>.Failure(CustomError.NotFound("Cannot find records with these params!"));
-                }
-                return Result<decimal>.Success((decimal)income);
-            }
-            case "half":
-            {
-                var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastHalfYearAsync(currency);
-                if (income is null)
-                {
-                    return Result<decimal>.Failure(CustomError.NotFound("Cannot find records with these params!"));
-                }
-                return Result<decimal>.Success((decimal)income);
-                }
+            var count = await unitOfWork.ReportRepository.GetNumberOfTransactionsAsync(dateFilter);
+            return Result<int>.Success(count);
         }
 
-        if (month == "previous")
+        return Result<int>.Failure(CustomError.Validation("Invalid query parameters. Use ?dateFilter=last-year, ?dateFilter=half-year, or ?dateFilter=last-month"));
+    }
+    public async Task<Result<decimal>> GetTransactionsIncomeSumAsync(string? dateFilter, string currency)
+    {
+        if (dateFilter is "last-year" or "half-year" or "last-month")
         {
-            var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyLastMonthAsync(currency);
+            var income = await unitOfWork.ReportRepository.GetTransactionsIncomeByCurrencyAsync(dateFilter, currency);
             if (income is null)
             {
-                return Result<decimal>.Failure(CustomError.NotFound("Cannot find records with these params!"));
+                return Result<decimal>.Failure(CustomError.NotFound("Transactions with these params not found!"));
             }
-            return Result<decimal>.Success((decimal)income);
+            return Result<decimal>.Success((decimal)income!);
         }
 
-        return Result<decimal>.Failure(CustomError.Validation("Invalid query parameters. Use ?year=previous, ?year=half, or ?month=previous, ?currency=GEL,USD,EUR"));
-
+        return Result<decimal>.Failure(CustomError.Validation("Invalid query parameters. Use ?dateFilter=last-year, ?dateFilter=half-year, or ?dateFilter=last-month / ?currency=GEL,USD,EUR"));
     }
 
     public async Task<Result<decimal>> GetAverageTransactionsIncomeAsync(string currency)

@@ -9,27 +9,27 @@ public class ReportController(IReportService reportService) : ControllerBase
 {
     [Authorize(Roles = "Manager")]
     [HttpGet("registered-count")]
-    public async Task<IActionResult> GetRegisteredUsersCount([FromQuery] string? year, [FromQuery] string? month)
+    public async Task<IActionResult> GetRegisteredUsersCount([FromQuery] string? dateFilter)
     {
-        var result = await reportService.GetRegisteredUsersCountAsync(year, month);
+            var result = await reportService.GetRegisteredUsersCountAsync(dateFilter);
 
         return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { RegisteredCount = result.Value});
     }
 
     [Authorize(Roles = "Manager")]
     [HttpGet("transactions-count")]
-    public async Task<IActionResult> GetTransactionsCount([FromQuery] string? year, [FromQuery] string? month)
+    public async Task<IActionResult> GetTransactionsCount([FromQuery] string? dateFilter)
     {
-        var result = await reportService.GetTransactionsCountAsync(year, month);
+        var result = await reportService.GetTransactionsCountAsync(dateFilter);
 
         return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsCount = result.Value });
     }
 
     [Authorize(Roles = "Manager")]
     [HttpGet("transactions-income")]
-    public async Task<IActionResult> GetTransactionsIncomeSum([FromQuery] string? year, [FromQuery] string? month, [FromQuery] string currency)
+    public async Task<IActionResult> GetTransactionsIncomeSum([FromQuery] string? dateFilter, [FromQuery] string currency)
     {
-        var result = await reportService.GetTransactionsIncomeSumAsync(year, month, currency);
+        var result = await reportService.GetTransactionsIncomeSumAsync(dateFilter, currency);
 
         return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsIncome = result.Value });
     }
