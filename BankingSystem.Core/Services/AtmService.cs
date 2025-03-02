@@ -109,8 +109,8 @@ public class AtmService : IAtmService
             }
             var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(withdrawMoneyDto.CardNumber);
 
-            decimal fee = withdrawMoneyDto.Amount * 0.02m;
-            decimal totalDeduction = withdrawMoneyDto.Amount + fee;
+            var fee = withdrawMoneyDto.Amount * 0.02m;
+            var totalDeduction = withdrawMoneyDto.Amount + fee;
 
             if (balance < totalDeduction)
             {
@@ -119,14 +119,14 @@ public class AtmService : IAtmService
 
             var newBalance = balance - totalDeduction;
             await _unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, newBalance);
-
-
+            
             var atmTransaction = new AtmTransaction
             {
                 Amount = withdrawMoneyDto.Amount,
                 Currency = withdrawMoneyDto.Currency,
                 TransactionDate = DateTime.UtcNow,
-                AccountId = bankAccount.BankAccountId
+                AccountId = bankAccount.BankAccountId,
+                TransactionFee = fee
             };
 
             await _unitOfWork.TransactionRepository.AddAtmTransactionAsync(atmTransaction);

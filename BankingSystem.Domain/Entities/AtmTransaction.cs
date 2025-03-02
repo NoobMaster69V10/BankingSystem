@@ -4,6 +4,8 @@ namespace BankingSystem.Domain.Entities;
 
 public class AtmTransaction
 {
+    [Key]
+    public int AtmTransactionId { get; set; }
     [Required]
     public int Amount { get; set; }
     [Required]

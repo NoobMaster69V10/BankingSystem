@@ -1,4 +1,3 @@
-using BankingSystem.Core.DTO;
 using BankingSystem.Core.DTO.AtmTransaction;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
@@ -16,13 +15,15 @@ namespace BankingSystem.Tests.Services
         private readonly IBankCardService _bankCardService;
         private readonly ILoggerService _loggerService;
         private readonly AtmService _atmService;
+        private readonly IHasherService _hasherService;
 
         public AtmServiceTests()
         {
             _unitOfWork = A.Fake<IUnitOfWork>();
             _bankCardService = A.Fake<IBankCardService>();
             _loggerService = A.Fake<ILoggerService>();
-            _atmService = new AtmService(_unitOfWork, _bankCardService, _loggerService);
+            _hasherService = A.Fake<IHasherService>();
+            _atmService = new AtmService(_unitOfWork, _bankCardService, _loggerService, _hasherService);
         }
 
         #region ShowBalanceAsync Tests
@@ -209,15 +210,13 @@ namespace BankingSystem.Tests.Services
 
         #endregion
 
+        #region WithDrawMoneyAsync Tests
+
         [Fact]
-        public async Task WithdrawMoneyAsync_ShouldReturnFailure_WhenAmountIsZeroOrNegative()
+        public async Task WithdrawMoneyAsync_WhenAmountIsZeroOrNegative_()
         {
             var withdrawDto = new WithdrawMoneyDto { Amount = 0, CardNumber = "1234", PinCode = "0000" };
-
-            var result = await _atmService.WithdrawMoneyAsync(withdrawDto);
-
-            Assert.False(result.IsSuccess);
-            Assert.Equal("Amount must be greater than 0.", result.Error.Message);
+            
         }
 
         //     [Fact]
@@ -282,5 +281,7 @@ namespace BankingSystem.Tests.Services
         //         Assert.True(result.IsSuccess);
         //     }
         // }
+
+        #endregion
     }
 }

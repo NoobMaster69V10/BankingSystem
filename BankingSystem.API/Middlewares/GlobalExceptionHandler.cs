@@ -1,6 +1,4 @@
-﻿using System.Net;
-using BankingSystem.Core.DTO.Response;
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankingSystem.API.Middlewares;

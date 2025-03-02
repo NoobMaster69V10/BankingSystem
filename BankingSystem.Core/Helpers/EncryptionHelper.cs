@@ -5,7 +5,7 @@ namespace BankingSystem.Core.Helpers;
 
 public static class EncryptionHelper
 {
-    private static readonly string EncryptionKey = "rQP1XMQXY3IZt27Y"; // 16 characters = 128 bits
+    private static readonly string EncryptionKey = "rQP1XMQXY3IZt27Y"; 
 
     public static string Encrypt(string plainText)
     {
