@@ -23,4 +23,9 @@ public class BankAccountRepository : GenericRepository<BankAccount>, IBankAccoun
                 IBAN = iban 
             });
     }
+    public async Task<string> GetAccountCurrencyAsync(int accountId)
+    {
+        const string query = "SELECT Currency FROM BankAccounts WHERE BankAccountId = @AccountId";
+        return await Connection.QueryFirstOrDefaultAsync<string>(query, new { AccountId = accountId });
+    }
 }

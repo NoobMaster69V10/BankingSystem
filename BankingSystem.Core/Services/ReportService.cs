@@ -2,12 +2,13 @@
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Errors;
+using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
 using Microsoft.IdentityModel.Tokens;
 
 namespace BankingSystem.Core.Services;
 
-public class ReportService(IUnitOfWork unitOfWork) : IReportService
+public class ReportService(IUnitOfWork unitOfWork, IExchangeRateApi exchangeRateApi) : IReportService
 {
     public async Task<Result<int>> GetRegisteredUsersCountAsync(string? dateFilter)
     {
@@ -17,7 +18,8 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
             return Result<int>.Success(count);
         }
 
-        return Result<int>.Failure(CustomError.Validation("Invalid query parameters. Use ?dateFilter=current-year, ?dateFilter=last-year, or ?dateFilter=last-month"));
+        return Result<int>.Failure(CustomError.Validation(
+            "Invalid query parameters. Use ?dateFilter=current-year, ?dateFilter=last-year, or ?dateFilter=last-month"));
     }
 
     public async Task<Result<int>> GetTransactionsCountAsync(string? dateFilter)
@@ -28,8 +30,10 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
             return Result<int>.Success(count);
         }
 
-        return Result<int>.Failure(CustomError.Validation("Invalid query parameters. Use ?dateFilter=last-year, ?dateFilter=half-year, or ?dateFilter=last-month"));
+        return Result<int>.Failure(CustomError.Validation(
+            "Invalid query parameters. Use ?dateFilter=last-year, ?dateFilter=half-year, or ?dateFilter=last-month"));
     }
+
     public async Task<Result<decimal>> GetTransactionsIncomeSumAsync(string? dateFilter, string currency)
     {
         if (dateFilter is "last-year" or "half-year" or "last-month")
@@ -39,10 +43,12 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
             {
                 return Result<decimal>.Failure(CustomError.NotFound("Transactions with these params not found!"));
             }
+
             return Result<decimal>.Success((decimal)income!);
         }
 
-        return Result<decimal>.Failure(CustomError.Validation("Invalid query parameters. Use ?dateFilter=last-year, ?dateFilter=half-year, or ?dateFilter=last-month / ?currency=GEL,USD,EUR"));
+        return Result<decimal>.Failure(CustomError.Validation(
+            "Invalid query parameters. Use ?dateFilter=last-year, ?dateFilter=half-year, or ?dateFilter=last-month / ?currency=GEL,USD,EUR"));
     }
 
     public async Task<Result<decimal>> GetAverageTransactionsIncomeAsync(string currency)
@@ -68,5 +74,39 @@ public class ReportService(IUnitOfWork unitOfWork) : IReportService
         }
 
         return Result<IEnumerable<DailyTransaction>>.Success(dailyTransactions);
+    }
+
+    public async Task<Result<decimal>> GetTotalWithdrawalsFromAtmInGelAsync()
+    {
+        var transactions = await unitOfWork.AtmRepository.GetAllAtmTransactionsAsync();
+
+        if (!transactions.Any())
+        {
+            return Result<decimal>.Success(0);
+        }
+
+        decimal totalInGel = 0m;
+
+        foreach (var transaction in transactions)
+        {
+            decimal transactionAmount = transaction.Amount;
+            var currency = transaction.Currency;
+
+            if (currency != "GEL")
+            {
+                var exchangeRate = await exchangeRateApi.GetExchangeRate(currency);
+                if (exchangeRate <= 0)
+                {
+                    return Result<decimal>.Failure(new CustomError("ExchangeRateError",
+                        $"Failed to retrieve exchange rate for {currency}."));
+                }
+
+                transactionAmount *= exchangeRate;
+            }
+
+            totalInGel += transactionAmount;
+        }
+
+        return Result<decimal>.Success((totalInGel));
     }
 }

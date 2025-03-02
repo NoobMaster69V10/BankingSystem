@@ -21,8 +21,6 @@ CREATE TABLE BankCards(
     ExpirationDate DATE NOT NULL CHECK (ExpirationDate > GETDATE()),
     CVV NVARCHAR(128) NOT NULL,
     PinCode NVARCHAR(128) NOT NULL,
-	Salt NVARCHAR(64) NOT NULL,
-
     AccountId INT NOT NULL,
     FOREIGN KEY (AccountId) REFERENCES BankAccounts(BankAccountId) ON DELETE CASCADE
 )
@@ -44,10 +42,9 @@ CREATE TABLE AccountTransactions(
 	REFERENCES BankAccounts(BankAccountId)
 )
 
-Create Table AtmWithdrawals(
-	Id INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+Create Table AtmTransactions(
+	AtmTransactionId INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	Amount decimal(18,2) NOT NULL CHECK (Amount >= 0),
-	Currency NVARCHAR(3) NOT NULL CHECK (Currency IN ('USD', 'EUR', 'GEL')),
 	TransactionDate DATETIME2 NOT NULL DEFAULT GETDATE(),
 	AccountId INT NOT NULL,
 	TransactionFee decimal NOT Null

@@ -9,10 +9,11 @@ public class AccountTransactionRepository : GenericRepository<AccountTransaction
 {
     public AccountTransactionRepository(IDbConnection connection) : base(connection, "AccountTransactions") { }
 
-    public async Task AddAtmTransactionAsync(AtmTransaction atmTransaction)
+    public async Task AddAccountTransactionAsync(AccountTransaction transactionObj)
     {
         const string query =
-            "Insert into ATMWithdrawals (Amount,Currency,TransactionDate,AccountId,TransactionFee) VALUES (@Amount,@Currency,@TransactionDate,@AccountId,@TransactionFee)";
-        await Connection.ExecuteAsync(query, atmTransaction, Transaction);
+            "INSERT INTO AccountTransactions(Amount, Currency, TransactionDate, FromAccountId, ToAccountId, TransactionFee) VALUES (@Amount, @Currency, @TransactionDate, @FromAccountId, @ToAccountId, @TransactionFee)";
+
+        await Connection.ExecuteAsync(query, transactionObj, Transaction);
     }
 }

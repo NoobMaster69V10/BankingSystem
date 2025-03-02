@@ -11,4 +11,5 @@ public interface IBankCardRepository : IGenericRepository<BankCard>
     Task<bool> DoesCardExistAsync(string cardNumber);
     Task<bool> IsCardExpiredAsync(string cardNumber);
     Task<(string PinCode,DateTime ExpiryDate, string Cvv)?> GetCardDetailsAsync(string cardNumber);
+    
 }

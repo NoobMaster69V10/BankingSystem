@@ -67,7 +67,7 @@ public class BankCardRepository : GenericRepository<BankCard>, IBankCardReposito
     public async Task<BankAccount?> GetAccountByCardAsync(string cardNumber)
     {
         return await Connection.QuerySingleOrDefaultAsync<BankAccount>(
-            "SELECT b.BankAccountId FROM BankCards bc INNER JOIN BankAccounts b ON bc.AccountId = b.BankAccountId WHERE bc.CardNumber = @CardNumber",
+            "SELECT b.BankAccountId,Currency FROM BankCards bc INNER JOIN BankAccounts b ON bc.AccountId = b.BankAccountId WHERE bc.CardNumber = @CardNumber",
             new { CardNumber = cardNumber }, Transaction);
     }
 }

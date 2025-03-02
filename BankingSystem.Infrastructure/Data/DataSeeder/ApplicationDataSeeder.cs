@@ -1,5 +1,4 @@
-﻿using BankingSystem.Core.DTO.BankCard;
-using BankingSystem.Core.Helpers;
+﻿using BankingSystem.Core.Helpers;
 using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;

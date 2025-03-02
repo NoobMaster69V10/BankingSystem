@@ -11,4 +11,5 @@ public interface IBankAccountRepository : IGenericRepository<BankAccount>
     //Task<BankAccount?> GetAccountByIdAsync(int id);
     Task UpdateBalanceAsync(BankAccount? account, decimal balance);
     Task<BankAccount?> GetAccountByIbanAsync(string iban);
+    Task<string> GetAccountCurrencyAsync(int accountId);
 }

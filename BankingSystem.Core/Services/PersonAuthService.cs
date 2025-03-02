@@ -33,7 +33,7 @@ public class PersonAuthService(
                 return Result<string>.Failure(CustomError.NotFound("Invalid email"));
 
             }
-            if (await userManager.CheckPasswordAsync(user, loginDto.Password))
+            if (!await userManager.CheckPasswordAsync(user, loginDto.Password))
             {
                 return Result<string>.Failure(CustomError.NotFound("Invalid password"));
             }

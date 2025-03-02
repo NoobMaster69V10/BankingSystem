@@ -14,4 +14,5 @@ public interface IReportService
     Task<Result<decimal>> GetAverageTransactionsIncomeAsync(string currency);
 
     Task<Result<IEnumerable<DailyTransaction>>> GetTransactionsChartForLastMonthAsync();
+    Task<Result<decimal>> GetTotalWithdrawalsFromAtmInGelAsync();
 }

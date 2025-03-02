@@ -63,7 +63,7 @@ public class AtmControllerTests
     [Fact]
     public async Task WithDrawMoney_WhenValidCard_ReturnOk()
     {
-        var withdrawDto = new WithdrawMoneyDto {CardNumber = "5127 8809 9999 9990",PinCode = "1234",Amount = 500,Currency = "USD"};
+        var withdrawDto = new WithdrawMoneyDto {CardNumber = "5127 8809 9999 9990",PinCode = "1234",Amount = 500};
         var expectedResult = Result<bool>.Success(true);
         A.CallTo(() => _atmService.WithdrawMoneyAsync(withdrawDto))
             .Returns(Task.FromResult(expectedResult));
@@ -83,7 +83,6 @@ public class AtmControllerTests
             CardNumber = "123456789", 
             PinCode = "1234", 
             Amount = 10000, 
-            Currency = "USD" 
         };
         var customError = new CustomError("NotEnoughBalance", "Not enough balance.");
         var expectedResult = Result<bool>.Failure(customError);
@@ -110,7 +109,6 @@ public class AtmControllerTests
             CardNumber = "invalid", 
             PinCode = "wrong", 
             Amount = 50, 
-            Currency = "USD" 
         };
         var expectedError = CustomError.NotFound("Card number not found");
         var expectedResult = Result<bool>.Failure(expectedError);

@@ -51,4 +51,13 @@ public class ReportController(IReportService reportService) : ControllerBase
 
         return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsChart = result.Value });
     }
+
+    [Authorize(Roles = "Manager")]
+    [HttpGet("atmtransactions-chart")]
+    public async Task<IActionResult> GetTransactionsChartForMonth()
+    {
+        var result = await reportService.GetTotalWithdrawalsFromAtmInGelAsync();
+        return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsChart = result.Value });
+
+    }
 }
