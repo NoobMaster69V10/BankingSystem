@@ -1,4 +1,5 @@
 ﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Person;
 using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;

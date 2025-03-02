@@ -28,7 +28,7 @@ public class PersonServiceTests
     [Fact]
     public async Task GetPersonById_ShouldReturnFailure_WhenPersonNotFound()
     {
-        _unitOfWorkMock.Setup(u => u.PersonRepository.GetPersonByIdAsync("1")).ReturnsAsync((Person)null);
+        _unitOfWorkMock.Setup(u => u.PersonRepository.GetByIdAsync("1")).ReturnsAsync((Person)null);
         var result = await _personService.GetPersonById("1");
         Assert.False(result.IsSuccess);
         Assert.Equal("User not found", result.Error.Message);
@@ -37,7 +37,7 @@ public class PersonServiceTests
     [Fact]
     public async Task GetPersonById_ShouldReturnSuccess_WhenIsValid()
     {
-        _unitOfWorkMock.Setup(u => u.PersonRepository.GetPersonByIdAsync("1")).ReturnsAsync(new Person());
+        _unitOfWorkMock.Setup(u => u.PersonRepository.GetByIdAsync("1")).ReturnsAsync(new Person());
         var result = await _personService.GetPersonById("1");
         Assert.True(result.IsSuccess);
     }

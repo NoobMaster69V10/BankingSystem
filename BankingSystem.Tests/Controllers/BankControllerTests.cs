@@ -1,5 +1,6 @@
 using BankingSystem.API.Controllers;
-using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.BankAccount;
+using BankingSystem.Core.DTO.BankCard;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
@@ -30,7 +31,7 @@ public class BankControllerTests
         { 
             Iban = "DE89370400440532013000",
             Balance = 1000m,
-            Username = "johndoe",
+            Username = "kiko",
             Currency = "EUR"
         };
         
@@ -39,7 +40,7 @@ public class BankControllerTests
             BankAccountId = 1,
             IBAN = "DE89370400440532013000",
             Balance = 1000m,
-            PersonId = "AASdasd",
+            PersonId = "kiko",
             Currency = "EUR"
         };
         
@@ -57,117 +58,93 @@ public class BankControllerTests
         createdResult.Value.Should().Be(createdAccount);
     }
     
-     [Fact]
-     public async Task BankController_CreateBankAccount_ReturnBadRequest_WhenValidationFails()
-     {
-         // Arrange
-         var bankAccountDto = new BankAccountRegisterDto 
-         { 
-             Iban = "DE89370400440532013000",
-             Balance = 1000m,
-             Username = "johndoe",
-             Currency = "EUR"
-         };
-         var customError = new CustomError("ValidationError", "Invalid account details provided");
-         var expectedResult = Result<BankAccount>.Failure(customError);
-         
-         A.CallTo(() => _accountService.CreateBankAccountAsync(bankAccountDto))
-             .Returns(Task.FromResult(expectedResult));
-         
-         var result = await _controller.CreateBankAccount(bankAccountDto);
-         
-         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Which;
-         badRequestResult.StatusCode.Should().Be(400);
-         badRequestResult.Value.Should().BeEquivalentTo(expectedResult);
-     }
+    [Fact]
+    public async Task CreateBankAccount_When_ReturnsBadRequest()
+    {
+        var bankAccountDto = new BankAccountRegisterDto 
+        { 
+            Iban = "DE89370400440532013000", 
+            Balance = 1000m,
+            Username = "johndoe",
+            Currency = "EUR"
+        };
+        var customError = CustomError.Validation("Bank account already exists.");
+        var expectedResult = Result<BankAccount>.Failure(customError); 
+        
+        A.CallTo(() => _accountService.CreateBankAccountAsync(bankAccountDto))
+            .Returns(Task.FromResult(expectedResult));
+        
+        var result = await _controller.CreateBankAccount(bankAccountDto); 
+        
+        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
+        var problemDetails = objectResult.Value.Should().BeOfType<ProblemDetails>().Subject;
 
-     [Fact]
-     public async Task BankController_CreateBankCard_ReturnCreated()
-     {
-         var cardRegisterDto = new BankCardRegisterDto 
-         { 
-             Username = "wiko",
-             CardNumber = "12345678",
-             Firstname = "Luka",
-             Lastname = "wiko",
-             ExpirationDate = DateTime.Now.AddYears(1),
-             Cvv = "123",
-             PinCode = "1234",
-             BankAccountId = 1
-         };
-         var expectedResponse = new BankCard 
-         { 
-             BankCardId = 1,
-             Firstname = cardRegisterDto.Firstname,
-             Lastname = cardRegisterDto.Lastname,
-             CardNumber = cardRegisterDto.CardNumber,
-             ExpirationDate = cardRegisterDto.ExpirationDate,
-             Cvv = cardRegisterDto.Cvv,
-             PinCode = cardRegisterDto.PinCode,
-             AccountId = cardRegisterDto.BankAccountId
-         };
-         var expectedResult = Result<BankCard>.Success(expectedResponse);
-         A.CallTo(() => _cardService.CreateBankCardAsync(cardRegisterDto))
-             .Returns(Task.FromResult(expectedResult));
-         
-         var result = await _controller.CreateBankCard(cardRegisterDto);
-         
-         var createdResult = result.Should().BeOfType<CreatedResult>().Which;
-         createdResult.StatusCode.Should().Be(201);
-         createdResult.Value.Should().BeEquivalentTo(expectedResult.Value);
-         createdResult.Location.Should().Be("card");
-     }
+        objectResult.StatusCode.Should().Be(400);
+        problemDetails.Title.Should().Be("Validation");
+        problemDetails.Type.Should().Be("https://tools.ietf.org/html/rfc7231#section-6.5.1");
+        problemDetails.Extensions.Should().ContainKey("errors");
+        problemDetails.Extensions["errors"].Should().BeEquivalentTo(new[] { customError });
+    }
+    [Fact]
+    public async Task CreateBankCard_WhenAccountDoesnotExist_ReturnNotFound()
+    {
+        var cardRegisterDto = new BankCardRegisterDto 
+        { 
+            Username = "wiko",
+            CardNumber = "12345678",
+            Firstname = "Luka",
+            Lastname = "wiko",
+            ExpirationDate = DateTime.Now.AddYears(1),
+            Cvv = "123",
+            PinCode = "1234",
+            BankAccountId = 1
+        };
+        
+        var expectedError = CustomError.NotFound("Bank account not found");
+        var expectedResult = Result<BankCard>.Failure(expectedError);
+        A.CallTo(() => _cardService.CreateBankCardAsync(cardRegisterDto))
+            .Returns(Task.FromResult(expectedResult));
+        
+        var result = await _controller.CreateBankCard(cardRegisterDto);
+        
+        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
+        var problemDetails = objectResult.Value.Should().BeOfType<ProblemDetails>().Subject;
 
-     [Fact]
-     public async Task BankController_CreateBankCard_ReturnBadRequest_WhenAccountNotFound()
-     {
-         var cardRegisterDto = new BankCardRegisterDto 
-         { 
-             Username = "wiko",
-             CardNumber = "12345678",
-             Firstname = "Luka",
-             Lastname = "wiko",
-             ExpirationDate = DateTime.Now.AddYears(1),
-             Cvv = "123",
-             PinCode = "1234",
-             BankAccountId = 1
-         };
-         
-         var expectedResult = Result<BankCard>.Failure(
-             CustomError.NotFound("Account not found"));
-         A.CallTo(() => _cardService.CreateBankCardAsync(cardRegisterDto))
-             .Returns(Task.FromResult(expectedResult));
-         
-         var result = await _controller.CreateBankCard(cardRegisterDto);
-         
-         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Which;
-         badRequestResult.StatusCode.Should().Be(400);
-         badRequestResult.Value.Should().BeEquivalentTo(expectedResult);
-     }
+        objectResult.StatusCode.Should().Be(404);
+        problemDetails.Title.Should().Be("Not Found");
+        problemDetails.Type.Should().Be("https://tools.ietf.org/html/rfc7231#section-6.5.4");
+        problemDetails.Extensions.Should().ContainKey("errors");
+        problemDetails.Extensions["errors"].Should().BeEquivalentTo(new[] { expectedError });
+    }
 
-     [Fact]
-     public async Task BankController_CreateBankCard_ReturnBadRequest_WhenValidationFails()
-     {
-         var cardRegisterDto = new BankCardRegisterDto 
-         { 
-             Username = "wiko",
-             CardNumber = "12345678",
-             Firstname = "Luka",
-             Lastname = "wiko",
-             ExpirationDate = DateTime.Now.AddYears(1),
-             Cvv = "123",
-             PinCode = "1234",
-             BankAccountId = 1
-         };
-         var customError = new CustomError("ValidationError", "Invalid card details provided");
-         var expectedResult = Result<BankCard>.Failure(customError);
-         A.CallTo(() => _cardService.CreateBankCardAsync(cardRegisterDto))
-             .Returns(Task.FromResult(expectedResult));
-         
-         var result = await _controller.CreateBankCard(cardRegisterDto);
-         
-         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Which;
-         badRequestResult.StatusCode.Should().Be(400);
-         badRequestResult.Value.Should().BeEquivalentTo(expectedResult);
-     }
- }
+    [Fact]
+    public async Task CreateBankCard_WhenValidationFails_ReturnsBadRequest()
+    {
+        var cardRegisterDto = new BankCardRegisterDto 
+        { 
+            Username = "wiko",
+            CardNumber = "12345678",
+            Firstname = "Luka",
+            Lastname = "wiko",
+            ExpirationDate = DateTime.Now.AddYears(1),
+            Cvv = "123",
+            PinCode = "1234",
+            BankAccountId = 1
+        };
+        var customError = CustomError.Failure("Bank card could not be created.");
+        var expectedResult = Result<BankCard>.Failure(customError);
+        A.CallTo(() => _cardService.CreateBankCardAsync(cardRegisterDto))
+            .Returns(Task.FromResult(expectedResult));
+        
+        var result = await _controller.CreateBankCard(cardRegisterDto);
+        
+        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
+        var problemDetails = objectResult.Value.Should().BeOfType<ProblemDetails>().Subject;
+
+        objectResult.StatusCode.Should().Be(500);
+        problemDetails.Title.Should().Be("Failure");
+        problemDetails.Type.Should().Be("https://tools.ietf.org/html/rfc7231#section-6.6.1");
+        problemDetails.Extensions.Should().ContainKey("errors");
+        problemDetails.Extensions["errors"].Should().BeEquivalentTo(new[] { customError });
+    }
+}

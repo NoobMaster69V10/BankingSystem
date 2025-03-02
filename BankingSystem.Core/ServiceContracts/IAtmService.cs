@@ -8,4 +8,5 @@ public interface IAtmService
 {
     Task<Result<BalanceResponseDto>> ShowBalanceAsync(CardAuthorizationDto cardDto);
     Task<Result<bool>> ChangePinAsync(ChangePinDto pinDto);
+    Task<Result<bool>> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto);
 }

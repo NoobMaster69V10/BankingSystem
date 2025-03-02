@@ -1,4 +1,6 @@
 using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.AccountTransaction;
+using BankingSystem.Core.DTO.AtmTransaction;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
@@ -47,7 +49,7 @@ public class AccountTransactionServiceTests
     [Fact]
     public async Task TransactionBetweenAccountsAsync_ShouldReturnFailure_WhenFromAccountNotFound()
     {
-        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123)).ReturnsAsync((BankAccount)null);
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetByIdAsync(123)).ReturnsAsync((BankAccount)null);
 
         var transactionDto = new AccountTransactionDto { FromAccountId = 123, ToAccountId = 456, Amount = 100 };
 
@@ -63,8 +65,8 @@ public class AccountTransactionServiceTests
         var fromAccount = new BankAccount { BankAccountId = 123, Balance = 50, Currency = "USD", PersonId = "user1" };
         var toAccount = new BankAccount { BankAccountId = 456, Balance = 200, Currency = "USD", PersonId = "user2" };
 
-        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123)).ReturnsAsync(fromAccount);
-        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(456)).ReturnsAsync(toAccount);
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetByIdAsync(123)).ReturnsAsync(fromAccount);
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetByIdAsync(456)).ReturnsAsync(toAccount);
 
         var transactionDto = new AccountTransactionDto { FromAccountId = 123, ToAccountId = 456, Amount = 100 };
 
@@ -72,74 +74,5 @@ public class AccountTransactionServiceTests
 
         Assert.False(result.IsSuccess);
         Assert.Equal("Insufficient balance for this transaction.", result.Error.Message);
-    }
-
-    [Fact]
-    public async Task WithdrawMoneyAsync_ShouldReturnFailure_WhenAmountIsZeroOrNegative()
-    {
-        var withdrawDto = new WithdrawMoneyDto { Amount = 0, CardNumber = "1234", PinCode = "0000" };
-
-        var result = await _accountTransactionService.WithdrawMoneyAsync(withdrawDto);
-
-        Assert.False(result.IsSuccess);
-        Assert.Equal("Amount must be greater than 0.", result.Error.Message);
-    }
-
-    [Fact]
-    public async Task WithdrawMoneyAsync_ShouldReturnFailure_WhenCardValidationFails()
-    {
-        var withdrawDto = new WithdrawMoneyDto { Amount = 100, CardNumber = "1234", PinCode = "0000" };
-
-        _bankCardServiceMock
-            .Setup((System.Linq.Expressions.Expression<Func<IBankCardService, Task<Core.DTO.Result.CustomResult<bool>>>>)(b => (Task<Core.DTO.Result.CustomResult<bool>>)b.ValidateCardAsync("1234", "0000")))
-            .ReturnsAsync((Core.DTO.Result.CustomResult<bool>)Result<bool>.Failure(CustomError.Validation("Invalid Card")));
-
-        var result = await _accountTransactionService.WithdrawMoneyAsync(withdrawDto);
-
-        Assert.False(result.IsSuccess);
-        Assert.Equal("Invalid Card", result.Error.Message);
-    }
-
-    [Fact]
-    public async Task WithdrawMoneyAsync_ShouldReturnFailure_WhenNotEnoughBalance()
-    {
-        var withdrawDto = new WithdrawMoneyDto { Amount = 200, CardNumber = "1234", PinCode = "0000" };
-
-        _bankCardServiceMock
-            .Setup((System.Linq.Expressions.Expression<Func<IBankCardService, Task<Core.DTO.Result.CustomResult<bool>>>>)(b => (Task<Core.DTO.Result.CustomResult<bool>>)b.ValidateCardAsync("1234", "0000")))
-            .ReturnsAsync((Core.DTO.Result.CustomResult<bool>)Result<bool>.Success(true));
-
-        _unitOfWorkMock.Setup(u => u.BankCardRepository.GetBalanceAsync("1234")).ReturnsAsync(100);
-
-        var result = await _accountTransactionService.WithdrawMoneyAsync(withdrawDto);
-
-        Assert.False(result.IsSuccess);
-        Assert.Equal("Not enough balance.", result.Error.Message);
-    }
-
-    [Fact]
-    public async Task WithdrawMoneyAsync_ShouldReturnSuccess_WhenValid()
-    {
-        var withdrawDto = new WithdrawMoneyDto { Amount = 100, CardNumber = "1234", PinCode = "0000", Currency = "USD" };
-        var bankAccount = new BankAccount { BankAccountId = 123, Balance = 500 };
-
-        _bankCardServiceMock
-            .Setup((System.Linq.Expressions.Expression<Func<IBankCardService, Task<Core.DTO.Result.CustomResult<bool>>>>)(b => (Task<Core.DTO.Result.CustomResult<bool>>)b.ValidateCardAsync("1234", "0000")))
-            .ReturnsAsync((Core.DTO.Result.CustomResult<bool>)Result<bool>.Success(true));
-
-        _unitOfWorkMock.Setup(u => u.BankCardRepository.GetBalanceAsync("1234")).ReturnsAsync(200);
-        _unitOfWorkMock.Setup(u => u.BankCardRepository.GetAccountByCardAsync("1234")).ReturnsAsync(bankAccount);
-
-        _unitOfWorkMock
-            .Setup(u => u.BankAccountRepository.UpdateBalanceAsync(bankAccount, 100))
-            .Returns(Task.CompletedTask);
-
-        _unitOfWorkMock
-            .Setup(u => u.TransactionRepository.AddAtmTransactionAsync(It.IsAny<AtmTransaction>()))
-            .Returns(Task.CompletedTask);
-
-        var result = await _accountTransactionService.WithdrawMoneyAsync(withdrawDto);
-
-        Assert.True(result.IsSuccess);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.BankAccount;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
 using BankingSystem.Domain.Entities;
@@ -39,7 +40,7 @@ public class BankAccountServiceTests
     public async Task CreateBankAccountAsync_ShouldReturnFailure_WhenPersonIsNull()
     {
         _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIbanAsync("GE00AS002313213211")).ReturnsAsync((BankAccount)null);
-        _unitOfWorkMock.Setup(u => u.PersonRepository.GetPersonByUsernameAsync("test@gmail.com")).ReturnsAsync((Person)null);
+        _unitOfWorkMock.Setup(u => u.PersonRepository.GetByUsernameAsync("test@gmail.com")).ReturnsAsync((Person)null);
         
         var bankAccountRegisterDto = new BankAccountRegisterDto { Username = "test@gmail.com", Balance = 2000, Currency = "USD", Iban = "GE00AS002313213211" };
         var result = await _bankAccountService.CreateBankAccountAsync(bankAccountRegisterDto);
@@ -51,7 +52,7 @@ public class BankAccountServiceTests
     public async Task CreateBankAccountAsync_ShouldReturnWhen_WhenValid()
     {
         _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIbanAsync("GE00AS002313213211")).ReturnsAsync((BankAccount)null);
-        _unitOfWorkMock.Setup(u => u.PersonRepository.GetPersonByUsernameAsync("test@gmail.com")).ReturnsAsync(new Person());
+        _unitOfWorkMock.Setup(u => u.PersonRepository.GetByUsernameAsync("test@gmail.com")).ReturnsAsync(new Person());
 
         var bankAccountRegisterDto = new BankAccountRegisterDto { Username = "test@gmail.com", Balance = 2000, Currency = "USD", Iban = "GE00AS002313213211" };
         var result = await _bankAccountService.CreateBankAccountAsync(bankAccountRegisterDto);

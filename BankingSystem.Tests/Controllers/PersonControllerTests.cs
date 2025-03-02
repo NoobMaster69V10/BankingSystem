@@ -10,6 +10,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using BankingSystem.Core.DTO.AccountTransaction;
 
 namespace BankingSystem.Tests.Controllers;
 
@@ -241,7 +242,7 @@ public class PersonControllerTests
         A.CallTo(() => _personAuthService.AuthenticationPersonAsync(loginModel))
             .Returns(Task.FromResult(successResult));
     
-        var result = await _controller.Login(loginModel);
+        var result = await _controller.LoginPerson(loginModel);
     
         result.Should().BeOfType<CreatedResult>();
         var createdResult = (CreatedResult)result;
@@ -265,7 +266,7 @@ public class PersonControllerTests
         A.CallTo(() => _personAuthService.AuthenticationPersonAsync(loginModel))
             .Returns(Task.FromResult(failureResult));
     
-        var result = await _controller.Login(loginModel);
+        var result = await _controller.LoginPerson(loginModel);
     
         result.Should().BeOfType<BadRequestObjectResult>();
         var badRequestResult = (BadRequestObjectResult)result;

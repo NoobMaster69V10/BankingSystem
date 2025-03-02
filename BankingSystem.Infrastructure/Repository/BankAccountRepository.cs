@@ -20,7 +20,7 @@ public class BankAccountRepository : GenericRepository<BankAccount>, IBankAccoun
         return await Connection.QueryFirstOrDefaultAsync<BankAccount?>(
             "select * from BankAccounts where IBAN = @iban", new
             {
-                IBAN = iban
+                IBAN = iban 
             });
     }
 }

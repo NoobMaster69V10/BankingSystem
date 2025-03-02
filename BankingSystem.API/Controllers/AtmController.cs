@@ -11,14 +11,10 @@ namespace BankingSystem.API.Controllers;
 public class AtmController : ControllerBase
 {
     private readonly IAtmService _atmService;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IAccountTransactionService _accountTransactionService;
 
-    public AtmController(IUnitOfWork unitOfWork, IAtmService atmService, IAccountTransactionService accountTransactionService)
+    public AtmController(IAtmService atmService)
     {
-        _unitOfWork = unitOfWork;
         _atmService = atmService;
-        _accountTransactionService = accountTransactionService;
     }
     
     [HttpPost("balance")]
@@ -31,7 +27,7 @@ public class AtmController : ControllerBase
     [HttpPost("withdraw-money")]
     public async Task<IActionResult> WithdrawMoney([FromBody] WithdrawMoneyDto cardDto)
     {
-        var result = await _accountTransactionService.WithdrawMoneyAsync(cardDto);
+        var result = await _atmService.WithdrawMoneyAsync(cardDto);
         return result.IsSuccess ? Ok(result) : result.ToProblemDetails();
     }
 
