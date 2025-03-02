@@ -15,11 +15,7 @@ public class BankController(IBankAccountService accountService, IBankCardService
     public async Task<IActionResult> CreateBankAccount(BankAccountRegisterDto bankAccountRegisterDto)
     {   
         var result = await accountService.CreateBankAccountAsync(bankAccountRegisterDto);
-        if(result.IsSuccess)
-        {
-            return Created("account", result.Value);
-        }
-        return result.ToProblemDetails();
+        return result.IsSuccess ? Created("account", result.Value) : result.ToProblemDetails();
     }
 
     [Authorize(Roles = "Operator")]
@@ -27,10 +23,6 @@ public class BankController(IBankAccountService accountService, IBankCardService
     public async Task<IActionResult> CreateBankCard(BankCardRegisterDto cardRegisterDto)
     {
         var result = await cardService.CreateBankCardAsync(cardRegisterDto);
-        if (result.IsSuccess)
-        {
-            return Created("card", result.Value);
-        }
-        return result.ToProblemDetails();
+        return result.IsSuccess ? Created("card", result.Value) : result.ToProblemDetails();
     }
 }

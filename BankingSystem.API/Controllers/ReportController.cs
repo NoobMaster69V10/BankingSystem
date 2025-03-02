@@ -13,12 +13,7 @@ public class ReportController(IReportService reportService) : ControllerBase
     {
         var result = await reportService.GetRegisteredUsersCountAsync(year, month);
 
-        if (!result.IsSuccess)
-        {
-            return result.ToProblemDetails();
-        }
-
-        return Ok(new { RegisteredCount = result.Value});
+        return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { RegisteredCount = result.Value});
     }
 
     [Authorize(Roles = "Manager")]
@@ -27,12 +22,7 @@ public class ReportController(IReportService reportService) : ControllerBase
     {
         var result = await reportService.GetTransactionsCountAsync(year, month);
 
-        if (!result.IsSuccess)
-        {
-            return result.ToProblemDetails();
-        }
-          
-        return Ok(new { TransactionsCount = result.Value });
+        return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsCount = result.Value });
     }
 
     [Authorize(Roles = "Manager")]
@@ -41,12 +31,7 @@ public class ReportController(IReportService reportService) : ControllerBase
     {
         var result = await reportService.GetTransactionsIncomeSumAsync(year, month, currency);
 
-        if (!result.IsSuccess)
-        {
-            return result.ToProblemDetails();
-        }
-
-        return Ok(new { TransactionsIncome = result.Value });
+        return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsIncome = result.Value });
     }
 
     [Authorize(Roles = "Manager")]
@@ -55,12 +40,7 @@ public class ReportController(IReportService reportService) : ControllerBase
     {
         var result = await reportService.GetAverageTransactionsIncomeAsync(currency);
 
-        if (!result.IsSuccess)
-        {
-            return result.ToProblemDetails();
-        }
-
-        return Ok(new { TransactionsAverageIncome = result.Value });
+        return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsAverageIncome = result.Value });
     }
 
     [Authorize(Roles = "Manager")]
@@ -69,11 +49,6 @@ public class ReportController(IReportService reportService) : ControllerBase
     {
         var result = await reportService.GetTransactionsChartForLastMonthAsync();
 
-        if (!result.IsSuccess)
-        {
-            return result.ToProblemDetails();
-        }
-
-        return Ok(new { TransactionsChart = result.Value });
+        return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsChart = result.Value });
     }
 }

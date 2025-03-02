@@ -34,6 +34,7 @@ public static class ServiceRegistration
         services.AddScoped<IBankCardRepository, BankCardRepository>();
         services.AddScoped<IBankAccountRepository, BankAccountRepository>();
         services.AddScoped<IExchangeRateApi, ExchangeRateApi>();
+        services.AddScoped<IAtmRepository, AtmRepository>();
         services.AddTransient<ApplicationDataSeeder>();
     }
 }

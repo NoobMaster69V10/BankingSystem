@@ -21,11 +21,7 @@ namespace BankingSystem.API.Controllers
             var userId = User.FindFirst("personId")!.Value;
             var result = await accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, userId);
 
-            if (result.IsFailure)
-            {
-                return result.ToProblemDetails();
-            }
-            return Created("transfer-money", result.Value);
+            return result.IsFailure ? result.ToProblemDetails() : Created("transfer-money", result.Value);
         }
 
         [Authorize(Roles = "Person")]
@@ -35,12 +31,7 @@ namespace BankingSystem.API.Controllers
             var personId = User.FindFirst("personId")!.Value;
 
             var result = await personService.GetPersonById(personId);
-            if (result.IsFailure)
-            {
-                return result.ToProblemDetails();
-            }
-
-            return Ok(result.Value);
+            return result.IsFailure ? result.ToProblemDetails() : Ok(result.Value);
         }
 
         [Authorize(Roles = "Operator")]
@@ -48,23 +39,14 @@ namespace BankingSystem.API.Controllers
         public async Task<IActionResult> RegisterUser([FromBody] PersonRegisterDto registerModel)
         {
             var result = await personAuthService.RegisterPersonAsync(registerModel);
-            if (result.IsFailure)
-            {
-                return result.ToProblemDetails();
-            }
-
-            return Created("register", result.Value);
+            return result.IsFailure ? result.ToProblemDetails() : Created("register", result.Value);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> LoginPerson([FromBody] PersonLoginDto loginModel)
         {
             var result = await personAuthService.AuthenticationPersonAsync(loginModel);
-            if (result.IsFailure)
-            {
-                return result.ToProblemDetails();
-            }
-            return Created("login", new { Token = result.Value });
+            return result.IsFailure ? result.ToProblemDetails() : Created("login", new { Token = result.Value });
         }
         
         [HttpPost("forgot-password")]

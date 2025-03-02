@@ -1,6 +1,7 @@
 using BankingSystem.Core.DTO.AtmTransaction;
 using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.DTO.Result;
+using BankingSystem.Core.Helpers;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Errors;
@@ -53,13 +54,19 @@ public class AtmService : IAtmService
     {
         try
         {
+            if (changePinDto.CurrentPin == changePinDto.NewPin)
+            {
+                return Result<bool>.Failure(new CustomError("PIN_SAME_ERROR", "Current PIN and new PIN cannot be the same."));
+            }
             var authResult = await AuthorizeCardAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
             if (!authResult.IsSuccess)
             {
                 if (authResult.Error != null) return Result<bool>.Failure(authResult.Error);
             }
-
-            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
+            
+            var (hashedPin, salt) = HashingHelper.HashPinAndCvv(changePinDto.NewPin);
+         
+            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, hashedPin,salt);
             return Result<bool>.Success(true);
         }
         catch (Exception ex)

@@ -5,7 +5,7 @@ namespace BankingSystem.Core.Helpers;
 
 public static class EncryptionHelper
 {
-    private static readonly string EncryptionKey = "rQP1XMQXY3IZt27Y7mkr+G/QKa6jlC+9ZIE87+FzAzjrp9lMncm7SF4tCcfHBL4N";
+    private static readonly string EncryptionKey = "rQP1XMQXY3IZt27Y"; // 16 characters = 128 bits
 
     public static string Encrypt(string plainText)
     {
@@ -29,18 +29,14 @@ public static class EncryptionHelper
 
     public static string Decrypt(string cipherText)
     {
-        using (Aes aes = Aes.Create())
-        {
-            aes.Key = Encoding.UTF8.GetBytes(EncryptionKey.PadRight(32));
-            aes.IV = new byte[16];
+        using Aes aes = Aes.Create();
+        aes.Key = Encoding.UTF8.GetBytes(EncryptionKey.PadRight(32));
+        aes.IV = new byte[16];
 
-            using (var decryptor = aes.CreateDecryptor(aes.Key, aes.IV))
-            using (var ms = new MemoryStream(Convert.FromBase64String(cipherText)))
-            using (var cryptoStream = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
-            using (var reader = new StreamReader(cryptoStream))
-            {
-                return reader.ReadToEnd();
-            }
-        }
+        using var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+        using var ms = new MemoryStream(Convert.FromBase64String(cipherText));
+        using var cryptoStream = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
+        using var reader = new StreamReader(cryptoStream);
+        return reader.ReadToEnd();
     }
 }

@@ -4,7 +4,7 @@ namespace BankingSystem.Domain.RepositoryContracts;
 
 public interface IBankCardRepository : IGenericRepository<BankCard>
 {
-    Task UpdatePinAsync(string cardNumber, string pinCode);
+    Task UpdatePinAsync(string cardNumber, string pinCode,string salt);
     Task<decimal> GetBalanceAsync(string cardNumber);
     Task<BankAccount?> GetAccountByCardAsync(string cardNumber);
     Task<BankCard?> GetCardAsync(string cardNumber);

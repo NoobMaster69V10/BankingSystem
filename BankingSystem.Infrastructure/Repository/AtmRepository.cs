@@ -7,7 +7,7 @@ namespace BankingSystem.Infrastructure.Repository;
 
 public class AtmRepository : GenericRepository<AtmTransaction>, IAtmRepository
 {
-    public AtmRepository(IDbConnection connection, string tableName) : base(connection, tableName)
+    public AtmRepository(IDbConnection connection) : base(connection, "AtmWithDrawals")
     {
     }
     public async Task<int> GetTotalWithdrawnTodayAsync(int accountId)

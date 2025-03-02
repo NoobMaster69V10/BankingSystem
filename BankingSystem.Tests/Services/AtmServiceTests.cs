@@ -94,7 +94,7 @@ namespace BankingSystem.Tests.Services
             A.CallTo(() => _bankCardService.ValidateCardAsync(changePinDto.CardNumber, changePinDto.CurrentPin))
                 .Returns(validationResult);
             A.CallTo(() =>
-                    _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.CurrentPin))
+                    _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.NewPin))
                 .Returns(Task.CompletedTask);
 
             var result = await _atmService.ChangePinAsync(changePinDto);
@@ -102,7 +102,7 @@ namespace BankingSystem.Tests.Services
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().BeTrue();
             A.CallTo(() =>
-                    _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.CurrentPin))
+                    _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.NewPin))
                 .MustHaveHappenedOnceExactly();
         }
 

@@ -53,14 +53,14 @@ public class BankCardRepository : GenericRepository<BankCard>, IBankCardReposito
             query, new { CardNumber = cardNumber }, Transaction);
     }
 
-    public async Task UpdatePinAsync(string cardNumber, string pinCode)
+    public async Task UpdatePinAsync(string cardNumber, string pinCode,string salt)
     {
         const string query = @"
         UPDATE BankCards 
-        SET PinCode = @PinCode 
+        SET PinCode = @PinCode,Salt = @Salt
         WHERE CardNumber = @CardNumber";
 
-        await Connection.ExecuteAsync(query, new { PinCode = pinCode, CardNumber = cardNumber }, Transaction);
+        await Connection.ExecuteAsync(query, new { PinCode = pinCode, CardNumber = cardNumber,Salt = salt}, Transaction);
     }
 
     public async Task<decimal> GetBalanceAsync(string cardNumber)
