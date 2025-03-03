@@ -5,7 +5,7 @@ CREATE TABLE AccountTransactions(
 	TransactionDate DATETIME2 NOT NULL DEFAULT GETDATE(),
 	FromAccountId INT NOT NULL,
 	ToAccountId INT NOT NULL,
-	TransactionFee decimal DEFAULT 0,
+	TransactionFee decimal(18,2) DEFAULT 0,
 
 	FOREIGN KEY (FromAccountId)
 	REFERENCES BankAccounts(BankAccountId),
