@@ -6,6 +6,7 @@ using BankingSystem.Infrastructure.Data.DataSeeder;
 using BankingSystem.API.Middlewares;
 using BankingSystem.Core.Configuration;
 using BankingSystem.Infrastructure.Configure;
+using BankingSystem.Infrastructure.Data.DatabaseConfiguration;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +30,8 @@ builder.Services.AddCoreServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -38,6 +41,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DatabaseConfiguration>();
+    await db.ConfigureDatabase();
+}
 
 using (var scope = app.Services.CreateScope())
 {

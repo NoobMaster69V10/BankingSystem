@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BankingSystem.Infrastructure.Configure;
 
+using Data.DatabaseConfiguration;
 using Domain.ExternalApiContracts;
 using ExternalApis;
 using UnitOfWork;
@@ -36,5 +37,6 @@ public static class ServiceRegistration
         services.AddScoped<IExchangeRateApi, ExchangeRateApi>();
         services.AddScoped<IAtmRepository, AtmRepository>();
         services.AddTransient<ApplicationDataSeeder>();
+        services.AddScoped<DatabaseConfiguration>();
     }
 }

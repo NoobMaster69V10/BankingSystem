@@ -51,15 +51,11 @@ public abstract class GenericRepository<T> : IGenericRepository<T> where T : cla
         return await Connection.ExecuteAsync(query, new { Id = id }, transaction: Transaction) > 0;
     }
 
-    
-
     private string GenerateInsertQuery()
     {
         var properties = typeof(T).GetProperties()
             .Where(p => p.Name.ToLower() != $"{typeof(T).Name.ToLower()}id" && p.Name.ToLower() != "id")
             .Select(p => p.Name);
-        Console.ForegroundColor = ConsoleColor.DarkBlue;
-        Console.WriteLine($"{typeof(T).Name.ToLower()}id");
         var columnNames = string.Join(", ", properties);
         var paramNames = string.Join(", ", properties.Select(p => "@" + p));
 
@@ -77,4 +73,3 @@ public abstract class GenericRepository<T> : IGenericRepository<T> where T : cla
         return $"UPDATE {_tableName} SET {setClause} WHERE {typeof(T).Name}Id = @{typeof(T).Name}Id";
     }
 }
-

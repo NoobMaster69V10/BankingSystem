@@ -115,9 +115,7 @@ public class ApplicationDataSeeder(
             var personAccountId = personFullInfo!.BankAccounts.First().BankAccountId;
 
             
-            var pinHash =
-                hasherService.Hash(GeneratePinCode());
-
+            var pinHash = hasherService.Hash("1234");
 
             var encryptedCvv = EncryptionHelper.Encrypt(GenerateCvv());
 
@@ -139,5 +137,4 @@ public class ApplicationDataSeeder(
     private string GenerateIban() => $"GE{new Random().Next(100000000, 999999999)}{new Random().Next(100000000, 999999999)}";
     private string GenerateCardNumber() => $"{new Random().Next(100000000, 999999999)}{new Random().Next(10000, 99999)}";
     private string GenerateCvv() => new Random().Next(100, 999).ToString();
-    private string GeneratePinCode() => new Random().Next(1000, 9999).ToString();
 }
