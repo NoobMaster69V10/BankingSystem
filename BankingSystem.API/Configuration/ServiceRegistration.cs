@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using BankingSystem.Core.Identity;
+using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Entities.Email;
 using BankingSystem.Infrastructure.Data.DatabaseContext;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,6 +18,8 @@ public static class ServiceRegistration
             .GetSection("EmailConfiguration")
             .Get<EmailConfiguration>();
         services.AddSingleton(emailConfig);
+        
+        services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         
         services.AddHttpClient();
         services.AddLogging();

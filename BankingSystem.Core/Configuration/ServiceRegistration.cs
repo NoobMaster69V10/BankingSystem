@@ -21,6 +21,7 @@ public static class ServiceRegistration
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IHasherService, HashingService>(); 
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.Configure<FormOptions>(o => {
             o.ValueLengthLimit = int.MaxValue;
             o.MultipartBodyLengthLimit = int.MaxValue;

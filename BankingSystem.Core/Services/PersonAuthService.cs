@@ -22,8 +22,7 @@ public class PersonAuthService(
     UserManager<IdentityPerson> userManager,
     RoleManager<IdentityRole> roleManager,
     ILoggerService loggerService,
-    IHttpContextAccessor httpContextAccessor, 
-    IEmailService emailService) : IPersonAuthService
+    IEmailService emailService,IJwtTokenGenerator tokenGenerator) : IPersonAuthService
 {
     public async Task<Result<string>> AuthenticationPersonAsync(PersonLoginDto loginDto)
     {
@@ -40,7 +39,7 @@ public class PersonAuthService(
                 return Result<string>.Failure(CustomError.NotFound("Invalid password"));
             }
 
-            var token = await GenerateJwtToken(user);
+            var token = await tokenGenerator.GenerateJwtToken(user);
             return Result<string>.Success(token);
         }
         catch (Exception ex)
@@ -93,49 +92,6 @@ public class PersonAuthService(
                 CustomError.Failure("Error occurred while authenticating person"));
         }
     }
-
-    public async Task<string> GenerateJwtToken(IdentityPerson person)
-    {
-        var jwtKey = configuration["Jwt:Key"];
-        var jwtIssuer = configuration["Jwt:Issuer"];
-        var jwtAudience = configuration["Jwt:Audience"];
-        var expirationMinutes = configuration["Jwt:EXPIRATION_MINUTES"];
-
-        if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience) ||
-            string.IsNullOrEmpty(expirationMinutes))
-        {
-            throw new Exception("JWT configuration is missing.");
-        }
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var roles = await userManager.GetRolesAsync(person);
-        var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
-
-        var claims = new List<Claim>
-        {
-            new Claim("personId", person.Id)
-        };
-
-        claims.AddRange(roleClaims);
-
-        var expiration = DateTime.UtcNow.AddMinutes(int.Parse(expirationMinutes));
-
-        var tokenGenerator = new JwtSecurityToken(
-            jwtIssuer,
-            jwtAudience,
-            claims,
-            expires: expiration,
-            signingCredentials: credentials
-        );
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var token = tokenHandler.WriteToken(tokenGenerator);
-
-        return token;
-    }
-
     public async Task<Result<string>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
     {
         var user = await userManager.FindByEmailAsync(forgotPasswordDto.Email);

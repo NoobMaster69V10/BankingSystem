@@ -9,6 +9,5 @@ public interface IPersonAuthService
     Task<Result<string>> AuthenticationPersonAsync(PersonLoginDto loginDto);
     Task<Result<string>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
     Task<Result<PersonRegisterDto>> RegisterPersonAsync(PersonRegisterDto registerDto);
-    Task<string> GenerateJwtToken(IdentityPerson user);
     Task<Result<bool>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
 }
