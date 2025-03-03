@@ -6,7 +6,7 @@ namespace BankingSystem.Core.ServiceContracts;
 
 public interface IAtmService
 {
-    Task<Result<BalanceResponseDto>> ShowBalanceAsync(CardAuthorizationDto cardDto);
-    Task<Result<bool>> ChangePinAsync(ChangePinDto pinDto);
-    Task<Result<bool>> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto);
+    Task<Result<BalanceResponse>> ShowBalanceAsync(CardAuthorizationDto cardDto);
+    Task<Result<string>> ChangePinAsync(ChangePinDto pinDto);
+    Task<Result<AtmTransactionResponse>> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto);
 }

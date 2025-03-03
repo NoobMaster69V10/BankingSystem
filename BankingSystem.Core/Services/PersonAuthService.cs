@@ -1,17 +1,13 @@
-﻿using System.Text;
-using System.Security.Claims;
-using BankingSystem.Core.Identity;
+﻿using BankingSystem.Core.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using BankingSystem.Core.DTO.Result;
 using Microsoft.Extensions.Configuration;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Errors;
-using Microsoft.AspNetCore.Http;
 
 using ResetPasswordDto = BankingSystem.Core.DTO.Person.ResetPasswordDto;
 using BankingSystem.Core.DTO.Person;
+using BankingSystem.Core.DTO.Response;
 using BankingSystem.Domain.Entities.Email;
 using Microsoft.AspNetCore.WebUtilities;
 
@@ -50,7 +46,7 @@ public class PersonAuthService(
     }
 
 
-    public async Task<Result<PersonRegisterDto>> RegisterPersonAsync(PersonRegisterDto registerDto)
+    public async Task<Result<RegisterResponse>> RegisterPersonAsync(PersonRegisterDto registerDto)
     {
         try
         {
@@ -58,7 +54,7 @@ public class PersonAuthService(
             {
                 UserName = registerDto.Email,
                 Email = registerDto.Email,
-                FirstName = registerDto.Name,
+                FirstName = registerDto.FirstName,
                 Lastname = registerDto.Lastname,
                 BirthDate = registerDto.BirthDate,
                 IdNumber = registerDto.IdNumber
@@ -68,30 +64,40 @@ public class PersonAuthService(
 
             if (!result.Succeeded)
             {
-                return Result<PersonRegisterDto>.Failure(new CustomError("UNEXPECTED_ERROR",
+                return Result<RegisterResponse>.Failure(new CustomError("UNEXPECTED_ERROR",
                     string.Join(" ", result.Errors.Select(e => e.Description))));
             }
+            
+            string role = string.IsNullOrEmpty(registerDto.Role) ? "Person" : registerDto.Role;
 
-            if (string.IsNullOrEmpty(registerDto.Role))
-                registerDto.Role = "User";
-
-            if (!await roleManager.RoleExistsAsync(registerDto.Role))
+            if (!await roleManager.RoleExistsAsync(role))
             {
-                return Result<PersonRegisterDto>.Failure(
-                    CustomError.NotFound($"The role '{registerDto.Role}' does not exist."));
+                return Result<RegisterResponse>.Failure(
+                    CustomError.NotFound($"The role '{role}' does not exist."));
             }
 
-            await userManager.AddToRoleAsync(person, registerDto.Role);
+            await userManager.AddToRoleAsync(person, role);
 
-            return Result<PersonRegisterDto>.Success(registerDto);
+            var response = new RegisterResponse
+            {
+                FirstName = person.FirstName,
+                Lastname = person.Lastname,
+                IdNumber = person.IdNumber,
+                BirthDate = person.BirthDate,
+                Email = person.Email,
+                Role = role
+            };
+
+            return Result<RegisterResponse>.Success(response);
         }
         catch (Exception ex)
         {
             loggerService.LogErrorInConsole(ex.Message);
-            return Result<PersonRegisterDto>.Failure(
+            return Result<RegisterResponse>.Failure(
                 CustomError.Failure("Error occurred while authenticating person"));
         }
     }
+
     public async Task<Result<string>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
     {
         var user = await userManager.FindByEmailAsync(forgotPasswordDto.Email);

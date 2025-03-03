@@ -28,7 +28,7 @@ public static class ServiceRegistration
         services.AddDbContext<BankingSystemDbContext>(options =>
             options.UseSqlServer(connectionString));
 
-        services.AddScoped<IReportRepository, ReportRepository>();
+        services.AddScoped<IBankReportRepository, BankReportRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPersonRepository, PersonRepository>();
         services.AddScoped<IAccountTransactionRepository, AccountTransactionRepository>();

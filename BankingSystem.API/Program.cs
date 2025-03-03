@@ -37,6 +37,7 @@ builder.Services.AddCoreServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddMemoryCache();
 
 
 

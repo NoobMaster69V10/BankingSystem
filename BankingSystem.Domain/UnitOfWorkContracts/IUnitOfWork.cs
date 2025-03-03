@@ -8,7 +8,7 @@ public interface IUnitOfWork : IAsyncDisposable
     public IAccountTransactionRepository TransactionRepository { get; }
     public IBankCardRepository BankCardRepository { get; }
     public IBankAccountRepository BankAccountRepository { get; }
-    public IReportRepository ReportRepository { get; }
+    public IBankReportRepository BankReportRepository { get; }
     Task BeginTransactionAsync();
     Task CommitAsync();
     Task RollbackAsync();

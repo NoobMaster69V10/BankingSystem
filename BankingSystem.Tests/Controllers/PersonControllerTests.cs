@@ -174,7 +174,7 @@ public class PersonControllerTests
     {
         var registerModel = new PersonRegisterDto
         {
-            Name = "wiko",
+            FirstName = "wiko",
             Lastname = "asd",
             Email = "asd.asd@example.com",
             IdNumber = "12345678901", 
@@ -201,7 +201,7 @@ public class PersonControllerTests
     {
         var registerModel = new PersonRegisterDto
         {
-            Name = "wiko",
+            FirstName = "wiko",
             Lastname = "asd",
             Email = "asd.asd@example.com",
             IdNumber = "12345678901", 

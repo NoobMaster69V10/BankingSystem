@@ -12,7 +12,7 @@ namespace BankingSystem.Core.Services;
 public class AccountTransactionService(
     IUnitOfWork unitOfWork,
     IExchangeRateApi exchangeRateApi,
-    ILoggerService loggerService,IBankCardService bankCardService) : IAccountTransactionService
+    ILoggerService loggerService) : IAccountTransactionService
 {
    public async Task<Result<AccountTransaction>> TransactionBetweenAccountsAsync(AccountTransactionDto transactionDto, string userId)
     {

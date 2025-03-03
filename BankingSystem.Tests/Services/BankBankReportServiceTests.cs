@@ -6,15 +6,15 @@ using Moq;
 
 namespace BankingSystem.Tests.Services;
 
-public class ReportServiceTests
+public class BankReportServiceTests
 {
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly IReportService _reportService;
-    public ReportServiceTests()
+    private readonly IBankReportService _bankReportService;
+    public BankReportServiceTests()
     {
         _unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        _reportService = new ReportService(
+        _bankReportService = new BankReportService(
             _unitOfWorkMock.Object
         );
     }
@@ -23,7 +23,7 @@ public class ReportServiceTests
     [InlineData("invalidParam", "invalidParam")]
     public async Task GetRegisteredUsersCount_ShouldReturnFailure_WhenParamsInvalid(string? year, string? month)
     {
-        var result = await _reportService.GetRegisteredUsersCountAsync(year, month);
+        var result = await _bankReportService.GetRegisteredUsersCountAsync(year, month);
         Assert.False(result.IsSuccess);
     }
 
@@ -32,8 +32,8 @@ public class ReportServiceTests
     [InlineData("current", "previous")]
     public async Task GetRegisteredUsersCount_ShouldReturnSuccess_WhenParamsAreValid(string? year, string? month)
     {
-        _unitOfWorkMock.Setup(u => u.ReportRepository.GetNumberOfRegisteredUsersThisYearAsync()).ReturnsAsync(1);
-        var result = await _reportService.GetRegisteredUsersCountAsync(year, month);
+        _unitOfWorkMock.Setup(u => u.BankReportRepository.GetNumberOfRegisteredUsersThisYearAsync()).ReturnsAsync(1);
+        var result = await _bankReportService.GetRegisteredUsersCountAsync(year, month);
         Assert.True(result.IsSuccess);
     }
 
@@ -41,7 +41,7 @@ public class ReportServiceTests
     [InlineData("invalidParam", "invalidParam")]
     public async Task GetTransactionsCount_ShouldReturnFailure_WhenParamsInvalid(string? year, string? month)
     {
-        var result = await _reportService.GetTransactionsCountAsync(year, month);
+        var result = await _bankReportService.GetTransactionsCountAsync(year, month);
         Assert.False(result.IsSuccess);
     }
 
@@ -49,8 +49,8 @@ public class ReportServiceTests
     [InlineData("current", "previous")]
     public async Task GetTransactionsCount_ShouldReturnSuccess_WhenParamsAreValid(string? year, string? month)
     {
-        _unitOfWorkMock.Setup(u => u.ReportRepository.GetNumberOfTransactionsForLastYearAsync()).ReturnsAsync(1);
-        var result = await _reportService.GetTransactionsCountAsync(year, month);
+        _unitOfWorkMock.Setup(u => u.BankReportRepository.GetNumberOfTransactionsForLastYearAsync()).ReturnsAsync(1);
+        var result = await _bankReportService.GetTransactionsCountAsync(year, month);
         Assert.True(result.IsSuccess);
     }
 
@@ -59,7 +59,7 @@ public class ReportServiceTests
     [InlineData("invalidParam", "invalidParam", "invalidParam")]
     public async Task GetTransactionsIncomeSum_ShouldReturnFailure_WhenParamsInvalid(string? year, string? month, string currency)
     {
-        var result = await _reportService.GetTransactionsIncomeSumAsync(year, month, currency);
+        var result = await _bankReportService.GetTransactionsIncomeSumAsync(year, month, currency);
         Assert.False(result.IsSuccess);
     }
 
@@ -68,8 +68,8 @@ public class ReportServiceTests
     [InlineData("invalidParam", "invalidParam", "invalidParam")]
     public async Task GetTransactionsIncomeSum_ShouldReturnFailure_WhenIncomeIsNull(string? year, string? month, string currency)
     {
-        _unitOfWorkMock.Setup(u => u.ReportRepository.GetTransactionsIncomeByCurrencyLastYearAsync(currency)).ReturnsAsync((decimal?)null);
-        var result = await _reportService.GetTransactionsIncomeSumAsync(year, month, currency);
+        _unitOfWorkMock.Setup(u => u.BankReportRepository.GetTransactionsIncomeByCurrencyLastYearAsync(currency)).ReturnsAsync((decimal?)null);
+        var result = await _bankReportService.GetTransactionsIncomeSumAsync(year, month, currency);
         Assert.False(result.IsSuccess);
     }
 
@@ -77,8 +77,8 @@ public class ReportServiceTests
     [InlineData("previous", "previous", "usd")]
     public async Task GetTransactionsIncomeSum_ShouldReturnSuccess_WhenParamsAreValid(string? year, string? month, string currency)
     {
-        _unitOfWorkMock.Setup(u => u.ReportRepository.GetTransactionsIncomeByCurrencyLastYearAsync(currency)).ReturnsAsync(1);
-        var result = await _reportService.GetTransactionsIncomeSumAsync(year, month, currency);
+        _unitOfWorkMock.Setup(u => u.BankReportRepository.GetTransactionsIncomeByCurrencyLastYearAsync(currency)).ReturnsAsync(1);
+        var result = await _bankReportService.GetTransactionsIncomeSumAsync(year, month, currency);
         Assert.True(result.IsSuccess);
     }
 
@@ -86,9 +86,9 @@ public class ReportServiceTests
     [InlineData("invalidParam")]
     public async Task GetAverageTransactionsIncome_ShouldReturnFailure_WhenAmountIsNull(string currency)
     {
-        _unitOfWorkMock.Setup(u => u.ReportRepository.GetAverageTransactionsIncomeByCurrencyAsync(currency))
+        _unitOfWorkMock.Setup(u => u.BankReportRepository.GetAverageTransactionsIncomeByCurrencyAsync(currency))
                        .ReturnsAsync((decimal?)null);
-        var result = await _reportService.GetAverageTransactionsIncomeAsync(currency);
+        var result = await _bankReportService.GetAverageTransactionsIncomeAsync(currency);
         Assert.False(result.IsSuccess);
     }
 
@@ -96,8 +96,8 @@ public class ReportServiceTests
     [InlineData("usd")]
     public async Task GetAverageTransactionsIncome_ShouldReturnSuccess_WhenAmountIsNotNull(string currency)
     {
-        _unitOfWorkMock.Setup(u => u.ReportRepository.GetAverageTransactionsIncomeByCurrencyAsync(currency)).ReturnsAsync((decimal?)1);
-        var result = await _reportService.GetAverageTransactionsIncomeAsync(currency);
+        _unitOfWorkMock.Setup(u => u.BankReportRepository.GetAverageTransactionsIncomeByCurrencyAsync(currency)).ReturnsAsync((decimal?)1);
+        var result = await _bankReportService.GetAverageTransactionsIncomeAsync(currency);
         Assert.True(result.IsSuccess);
     }
 
@@ -105,16 +105,16 @@ public class ReportServiceTests
     [Fact]
     public async Task GetTransactionsChartForLastMonth_ShouldReturnFailure_WhenTransactionIsNull()
     {
-        _unitOfWorkMock.Setup(u => u.ReportRepository.GetTransactionsChartForLastMonthAsync()).ReturnsAsync((IEnumerable<DailyTransaction>)null);
-        var result = await _reportService.GetTransactionsChartForLastMonthAsync();
+        _unitOfWorkMock.Setup(u => u.BankReportRepository.GetTransactionsChartForLastMonthAsync()).ReturnsAsync((IEnumerable<DailyTransaction>)null);
+        var result = await _bankReportService.GetTransactionsChartForLastMonthAsync();
         Assert.False(result.IsSuccess);
     }
 
     [Fact]
     public async Task GetTransactionsChartForLastMonth_ShouldReturnSuccess_WhenTransactionIsNotNull()
     {
-        _unitOfWorkMock.Setup(u => u.ReportRepository.GetTransactionsChartForLastMonthAsync()).ReturnsAsync(new List<DailyTransaction>(){new()});
-        var result = await _reportService.GetTransactionsChartForLastMonthAsync();
+        _unitOfWorkMock.Setup(u => u.BankReportRepository.GetTransactionsChartForLastMonthAsync()).ReturnsAsync(new List<DailyTransaction>(){new()});
+        var result = await _bankReportService.GetTransactionsChartForLastMonthAsync();
         Assert.True(result.IsSuccess);
     }
 }

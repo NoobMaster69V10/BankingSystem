@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace BankingSystem.Core.DTO.Person;
+namespace BankingSystem.Core.DTO.Response;
 
-public record PersonRegisterDto
+public record RegisterResponse
 {
     [Required(ErrorMessage = "Name is required.")]
     public string FirstName { get; init; }
@@ -22,10 +22,6 @@ public record PersonRegisterDto
     [Required(ErrorMessage = "Email is required.")]
     [EmailAddress(ErrorMessage = "Invalid email format.")]
     public string Email { get; init; }
-
-    [Required(ErrorMessage = "Password is required.")]
-    [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
-    public string Password { get; init; }
 
     [AllowedValues("Operator", "Person", ErrorMessage = "Role must be either 'Operator' or 'Person'.")]
     [JsonIgnore]
