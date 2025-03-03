@@ -1,5 +1,7 @@
 ﻿using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
+using BankingSystem.Domain.Entities.Email;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BankingSystem.Core.Configuration;
@@ -17,6 +19,12 @@ public static class ServiceRegistration
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<ILoggerService, LoggerService>();
         services.AddScoped<IEmailService, EmailService>();
-        services.AddScoped<IHasherService, HashingService>();
+        services.AddScoped<IHasherService, HashingService>(); 
+        services.AddScoped<IEmailService, EmailService>();
+        services.Configure<FormOptions>(o => {
+            o.ValueLengthLimit = int.MaxValue;
+            o.MultipartBodyLengthLimit = int.MaxValue;
+            o.MemoryBufferThreshold = int.MaxValue;
+        });
     }
 }

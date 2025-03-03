@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Http;
 
 using ResetPasswordDto = BankingSystem.Core.DTO.Person.ResetPasswordDto;
 using BankingSystem.Core.DTO.Person;
+using BankingSystem.Domain.Entities.Email;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace BankingSystem.Core.Services;
 
@@ -20,7 +22,7 @@ public class PersonAuthService(
     UserManager<IdentityPerson> userManager,
     RoleManager<IdentityRole> roleManager,
     ILoggerService loggerService,
-    IHttpContextAccessor httpContextAccessor,
+    IHttpContextAccessor httpContextAccessor, 
     IEmailService emailService) : IPersonAuthService
 {
     public async Task<Result<string>> AuthenticationPersonAsync(PersonLoginDto loginDto)
@@ -141,36 +143,18 @@ public class PersonAuthService(
         {
             return Result<string>.Failure(CustomError.NotFound("Invalid email"));
         }
-
         var token = await userManager.GeneratePasswordResetTokenAsync(user);
-        var request = httpContextAccessor.HttpContext?.Request;
-        var resetLink =
-            $"{request?.Scheme}://{request.Host}/reset-password?userId={user.Id}&token={Uri.EscapeDataString(token)}";
-
-        string email = user.Email?.Trim();
-        if (string.IsNullOrWhiteSpace(email))
+        var param = new Dictionary<string, string>
         {
-            return Result<string>.Failure(CustomError.Validation("User has no valid email address"));
-        }
-
-        string emailBody = $@"
-<div style=""font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;"">
-    <h2 style=""color: #333;"">Reset Your Password</h2>
-    <p>Hello,</p>
-    <p>We received a request to reset your password for your Banking System account. If you didn't make this request, you can safely ignore this email.</p>
-    <p>To reset your password, click the button below:</p>
-    <div style=""text-align: center; margin: 30px 0;"">
-        <a href=""{resetLink}"" style=""background-color: #4CAF50; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;"">Reset Password</a>
-    </div>
-    <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
-    <p style=""word-break: break-all; color: #666;"">{resetLink}</p>
-    <p>This link will expire in 24 hours.</p>
-    <p>Regards,<br>Banking System Team</p>
-</div>";
-
-        await emailService.SendEmailAsync(email, "Reset Your Password", emailBody);
-        return Result<string>.Success(token);
+            { "token", token },
+            { "email", forgotPasswordDto.Email }
+        };
+        var callback = QueryHelpers.AddQueryString(forgotPasswordDto.ClientUri, param);
+        var message = new Message([user.Email],"Reset Your password",callback,null);
+        await emailService.SendEmailAsync(message);
+        return Result<string>.Success("Email sent successfully.");
     }
+    
     public async Task<Result<bool>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
     {
         var user = await userManager.FindByEmailAsync(resetPasswordDto.Email);

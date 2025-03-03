@@ -5,6 +5,8 @@ using DotNetEnv;
 using BankingSystem.Infrastructure.Data.DataSeeder;
 using BankingSystem.API.Middlewares;
 using BankingSystem.Core.Configuration;
+using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Entities.Email;
 using BankingSystem.Infrastructure.Configure;
 using BankingSystem.Infrastructure.Data.DatabaseConfiguration;
 
@@ -24,12 +26,18 @@ builder.Services.AddFluentEmail("bankingsystemcredo@gmail.com")
         EnableSsl = true
     });
 
+var emailConfig = builder.Configuration
+    .GetSection("EmailConfiguration")
+    .Get<EmailConfiguration>();
+builder.Services.AddSingleton(emailConfig);
+
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddCoreServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 
 
 var app = builder.Build();
