@@ -1,19 +1,47 @@
 ﻿using Dapper;
 using System.Data;
 using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.RepositoryContracts;
 
 namespace BankingSystem.Infrastructure.Repository;
 
 public class AccountTransactionRepository : GenericRepository<AccountTransaction>, IAccountTransactionRepository
 {
-    public AccountTransactionRepository(IDbConnection connection) : base(connection, "AccountTransactions") { }
+    public AccountTransactionRepository(IDbConnection connection) : base(connection, "AccountTransactions")
+    {
+    }
 
     public async Task AddAccountTransactionAsync(AccountTransaction transactionObj)
     {
         const string query =
-            "INSERT INTO AccountTransactions(Amount,TransactionDate, FromAccountId, ToAccountId, TransactionFee) VALUES (@Amount, @Currency, @TransactionDate, @FromAccountId, @ToAccountId, @TransactionFee)";
+            "INSERT INTO AccountTransactions(Amount,TransactionDate, FromAccountId, ToAccountId, TransactionFee,TransactionType) VALUES (@Amount, @Currency, @TransactionDate, @FromAccountId, @ToAccountId, @TransactionFee,@TransactionType)";
 
         await Connection.ExecuteAsync(query, transactionObj, Transaction);
     }
+
+    public async Task<decimal> GetTotalWithdrawnTodayAsync(int accountId)
+    {
+        const string query = @"
+    SELECT COALESCE(SUM(Amount), 0) 
+    FROM AccountTransactions 
+    WHERE FromAccountId = @AccountId
+    AND TransactionType = @TransactionType
+    AND TransactionDate >= @TransactionDate";
+
+        var parameters = new
+        {
+            AccountId = accountId,
+            TransactionDate = DateTime.UtcNow.Date,
+            TransactionType = TransactionType.Atm
+        };
+
+        return await Connection.QueryFirstOrDefaultAsync<decimal>(query, parameters, Transaction);
+    }
+
+    public async Task AddAtmTransactionAsync(AtmTransaction atmTransaction)
+    {
+        const string query =
+            "Insert into AtmTransactions (Amount,TransactionDate,AccountId,TransactionFee,TransactionType) VALUES (@Amount,@TransactionDate,@AccountId,@TransactionFee,@TransactionType)";
+        await Connection.ExecuteAsync(query, atmTransaction, Transaction);}
 }

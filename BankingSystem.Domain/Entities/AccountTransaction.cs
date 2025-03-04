@@ -12,5 +12,5 @@ public class AccountTransaction
     public decimal TransactionFee { get; set; }
     public TransactionType TransactionType { get; set; } 
     public int FromAccountId { get; set; }
-    public int ToAccountId { get; set; }
+    public int? ToAccountId { get; set; } = null;
 }

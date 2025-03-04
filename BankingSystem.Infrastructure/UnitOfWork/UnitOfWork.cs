@@ -11,7 +11,6 @@ public class UnitOfWork : IUnitOfWork
     private bool _disposed;
 
     public IPersonRepository PersonRepository { get; }
-    public IAtmRepository AtmRepository { get; }
     public IAccountTransactionRepository TransactionRepository { get; }
     public IBankCardRepository BankCardRepository { get; }
     public IBankAccountRepository BankAccountRepository { get; }
@@ -19,7 +18,7 @@ public class UnitOfWork : IUnitOfWork
 
     public UnitOfWork(IDbConnection connection, IPersonRepository personRepository,
         IAccountTransactionRepository transactionRepository, IBankCardRepository bankCardRepository,
-        IBankAccountRepository bankAccountRepository, IBankReportRepository bankReportRepository, IAtmRepository atmRepository)
+        IBankAccountRepository bankAccountRepository, IBankReportRepository bankReportRepository)
     {
         _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         PersonRepository = personRepository ?? throw new ArgumentNullException(nameof(personRepository));
@@ -27,7 +26,6 @@ public class UnitOfWork : IUnitOfWork
         BankCardRepository = bankCardRepository ?? throw new ArgumentNullException(nameof(bankCardRepository));
         BankAccountRepository = bankAccountRepository ?? throw new ArgumentNullException(nameof(bankAccountRepository));
         BankReportRepository = bankReportRepository ?? throw new ArgumentNullException(nameof(bankReportRepository));
-        AtmRepository = atmRepository;
         _connection.Open();
     }
 
@@ -40,7 +38,6 @@ public class UnitOfWork : IUnitOfWork
             TransactionRepository.SetTransaction(_transaction);
             BankCardRepository.SetTransaction(_transaction);
             BankAccountRepository.SetTransaction(_transaction);
-            AtmRepository.SetTransaction(_transaction);
         }
 
         return Task.CompletedTask;

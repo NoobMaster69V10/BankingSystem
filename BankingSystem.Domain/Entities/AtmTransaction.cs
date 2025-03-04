@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using BankingSystem.Domain.Enums;
 
 namespace BankingSystem.Domain.Entities;
 
 public class AtmTransaction
 {
-    [Key]
-    public int AtmTransactionId { get; set; }
     [Required]
     public int Amount { get; set; }
     [Required]
@@ -16,4 +15,6 @@ public class AtmTransaction
     public int AccountId { get; set; }
     [Required]
     public decimal TransactionFee { get; set; }
+
+    [Required] public TransactionType TransactionType { get; set; } = TransactionType.Atm;
 }

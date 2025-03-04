@@ -142,14 +142,13 @@ public class AtmService : IAtmService
             var newBalance = balance - totalDeduction;
             await _unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, newBalance);
 
-            var atmTransaction = new AtmTransaction
+            var atmTransaction = new AccountTransaction
             {
                 Amount = withdrawMoneyDto.Amount,
-                TransactionDate = DateTime.UtcNow,
-                AccountId = bankAccount.BankAccountId,
+                TransactionDate = DateTime.UtcNow, 
                 TransactionFee = fee
             };
-            await _unitOfWork.AtmRepository.AddAtmTransactionAsync(atmTransaction);
+            await _unitOfWork.TransactionRepository.AddAccountTransactionAsync(atmTransaction);
             await _unitOfWork.CommitAsync();
 
             var response = new AtmTransactionResponse
@@ -190,7 +189,7 @@ public class AtmService : IAtmService
     {
         try
         {
-            var totalWithdrawnToday = await _unitOfWork.AtmRepository.GetTotalWithdrawnTodayAsync(bankAccount.BankAccountId);
+            var totalWithdrawnToday = await _unitOfWork.TransactionRepository.GetTotalWithdrawnTodayAsync(bankAccount.BankAccountId);
 
             if (bankAccount.Currency != "GEL")
             {
@@ -201,7 +200,7 @@ public class AtmService : IAtmService
                         new CustomError("ExchangeError", "Failed to retrieve exchange rate."));
                 }
 
-                totalWithdrawnToday = totalWithdrawnToday * exchangeRate;
+                totalWithdrawnToday *= exchangeRate;
             }
 
             return Result<decimal>.Success(totalWithdrawnToday);
