@@ -6,7 +6,7 @@ namespace BankingSystem.Core.DTO.Person;
 public record PersonRegisterDto
 {
     [Required(ErrorMessage = "Name is required.")]
-    public string Name { get; init; } = string.Empty;
+    public string FirstName { get; init; } = string.Empty;
 
     [Required(ErrorMessage = "Lastname is required.")]
     public string Lastname { get; init; } = string.Empty;

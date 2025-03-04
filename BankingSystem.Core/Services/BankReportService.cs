@@ -6,8 +6,6 @@ using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.Statistics;
 using BankingSystem.Domain.UnitOfWorkContracts;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
-using Sprache;
 
 namespace BankingSystem.Core.Services;
 
@@ -15,7 +13,7 @@ public class BankReportService(
     IUnitOfWork unitOfWork,
     IExchangeRateApi exchangeRateApi,
     IMemoryCache cache,
-    ILogger<BankReportService> logger) : IBankReportService
+    ILoggerService logger) : IBankReportService
 {
     
     private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
@@ -48,7 +46,7 @@ public class BankReportService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error generating bank manager report"); 
+            logger.LogError("Error generating bank manager report\n" + ex); 
             return Result<BankManagerReport>.Failure(CustomError.Failure("Error generating bank manager report"));
         }
     }
@@ -83,7 +81,7 @@ public class BankReportService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error generating user statistics");
+            logger.LogError("Error generating user statistics\n" + ex);
             throw;
         }
     }
@@ -121,7 +119,7 @@ public class BankReportService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error generating transaction statistics");
+            logger.LogError("Error generating transaction statistics\n" + ex);
             return Result<TransactionStatistics>.Failure(CustomError.Failure("Error generating transaction statistics"));
         }
     }
@@ -161,7 +159,7 @@ public class BankReportService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error generating ATM withdrawal statistics"); 
+            logger.LogError("Error generating ATM withdrawal statistics\n" + ex); 
             return Result<AtmTransactionsStatistics>.Failure(CustomError.Failure("Error generating ATM withdrawal statistics"));
         }
     } 

@@ -28,92 +28,92 @@ public class AtmService : IAtmService
     }
 
 
-    public async Task<Result<BalanceResponseDto>> ShowBalanceAsync(CardAuthorizationDto cardDto)
+    public async Task<Result<BalanceResponse>> ShowBalanceAsync(CardAuthorizationDto cardDto)
     {
         try
         {
             var authResult = await AuthorizeCardAsync(cardDto.CardNumber, cardDto.PinCode);
             if (authResult.IsFailure)
             {
-                if (authResult.Error != null) return Result<BalanceResponseDto>.Failure(authResult.Error);
+                if (authResult.Error != null) return Result<BalanceResponse>.Failure(authResult.Error);
             }
 
             var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardDto.CardNumber);
-            var response = new BalanceResponseDto(
+            var response = new BalanceResponse(
                 balance: balance,
                 cardNumber: cardDto.CardNumber
             );
 
-            return Result<BalanceResponseDto>.Success(response);
+            return Result<BalanceResponse>.Success(response);
         }
         catch (Exception ex)
         {
             _loggerService.LogError($"Error in ShowBalanceAsync: {ex}");
-            return Result<BalanceResponseDto>.Failure(
+            return Result<BalanceResponse>.Failure(
                 new CustomError("BALANCE_ERROR", "An error occurred while retrieving the balance")
             );
         }
     }
 
-    public async Task<Result<bool>> ChangePinAsync(ChangePinDto changePinDto)
+    public async Task<Result<string>> ChangePinAsync(ChangePinDto changePinDto)
     {
         try
         {
             if (changePinDto.CurrentPin == changePinDto.NewPin)
             {
-                return Result<bool>.Failure(new CustomError("PIN_SAME_ERROR",
+                return Result<string>.Failure(new CustomError("PIN_SAME_ERROR",
                     "Current PIN and new PIN cannot be the same."));
             }
 
             var authResult = await AuthorizeCardAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
             if (!authResult.IsSuccess)
             {
-                if (authResult.Error != null) return Result<bool>.Failure(authResult.Error);
+                if (authResult.Error != null) return Result<string>.Failure(authResult.Error);
             }
 
             var pinHash = _hasherService.Hash(changePinDto.NewPin);
 
             await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, pinHash);
-            return Result<bool>.Success(true);
+            return Result<string>.Success("Pin changed Successfully");
         }
         catch (Exception ex)
         {
             _loggerService.LogError($"Error in ChangePinAsync: {ex}");
-            return Result<bool>.Failure(
+            return Result<string>.Failure(
                 new CustomError("PIN_CHANGE_ERROR", "An error occurred while changing the PIN")
             );
         }
     }
 
-    public async Task<Result<bool>> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto)
+    public async Task<Result<AtmTransactionResponse>> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto)
     {
         try
         {
             if (withdrawMoneyDto.Amount % 1 != 0)
             {
-                return Result<bool>.Failure(new CustomError("InvalidAmount",
+                return Result<AtmTransactionResponse>.Failure(new CustomError("InvalidAmount",
                     "Withdrawals must be in whole numbers (paper money only)."));
             }
 
             if (withdrawMoneyDto.Amount <= 0)
             {
-                return Result<bool>.Failure(new CustomError("AmountLessOrEqualZero", "Amount must be greater than 0."));
+                return Result<AtmTransactionResponse>.Failure(new CustomError("AmountLessOrEqualZero", "Amount must be greater than 0."));
             }
 
             var bankAccount = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(withdrawMoneyDto.CardNumber);
             if (bankAccount == null)
             {
-                return Result<bool>.Failure(CustomError.NotFound("Bank account not found."));
+                return Result<AtmTransactionResponse>.Failure(CustomError.NotFound("Bank account not found."));
             }
 
             var totalWithdrawnTodayInGel = await GetTotalWithdrawnTodayInGelAsync(bankAccount);
             decimal withdrawAmountInGel = withdrawMoneyDto.Amount;
             if (bankAccount.Currency != "GEL")
             {
-                var exchangeRate = await _exchangeRateApi.GetExchangeRate(bankAccount.Currency);
+                var exchangeRate = await _exchangeRateApi.GetExchangeRate(bankAccount.Currency!);
                 if (exchangeRate <= 0)
                 {
-                    return Result<bool>.Failure(new CustomError("ExchangeRateError",
+                    return Result<AtmTransactionResponse>.Failure(new CustomError("ExchangeRateError",
                         "Failed to retrieve exchange rate."));
                 }
 
@@ -124,7 +124,7 @@ public class AtmService : IAtmService
 
             if (totalWithdrawnTodayInGel.Value + withdrawAmountInGel > dailylimit)
             {
-                return Result<bool>.Failure(new CustomError("DailyLimitExceeded",
+                return Result<AtmTransactionResponse>.Failure(new CustomError("DailyLimitExceeded",
                     "You cannot withdraw more than 10,000 GEL per day."));
             }
 
@@ -134,10 +134,11 @@ public class AtmService : IAtmService
             var totalDeduction = withdrawMoneyDto.Amount + fee;
             if (balance < totalDeduction)
             {
-                return Result<bool>.Failure(new CustomError("NotEnoughBalance",
+                return Result<AtmTransactionResponse>.Failure(new CustomError("NotEnoughBalance",
                     "Not enough balance including the transaction fee."));
             }
 
+            await _unitOfWork.BeginTransactionAsync();
             var newBalance = balance - totalDeduction;
             await _unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, newBalance);
 
@@ -148,15 +149,21 @@ public class AtmService : IAtmService
                 AccountId = bankAccount.BankAccountId,
                 TransactionFee = fee
             };
-
             await _unitOfWork.AtmRepository.AddAtmTransactionAsync(atmTransaction);
             await _unitOfWork.CommitAsync();
-            return Result<bool>.Success(true);
+
+            var response = new AtmTransactionResponse
+            {
+                Amount = withdrawMoneyDto.Amount,
+                Currency = bankAccount.Currency!,
+                Iban = bankAccount.Iban!
+            };
+            return Result<AtmTransactionResponse>.Success(response);
         }
         catch (Exception ex)
         {
             _loggerService.LogError($"Error in WithdrawMoneyAsync: {ex}");
-            return Result<bool>.Failure(CustomError.Failure("An error occurred during the transaction."));
+            return Result<AtmTransactionResponse>.Failure(CustomError.Failure("An error occurred during the transaction."));
         }
     }
 
@@ -184,10 +191,10 @@ public class AtmService : IAtmService
         try
         {
             var totalWithdrawnToday = await _unitOfWork.AtmRepository.GetTotalWithdrawnTodayAsync(bankAccount.BankAccountId);
-        
+
             if (bankAccount.Currency != "GEL")
             {
-                var exchangeRate = await _exchangeRateApi.GetExchangeRate(bankAccount.Currency);
+                var exchangeRate = await _exchangeRateApi.GetExchangeRate(bankAccount.Currency!);
                 if (exchangeRate <= 0)
                 {
                     return Result<decimal>.Failure(
@@ -199,8 +206,9 @@ public class AtmService : IAtmService
 
             return Result<decimal>.Success(totalWithdrawnToday);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _loggerService.LogError($"Error in ShowBalanceAsync: {ex}");
             return Result<decimal>.Failure(new CustomError("Error", "Error during getting money"));
         }
     }
