@@ -5,6 +5,7 @@ using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
 using BankingSystem.Core.DTO.AccountTransaction;
+using BankingSystem.Domain.Enums;
 
 namespace BankingSystem.Core.Services;
 
@@ -57,10 +58,10 @@ public class AccountTransactionService(
             {
                 FromAccountId = transactionDto.FromAccountId,
                 ToAccountId = transactionDto.ToAccountId,
-                Currency = fromAccount.Currency,
                 Amount = transactionDto.Amount,
                 TransactionDate = DateTime.UtcNow,
-                TransactionFee = transactionFee
+                TransactionFee = transactionFee,
+                TransactionType = TransactionType.AccountTransfer
             };
 
             fromAccount.Balance -= (transactionDto.Amount + transactionFee);

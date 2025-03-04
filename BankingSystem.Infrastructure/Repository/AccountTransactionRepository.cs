@@ -12,7 +12,7 @@ public class AccountTransactionRepository : GenericRepository<AccountTransaction
     public async Task AddAccountTransactionAsync(AccountTransaction transactionObj)
     {
         const string query =
-            "INSERT INTO AccountTransactions(Amount, Currency, TransactionDate, FromAccountId, ToAccountId, TransactionFee) VALUES (@Amount, @Currency, @TransactionDate, @FromAccountId, @ToAccountId, @TransactionFee)";
+            "INSERT INTO AccountTransactions(Amount,TransactionDate, FromAccountId, ToAccountId, TransactionFee) VALUES (@Amount, @Currency, @TransactionDate, @FromAccountId, @ToAccountId, @TransactionFee)";
 
         await Connection.ExecuteAsync(query, transactionObj, Transaction);
     }

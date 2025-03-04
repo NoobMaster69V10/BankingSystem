@@ -37,14 +37,10 @@ public class DatabaseConfiguration(IServiceProvider serviceProvider, IConfigurat
 
                 var createAccountTransactionTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
                     @"..\BankingSystem.SQL\Tables\AccountTransactions.sql"));
-
-                var createAtmTransactionTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                    @"..\BankingSystem.SQL\Tables\AtmTransactions.sql"));
-
+                
                 await connection.ExecuteAsync(createBankAccountTable);
                 await connection.ExecuteAsync(createBankCardTable);
                 await connection.ExecuteAsync(createAccountTransactionTable);
-                await connection.ExecuteAsync(createAtmTransactionTable);
                 loggerService.LogSuccess("Database created successfully!");
             }
         }
