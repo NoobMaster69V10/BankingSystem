@@ -1,34 +1,24 @@
 ﻿using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.Statistics;
 using BankingSystem.Domain.UnitOfWorkContracts;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace BankingSystem.Core.Services;
 
 public class BankReportService(
     IUnitOfWork unitOfWork,
     IExchangeRateApi exchangeRateApi,
-    IMemoryCache cache,
     ILoggerService logger) : IBankReportService
 {
-    
-    private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
-
     public async Task<Result<BankManagerReport>> GetBankManagerReportAsync()
     {
-        var cacheKey = "BankManagerReport";
-    
-        if (cache.TryGetValue(cacheKey, out BankManagerReport? cachedReport))
-        {
-            return Result<BankManagerReport>.Success(cachedReport);
-        }
         try
         {
-            var userStats =await GetUserStatisticsAsync();
+            var userStats = await GetUserStatisticsAsync();
             var transactionStats = await GetTransactionStatisticsAsync();
             var dailyTransactions = await GetDailyTransactionsAsync();
             var atmStats = await GetAtmTransactionsStatisticsAsync();
@@ -41,7 +31,6 @@ public class BankReportService(
                 AtmStats = atmStats.Value,
             };
     
-            cache.Set(cacheKey, report, _cacheDuration);
             return Result<BankManagerReport>.Success(report);
         }
         catch (Exception ex)
@@ -53,13 +42,6 @@ public class BankReportService(
 
     public async Task<Result<UserStatistics>> GetUserStatisticsAsync()
     {
-        var cacheKey = "UserStatistics";
-
-        if (cache.TryGetValue(cacheKey, out UserStatistics cachedStats))
-        {
-            return Result<UserStatistics>.Success(cachedStats);
-        }
-
         try
         {
             var now = DateTime.Now;
@@ -76,7 +58,6 @@ public class BankReportService(
                 RegisteredLast30Days = await unitOfWork.BankReportRepository.GetUserCountAsync(thirtyDaysAgo)
             };
 
-            cache.Set(cacheKey, stats, _cacheDuration);
             return Result<UserStatistics>.Success(stats);
         }
         catch (Exception ex)
@@ -88,12 +69,6 @@ public class BankReportService(
 
     public async Task<Result<TransactionStatistics>> GetTransactionStatisticsAsync()
     {
-        string cacheKey = "TransactionStatistics";
-
-        if (cache.TryGetValue(cacheKey, out TransactionStatistics cachedStats))
-        {
-            return Result<TransactionStatistics>.Success(cachedStats);
-        }
         try
         {
             var now = DateTime.Now;
@@ -104,17 +79,14 @@ public class BankReportService(
             var stats = new TransactionStatistics
             {
                 TransactionsLastMonth = await unitOfWork.BankReportRepository.GetTransactionCountAsync(oneMonthAgo),
-                TransactionsLastSixMonths = await  unitOfWork.BankReportRepository.GetTransactionCountAsync(sixMonthsAgo),
-                TransactionsLastYear = await  unitOfWork.BankReportRepository.GetTransactionCountAsync(oneYearAgo),
-
-                IncomeLastMonth = await  unitOfWork.BankReportRepository.GetTransactionIncomeAsync(oneMonthAgo),
-                IncomeLastSixMonths = await  unitOfWork.BankReportRepository.GetTransactionIncomeAsync(sixMonthsAgo),
-                IncomeLastYear = await  unitOfWork.BankReportRepository.GetTransactionIncomeAsync(oneYearAgo),
-
-                AverageIncomePerTransaction = await  unitOfWork.BankReportRepository.GetAverageTransactionIncomeAsync()
+                TransactionsLastSixMonths = await unitOfWork.BankReportRepository.GetTransactionCountAsync(sixMonthsAgo),
+                TransactionsLastYear = await unitOfWork.BankReportRepository.GetTransactionCountAsync(oneYearAgo),
+                IncomeLastMonth = await unitOfWork.BankReportRepository.GetTransactionIncomeAsync(oneMonthAgo),
+                IncomeLastSixMonths = await unitOfWork.BankReportRepository.GetTransactionIncomeAsync(sixMonthsAgo),
+                IncomeLastYear = await unitOfWork.BankReportRepository.GetTransactionIncomeAsync(oneYearAgo),
+                AverageIncomePerTransaction = await unitOfWork.BankReportRepository.GetAverageTransactionIncomeAsync()
             };
 
-            cache.Set(cacheKey, stats, _cacheDuration);
             return Result<TransactionStatistics>.Success(stats);
         }
         catch (Exception ex)
@@ -126,35 +98,19 @@ public class BankReportService(
 
     public async Task<Result<IEnumerable<DailyTransactionReport>>> GetDailyTransactionsAsync(int days = 30)
     {
-        string cacheKey = $"DailyTransactions_{days}";
-
-        if (cache.TryGetValue(cacheKey, out IEnumerable<DailyTransactionReport> cachedData))
-        {
-            return Result<IEnumerable<DailyTransactionReport>>.Success(cachedData);
-        }
-
-        var data = await  unitOfWork.BankReportRepository.GetDailyTransactionsAsync(days);
-        cache.Set(cacheKey, data, _cacheDuration);
+        var data = await unitOfWork.BankReportRepository.GetDailyTransactionsAsync(days);
         return Result<IEnumerable<DailyTransactionReport>>.Success(data);
     }
 
     public async Task<Result<AtmTransactionsStatistics>> GetAtmTransactionsStatisticsAsync()
     {
-        string cacheKey = "AtmWithdrawalStatistics";
-
-        if (cache.TryGetValue(cacheKey, out AtmTransactionsStatistics cachedStats))
-        {
-            return Result<AtmTransactionsStatistics>.Success(cachedStats);
-        }
-
         try
         {
             var stats = new AtmTransactionsStatistics
             {
                 TotalWithdrawnAmount = await GetTotalWithdrawalsFromAtmInGelAsync(), 
+                Currency = Currency.GEL
             };
-
-            cache.Set(cacheKey, stats, _cacheDuration);
             return Result<AtmTransactionsStatistics>.Success(stats);
         }
         catch (Exception ex)
@@ -163,7 +119,6 @@ public class BankReportService(
             return Result<AtmTransactionsStatistics>.Failure(CustomError.Failure("Error generating ATM withdrawal statistics"));
         }
     } 
-    
     
     private async Task<decimal> GetTotalWithdrawalsFromAtmInGelAsync()
     {
