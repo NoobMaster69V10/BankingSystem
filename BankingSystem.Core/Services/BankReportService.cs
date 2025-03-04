@@ -63,7 +63,7 @@ public class BankReportService(
         catch (Exception ex)
         {
             logger.LogError("Error generating user statistics\n" + ex);
-            throw;
+            return Result<UserStatistics>.Failure(CustomError.Failure("Error generating user statistics"));
         }
     }
 
