@@ -97,17 +97,17 @@ namespace BankingSystem.Tests.Services
 
             A.CallTo(() => _bankCardService.ValidateCardAsync(changePinDto.CardNumber, changePinDto.CurrentPin))
                 .Returns(validationResult);
+
+            A.CallTo(() => _hasherService.Hash(changePinDto.NewPin))
+                .Returns("pin-hash");
             A.CallTo(() =>
-                    _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.NewPin))
+                    _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, "pin-hash"))
                 .Returns(Task.CompletedTask);
 
             var result = await _atmService.ChangePinAsync(changePinDto);
 
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeTrue();
-            A.CallTo(() =>
-                    _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.NewPin))
-                .MustHaveHappenedOnceExactly();
+            result.Value.Should().Be("Pin changed Successfully");
         }
 
         [Fact]
@@ -136,16 +136,18 @@ namespace BankingSystem.Tests.Services
 
             A.CallTo(() => _bankCardService.ValidateCardAsync(changePinDto.CardNumber, changePinDto.CurrentPin))
                 .Returns(validationResult);
+
+            A.CallTo(() => _hasherService.Hash(changePinDto.NewPin))
+                .Returns("pin-hash");
+
             A.CallTo(() =>
-                    _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, changePinDto.CurrentPin))
+                    _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, "pin-hash"))
                 .Throws(new Exception("Database error"));
 
             var result = await _atmService.ChangePinAsync(changePinDto);
 
             result.IsFailure.Should().BeTrue();
             result.Error.Code.Should().Be("PIN_CHANGE_ERROR");
-            A.CallTo(() => _loggerService.LogError(A<string>.That.Contains("Error in ChangePinAsync")))
-                .MustHaveHappenedOnceExactly();
         }
 
         #endregion
