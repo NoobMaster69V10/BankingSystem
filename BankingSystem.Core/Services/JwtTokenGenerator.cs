@@ -1,16 +1,14 @@
+using System.Text;
+using System.Security.Claims;
 using BankingSystem.Core.Identity;
-using BankingSystem.Core.ServiceContracts;
-using BankingSystem.Domain.Entities;
-using Microsoft.AspNetCore.Identity;
-
-namespace BankingSystem.Core.Services;
-
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
+using BankingSystem.Core.ServiceContracts;
+using BankingSystem.Domain.ConfigurationSettings.Jwt;
+
+namespace BankingSystem.Core.Services;
 
 public class JwtTokenGenerator : IJwtTokenGenerator
 {

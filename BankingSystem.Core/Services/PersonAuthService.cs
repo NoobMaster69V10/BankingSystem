@@ -1,24 +1,15 @@
-﻿using System.Text;
-using System.Security.Claims;
-using BankingSystem.Core.Identity;
+﻿using BankingSystem.Core.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using BankingSystem.Core.DTO.Result;
-using Microsoft.Extensions.Configuration;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Errors;
-using Microsoft.AspNetCore.Http;
-
-using ResetPasswordDto = BankingSystem.Core.DTO.Person.ResetPasswordDto;
 using BankingSystem.Core.DTO.Person;
-using BankingSystem.Domain.Entities.Email;
+using BankingSystem.Domain.ConfigurationSettings.Email;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace BankingSystem.Core.Services;
 
 public class PersonAuthService(
-    IConfiguration configuration,
     UserManager<IdentityPerson> userManager,
     RoleManager<IdentityRole> roleManager,
     ILoggerService loggerService,
@@ -44,7 +35,7 @@ public class PersonAuthService(
         }
         catch (Exception ex)
         {
-            loggerService.LogErrorInConsole(ex.Message);
+            loggerService.LogError(ex.Message);
             return Result<string>.Failure(CustomError.Failure("Error occurred while authenticating person"));
         }
     }
@@ -87,7 +78,7 @@ public class PersonAuthService(
         }
         catch (Exception ex)
         {
-            loggerService.LogErrorInConsole(ex.Message);
+            loggerService.LogError(ex.Message);
             return Result<PersonRegisterDto>.Failure(
                 CustomError.Failure("Error occurred while authenticating person"));
         }
@@ -105,8 +96,8 @@ public class PersonAuthService(
             { "token", token },
             { "email", forgotPasswordDto.Email }
         };
-        var callback = QueryHelpers.AddQueryString(forgotPasswordDto.ClientUri, param);
-        var message = new Message([user.Email],"Reset Your password",callback,null);
+        var callback = QueryHelpers.AddQueryString(forgotPasswordDto.ClientUri, param!);
+        var message = new Message([user.Email],"Reset Your password",callback,null!);
         await emailService.SendEmailAsync(message);
         return Result<string>.Success("Email sent successfully.");
     }

@@ -1,11 +1,7 @@
-using BankingSystem.Core.DTO;
 using BankingSystem.Core.DTO.AccountTransaction;
-using BankingSystem.Core.DTO.AtmTransaction;
-using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
 using BankingSystem.Domain.Entities;
-using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
 using Moq;
@@ -17,7 +13,6 @@ public class AccountTransactionServiceTests
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IExchangeRateApi> _exchangeRateApiMock;
     private readonly Mock<ILoggerService> _loggerServiceMock;
-    private readonly Mock<IBankCardService> _bankCardServiceMock;
     private readonly IAccountTransactionService _accountTransactionService;
 
     public AccountTransactionServiceTests()
@@ -25,13 +20,11 @@ public class AccountTransactionServiceTests
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _exchangeRateApiMock = new Mock<IExchangeRateApi>();
         _loggerServiceMock = new Mock<ILoggerService>();
-        _bankCardServiceMock = new Mock<IBankCardService>();
 
         _accountTransactionService = new AccountTransactionService(
             _unitOfWorkMock.Object,
             _exchangeRateApiMock.Object,
-            _loggerServiceMock.Object,
-            _bankCardServiceMock.Object
+            _loggerServiceMock.Object
         );
     }
 
@@ -43,7 +36,7 @@ public class AccountTransactionServiceTests
         var result = await _accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, "user1");
 
         Assert.False(result.IsSuccess);
-        Assert.Equal("It is not possible to make a transaction between the same accounts.", result.Error.Message);
+        Assert.Equal("It is not possible to make a transaction between the same accounts.", result.Error!.Message);
     }
 
     [Fact]

@@ -9,11 +9,11 @@ namespace BankingSystem.Domain.Errors
         private const string AccessDeniedErrorCode = "AccessDenied";
         private const string AccessForbiddenErrorCode = "AccessForbidden";
         
-        public static readonly CustomError None = new(string.Empty, string.Empty,ErrorType.Failure);
-        public static readonly CustomError NullValue = new("Error.NullValue","Null value was provided",ErrorType.Failure);
+        public static readonly CustomError None = new(string.Empty, string.Empty);
+        public static readonly CustomError NullValue = new("Error.NullValue","Null value was provided");
         
         public static CustomError Failure(string description) =>
-            new(ServerErrorCode, description, ErrorType.Failure);
+            new(ServerErrorCode, description);
 
         public static CustomError NotFound(string description) =>
             new(RecordNotFoundCode, description, ErrorType.NotFound);

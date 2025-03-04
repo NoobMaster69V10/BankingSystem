@@ -48,7 +48,7 @@ public class AtmService : IAtmService
         }
         catch (Exception ex)
         {
-            _loggerService.LogErrorInConsole($"Error in ShowBalanceAsync: {ex}");
+            _loggerService.LogError($"Error in ShowBalanceAsync: {ex}");
             return Result<BalanceResponseDto>.Failure(
                 new CustomError("BALANCE_ERROR", "An error occurred while retrieving the balance")
             );
@@ -78,7 +78,7 @@ public class AtmService : IAtmService
         }
         catch (Exception ex)
         {
-            _loggerService.LogErrorInConsole($"Error in ChangePinAsync: {ex}");
+            _loggerService.LogError($"Error in ChangePinAsync: {ex}");
             return Result<bool>.Failure(
                 new CustomError("PIN_CHANGE_ERROR", "An error occurred while changing the PIN")
             );
@@ -155,7 +155,7 @@ public class AtmService : IAtmService
         }
         catch (Exception ex)
         {
-            _loggerService.LogErrorInConsole($"Error in WithdrawMoneyAsync: {ex}");
+            _loggerService.LogError($"Error in WithdrawMoneyAsync: {ex}");
             return Result<bool>.Failure(CustomError.Failure("An error occurred during the transaction."));
         }
     }
@@ -174,7 +174,7 @@ public class AtmService : IAtmService
         }
         catch (Exception ex)
         {
-            _loggerService.LogErrorInConsole($"Error in AuthorizeCardAsync: {ex}");
+            _loggerService.LogError($"Error in AuthorizeCardAsync: {ex}");
             return Result<bool>.Failure(new CustomError("AUTH_ERROR", "Error occurred while authorizing"));
         }
     }
@@ -199,7 +199,7 @@ public class AtmService : IAtmService
 
             return Result<decimal>.Success(totalWithdrawnToday);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return Result<decimal>.Failure(new CustomError("Error", "Error during getting money"));
         }

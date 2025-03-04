@@ -1,17 +1,30 @@
-﻿using BankingSystem.Core.ServiceContracts;
+﻿using Serilog;
+using BankingSystem.Core.ServiceContracts;
 using Microsoft.Extensions.Logging;
 
 namespace BankingSystem.Core.Services;
 
-public class LoggerService(ILogger<LoggerService> logger) : ILoggerService
+public class LoggerService : ILoggerService
 {
-    public void LogErrorInConsole(string errorMessage)
+    private readonly Serilog.ILogger _fileLogger;
+    private readonly ILogger<LoggerService> _logger;
+
+    public LoggerService(ILogger<LoggerService> logger)
     {
-        logger.LogError(errorMessage);
+        _logger = logger;
+        _fileLogger = new LoggerConfiguration()
+            .WriteTo.File("Logs/banking_system.log", rollingInterval: RollingInterval.Infinite)
+            .CreateLogger();
+    }
+    public void LogError(string errorMessage)
+    {
+        _logger.LogError(errorMessage);
+        _fileLogger.Error(errorMessage);
     }
 
-    public void LogSuccessInConsole(string message)
+    public void LogSuccess(string message)
     {
-        logger.LogInformation(message);
+        _logger.LogInformation(message);
+        _fileLogger.Information(message);
     }
 }

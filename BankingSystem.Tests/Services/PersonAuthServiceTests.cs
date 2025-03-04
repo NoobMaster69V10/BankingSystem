@@ -1,9 +1,7 @@
-﻿using BankingSystem.Core.DTO;
-using BankingSystem.Core.DTO.Person;
+﻿using BankingSystem.Core.DTO.Person;
 using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -15,10 +13,10 @@ public class PersonAuthServiceTests
     private readonly Mock<ILoggerService> _loggerServiceMock;
     private readonly IPersonAuthService _personAuthService;
     private readonly Mock<IEmailService> _emailServiceMock;
+    private readonly Mock<IJwtTokenGenerator> _jwtTokenGeneratorMock;
     private readonly Mock<UserManager<IdentityPerson>> _userManagerMock;
     private readonly Mock<RoleManager<IdentityRole>> _roleManagerMock;
-    private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
-
+    
     public PersonAuthServiceTests()
     {
         var inMemorySettings = new Dictionary<string, string>
@@ -36,16 +34,15 @@ public class PersonAuthServiceTests
         _roleManagerMock = new Mock<RoleManager<IdentityRole>>(
             Mock.Of<IRoleStore<IdentityRole>>(), null, null, null, null);
         _loggerServiceMock = new Mock<ILoggerService>();
-        _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
         _emailServiceMock = new Mock<IEmailService>();
+        _jwtTokenGeneratorMock = new Mock<IJwtTokenGenerator>();
 
         _personAuthService = new PersonAuthService(
-            configuration,
             _userManagerMock.Object,
             _roleManagerMock.Object,
             _loggerServiceMock.Object,
-            _httpContextAccessorMock.Object,
-            _emailServiceMock.Object
+            _emailServiceMock.Object,
+            _jwtTokenGeneratorMock.Object
         );
     }
 
@@ -57,30 +54,35 @@ public class PersonAuthServiceTests
         var result = await _personAuthService.AuthenticationPersonAsync(new PersonLoginDto());
 
         Assert.False(result.IsSuccess);
-        Assert.Equal("Invalid email or password", result.Error.Message);
+        Assert.Equal("Invalid email", result.Error.Message);
     }
 
     [Fact]
     public async Task AuthenticationPersonAsync_ShouldReturnFailure_WhenPasswordIsIncorrect()
     {
+        _userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(new IdentityPerson());
         _userManagerMock.Setup(x => x.CheckPasswordAsync(new IdentityPerson{ UserName = "test@gmail.com" }, "pass123")).ReturnsAsync(false);
 
         var result = await _personAuthService.AuthenticationPersonAsync(new PersonLoginDto { Email = "test@gmail.com", Password = "pass123" });
 
         Assert.False(result.IsSuccess);
-        Assert.Equal("Invalid email or password", result.Error.Message);
+        Assert.Equal("Invalid password", result.Error.Message);
     }
 
-    //[Fact]
-    //public async Task AuthenticationPersonAsync_ShouldReturnSuccess_WhenIsValid()
-    //{
-    //    _userManagerMock.Setup(x => x.FindByEmailAsync("test@gmail.com")).ReturnsAsync(new IdentityPerson());
-    //    _userManagerMock.Setup(x => x.CheckPasswordAsync(new IdentityPerson { UserName = "test@gmail.com" }, "pass123")).ReturnsAsync(true);
+    [Fact]
+    public async Task AuthenticationPersonAsync_ShouldReturnSuccess_WhenIsValid()
+    {
+        var user = new IdentityPerson
+        {
+            UserName = "test@gmail.com"
+        };
+        _userManagerMock.Setup(x => x.FindByEmailAsync("test@gmail.com")).ReturnsAsync(user);
+        _userManagerMock.Setup(x => x.CheckPasswordAsync(user, "pass123")).ReturnsAsync(true);
 
-    //    var result = await _personAuthService.AuthenticationPersonAsync(new PersonLoginDto{ Email = "test@gmail.com", Password = "pass123" });
+        var result = await _personAuthService.AuthenticationPersonAsync(new PersonLoginDto { Email = "test@gmail.com", Password = "pass123" });
 
-    //    Assert.True(result.IsSuccess);
-    //}
+        Assert.True(result.IsSuccess);
+    }
 
     [Fact]
     public async Task RegisterPersonAsync_ShouldReturnFailure_WhenUserCannotBeCreated()

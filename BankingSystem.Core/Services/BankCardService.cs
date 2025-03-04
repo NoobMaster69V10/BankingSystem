@@ -1,6 +1,5 @@
 ﻿using BankingSystem.Core.DTO.BankCard;
 using BankingSystem.Core.DTO.Result;
-using BankingSystem.Core.Helpers;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Errors;
@@ -8,7 +7,7 @@ using BankingSystem.Domain.UnitOfWorkContracts;
 
 namespace BankingSystem.Core.Services;
 
-public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerService,IHasherService hasherService) : IBankCardService
+public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerService, IHasherService hasherService, IEncryptionService encryptionService) : IBankCardService
 {
     public async Task<Result<bool>> ValidateCardAsync(string cardNumber, string pinCode)
     {
@@ -30,7 +29,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
         }
         catch (Exception ex)
         {
-            loggerService.LogErrorInConsole(ex.Message);
+            loggerService.LogError(ex.Message);
             return Result<bool>.Failure(CustomError.Failure("Error occurred while validating card"));
         }
     }
@@ -68,7 +67,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
         }
 
         var pinHash = hasherService.Hash(bankCardRegisterDto.PinCode);
-        var encryptedCvv = EncryptionHelper.Encrypt(bankCardRegisterDto.Cvv);
+        var encryptedCvv = encryptionService.Encrypt(bankCardRegisterDto.Cvv);
 
         var newCard = new BankCard
         {
@@ -88,7 +87,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
     }
     catch (Exception ex)
     {
-        loggerService.LogErrorInConsole($"[CreateBankCardAsync] An error occurred: {ex.Message}");
+        loggerService.LogError($"[CreateBankCardAsync] An error occurred: {ex.Message}");
 
         return Result<BankCard>.Failure(CustomError.Failure("An unexpected error occurred while processing your request. Please try again later."));
     }

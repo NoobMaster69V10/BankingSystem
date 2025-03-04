@@ -5,14 +5,13 @@ using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
 using BankingSystem.Core.DTO.AccountTransaction;
-using BankingSystem.Core.DTO.AtmTransaction;
 
 namespace BankingSystem.Core.Services;
 
 public class AccountTransactionService(
     IUnitOfWork unitOfWork,
     IExchangeRateApi exchangeRateApi,
-    ILoggerService loggerService,IBankCardService bankCardService) : IAccountTransactionService
+    ILoggerService loggerService) : IAccountTransactionService
 {
    public async Task<Result<AccountTransaction>> TransactionBetweenAccountsAsync(AccountTransactionDto transactionDto, string userId)
     {
@@ -78,7 +77,7 @@ public class AccountTransactionService(
         catch (Exception ex)
         {
             await unitOfWork.RollbackAsync();
-            loggerService.LogErrorInConsole(ex.Message);
+            loggerService.LogError(ex.Message);
 
             return Result<AccountTransaction>.Failure(CustomError.Failure("An error occurred during the transaction."));
         }

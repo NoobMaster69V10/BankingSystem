@@ -56,8 +56,9 @@ public abstract class GenericRepository<T> : IGenericRepository<T> where T : cla
         var properties = typeof(T).GetProperties()
             .Where(p => p.Name.ToLower() != $"{typeof(T).Name.ToLower()}id" && p.Name.ToLower() != "id")
             .Select(p => p.Name);
-        var columnNames = string.Join(", ", properties);
-        var paramNames = string.Join(", ", properties.Select(p => "@" + p));
+        var enumerable = properties as string[] ?? properties.ToArray();
+        var columnNames = string.Join(", ", enumerable);
+        var paramNames = string.Join(", ", enumerable.Select(p => "@" + p));
 
         return $"INSERT INTO {_tableName} ({columnNames}) VALUES ({paramNames})";
     }

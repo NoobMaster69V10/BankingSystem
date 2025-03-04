@@ -62,6 +62,7 @@
     <Build Include="Tables\AccountTransactions.sql" />
     <Build Include="Tables\AtmTransactions.sql" />
     <Build Include="Tables\BankAccounts.sql" />
+    <Build Include="Tables\AspNetUsers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\BankCards.sql" />

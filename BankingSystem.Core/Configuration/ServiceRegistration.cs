@@ -1,6 +1,5 @@
 ﻿using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
-using BankingSystem.Domain.Entities.Email;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,5 +26,6 @@ public static class ServiceRegistration
             o.MultipartBodyLengthLimit = int.MaxValue;
             o.MemoryBufferThreshold = int.MaxValue;
         });
+        services.AddScoped<IEncryptionService, EncryptionService>();
     }
 }

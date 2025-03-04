@@ -1,13 +1,19 @@
-﻿using System.Security.Cryptography;
-using System.Text;
+﻿using System.Text;
+using System.Security.Cryptography;
+using Microsoft.Extensions.Options;
+using BankingSystem.Core.ServiceContracts;
+using BankingSystem.Domain.ConfigurationSettings.Encryption;
 
-namespace BankingSystem.Core.Helpers;
+namespace BankingSystem.Core.Services;
 
-public static class EncryptionHelper
+public class EncryptionService : IEncryptionService
 {
-    private static readonly string EncryptionKey = "rQP1XMQXY3IZt27Y";
-
-    public static string Encrypt(string plainText)
+    private string EncryptionKey { get; }
+    public EncryptionService(IOptions<EncryptionSettings> encryptionOptions)
+    {
+        EncryptionKey = encryptionOptions.Value.EncryptionKey;
+    }
+    public string Encrypt(string plainText)
     {
         using (var aes = Aes.Create())
         {
@@ -27,7 +33,7 @@ public static class EncryptionHelper
         }
     }
 
-    public static string Decrypt(string cipherText)
+    public string Decrypt(string cipherText)
     {
         using var aes = Aes.Create();
         aes.Key = Encoding.UTF8.GetBytes(EncryptionKey.PadRight(32));

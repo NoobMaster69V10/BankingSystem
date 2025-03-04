@@ -44,7 +44,7 @@ public class ReportService(IUnitOfWork unitOfWork, IExchangeRateApi exchangeRate
                 return Result<decimal>.Failure(CustomError.NotFound("Transactions with these params not found!"));
             }
 
-            return Result<decimal>.Success((decimal)income!);
+            return Result<decimal>.Success((decimal)income);
         }
 
         return Result<decimal>.Failure(CustomError.Validation(
@@ -80,21 +80,22 @@ public class ReportService(IUnitOfWork unitOfWork, IExchangeRateApi exchangeRate
     {
         var transactions = await unitOfWork.AtmRepository.GetAllAtmTransactionsAsync();
 
-        if (!transactions.Any())
+        var atmTransactions = transactions.ToList();
+        if (!atmTransactions.Any())
         {
             return Result<decimal>.Success(0);
         }
 
         decimal totalInGel = 0m;
 
-        foreach (var transaction in transactions)
+        foreach (var transaction in atmTransactions)
         {
             decimal transactionAmount = transaction.Amount;
             var currency = transaction.Currency;
 
             if (currency != "GEL")
             {
-                var exchangeRate = await exchangeRateApi.GetExchangeRate(currency);
+                var exchangeRate = await exchangeRateApi.GetExchangeRate(currency!);
                 if (exchangeRate <= 0)
                 {
                     return Result<decimal>.Failure(new CustomError("ExchangeRateError",

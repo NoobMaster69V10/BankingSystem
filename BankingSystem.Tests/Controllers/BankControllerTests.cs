@@ -38,7 +38,7 @@ public class BankControllerTests
         var createdAccount = new BankAccount 
         { 
             BankAccountId = 1,
-            IBAN = "DE89370400440532013000",
+            Iban = "DE89370400440532013000",
             Balance = 1000m,
             PersonId = "kiko",
             Currency = "EUR"

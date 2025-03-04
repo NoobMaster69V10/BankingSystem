@@ -1,5 +1,4 @@
-﻿using BankingSystem.Core.DTO;
-using BankingSystem.Core.DTO.BankAccount;
+﻿using BankingSystem.Core.DTO.BankAccount;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
 using BankingSystem.Domain.Entities;

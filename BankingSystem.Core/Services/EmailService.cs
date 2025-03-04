@@ -1,6 +1,7 @@
 using BankingSystem.Core.ServiceContracts;
-using BankingSystem.Domain.Entities.Email;
+using BankingSystem.Domain.ConfigurationSettings.Email;
 using MailKit.Net.Smtp;
+using Microsoft.Extensions.Options;
 using MimeKit;
 
 namespace BankingSystem.Core.Services;
@@ -10,9 +11,10 @@ public class EmailService : IEmailService
     private readonly EmailConfiguration _emailConfig;
     private readonly ILoggerService _loggerService;
 
-    public EmailService(EmailConfiguration emailConfig)
+    public EmailService(IOptions<EmailConfiguration> emailConfig, ILoggerService loggerService)
     {
-        _emailConfig = emailConfig;
+        _emailConfig = emailConfig.Value;
+        _loggerService = loggerService;
     }
 
     public async Task SendEmailAsync(Message message)
@@ -44,7 +46,7 @@ public class EmailService : IEmailService
                     fileBytes = ms.ToArray();
                 }
 
-                var contentType = attachment.ContentType.ToString().Split('/');
+                var contentType = attachment.ContentType.Split('/');
                 var mediaType = contentType[0];
                 var subType = contentType[1];
 
@@ -69,7 +71,7 @@ public class EmailService : IEmailService
         }
         catch (Exception ex)
         {
-            _loggerService.LogErrorInConsole(ex.Message);
+            _loggerService.LogError(ex.Message);
         }
         finally
         {

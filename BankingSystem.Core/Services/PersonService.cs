@@ -23,7 +23,7 @@ public class PersonService(IUnitOfWork unitOfWork, ILoggerService loggerService)
         }
         catch (Exception ex)
         {
-            loggerService.LogErrorInConsole(ex.Message);
+            loggerService.LogError(ex.Message);
             return Result<Person>.Failure(CustomError.Failure("Error occurred while getting person"));
         }
     }

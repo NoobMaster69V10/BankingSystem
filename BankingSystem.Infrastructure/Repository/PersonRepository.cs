@@ -1,7 +1,7 @@
-﻿using System.Data;
+﻿using Dapper;
+using System.Data;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
-using Dapper;
 
 namespace BankingSystem.Infrastructure.Repository;
 
@@ -25,19 +25,19 @@ public class PersonRepository : GenericRepository<Person>, IPersonRepository
             query,
             (person, bankAccount, bankCard) =>
             {
-                if (!userDictionary.TryGetValue(person.PersonId, out var currentUser))
+                if (!userDictionary.TryGetValue(person.PersonId!, out var currentUser))
                 {
                     currentUser = person;
                     currentUser.BankAccounts = new List<BankAccount>();
                     currentUser.Cards = new List<BankCard>();
-                    userDictionary.Add(currentUser.PersonId, currentUser);
+                    userDictionary.Add(currentUser.PersonId!, currentUser);
                 }
 
-                if (bankAccount?.BankAccountId != null && currentUser.BankAccounts.All(a => a.BankAccountId != bankAccount.BankAccountId))
-                    currentUser.BankAccounts.Add(bankAccount);
+                if (currentUser.BankAccounts!.All(a => a.BankAccountId != bankAccount.BankAccountId))
+                    currentUser.BankAccounts!.Add(bankAccount);
 
-                if (bankCard?.BankCardId != null && currentUser.Cards!.All(c => c.BankCardId != bankCard.BankCardId))
-                    currentUser.Cards.Add(bankCard);
+                if (currentUser.Cards!.All(c => c.BankCardId != bankCard.BankCardId))
+                    currentUser.Cards!.Add(bankCard);
                 
                 return currentUser;
             },
@@ -64,19 +64,19 @@ public class PersonRepository : GenericRepository<Person>, IPersonRepository
             query,
             (person, bankAccount, bankCard) =>
             {
-                if (!userDictionary.TryGetValue(person.PersonId, out var currentUser))
+                if (!userDictionary.TryGetValue(person.PersonId!, out var currentUser))
                 {
                     currentUser = person;
                     currentUser.BankAccounts = new List<BankAccount>();
                     currentUser.Cards = new List<BankCard>();
-                    userDictionary.Add(currentUser.PersonId, currentUser);
+                    userDictionary.Add(currentUser.PersonId!, currentUser);
                 }
 
-                if (bankAccount?.BankAccountId != null && currentUser.BankAccounts.All(a => a.BankAccountId != bankAccount.BankAccountId))
-                    currentUser.BankAccounts.Add(bankAccount);
+                if (currentUser.BankAccounts!.All(a => a.BankAccountId != bankAccount.BankAccountId))
+                    currentUser.BankAccounts?.Add(bankAccount);
 
-                if (bankCard?.BankCardId != null && currentUser.Cards!.All(c => c.BankCardId != bankCard.BankCardId))
-                    currentUser.Cards.Add(bankCard);
+                if (currentUser.Cards!.All(c => c.BankCardId != bankCard.BankCardId))
+                    currentUser.Cards!.Add(bankCard);
 
                 return currentUser;
             },

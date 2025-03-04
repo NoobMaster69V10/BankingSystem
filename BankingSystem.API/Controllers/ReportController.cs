@@ -53,7 +53,7 @@ public class ReportController(IReportService reportService) : ControllerBase
     }
 
     [Authorize(Roles = "Manager")]
-    [HttpGet("atmtransactions-chart")]
+    [HttpGet("atm-transactions-chart")]
     public async Task<IActionResult> GetTransactionsChartForMonth()
     {
         var result = await reportService.GetTotalWithdrawalsFromAtmInGelAsync();

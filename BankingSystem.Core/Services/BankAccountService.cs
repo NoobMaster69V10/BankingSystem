@@ -27,7 +27,7 @@ public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerSer
 
             var account = new BankAccount
             {
-                IBAN = bankAccountRegisterDto.Iban,
+                Iban = bankAccountRegisterDto.Iban,
                 Balance = bankAccountRegisterDto.Balance,
                 PersonId = person.PersonId,
                 Currency = bankAccountRegisterDto.Currency
@@ -39,7 +39,7 @@ public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerSer
         }
         catch (Exception ex)
         {
-            loggerService.LogErrorInConsole($"Error in CreateBankAccountAsync: {ex}");
+            loggerService.LogError($"Error in CreateBankAccountAsync: {ex}");
             return Result<BankAccount>.Failure(CustomError.Failure("Account could not be created."));
         }
     }

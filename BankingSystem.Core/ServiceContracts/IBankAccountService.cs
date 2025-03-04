@@ -1,5 +1,4 @@
 ﻿using BankingSystem.Core.DTO.BankAccount;
-using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Domain.Entities;
 

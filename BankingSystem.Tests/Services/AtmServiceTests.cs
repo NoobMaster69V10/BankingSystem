@@ -1,11 +1,12 @@
+using FakeItEasy;
+using FluentAssertions;
 using BankingSystem.Core.DTO.AtmTransaction;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
 using BankingSystem.Domain.Errors;
+using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
-using FakeItEasy;
-using FluentAssertions;
 
 namespace BankingSystem.Tests.Services
 {
@@ -16,6 +17,7 @@ namespace BankingSystem.Tests.Services
         private readonly ILoggerService _loggerService;
         private readonly AtmService _atmService;
         private readonly IHasherService _hasherService;
+        private readonly IExchangeRateApi _exchangeRateApi;
 
         public AtmServiceTests()
         {
@@ -23,7 +25,8 @@ namespace BankingSystem.Tests.Services
             _bankCardService = A.Fake<IBankCardService>();
             _loggerService = A.Fake<ILoggerService>();
             _hasherService = A.Fake<IHasherService>();
-            _atmService = new AtmService(_unitOfWork, _bankCardService, _loggerService, _hasherService);
+            _exchangeRateApi = A.Fake<IExchangeRateApi>();
+            _atmService = new AtmService(_unitOfWork, _bankCardService, _loggerService, _hasherService, _exchangeRateApi);
         }
 
         #region ShowBalanceAsync Tests
@@ -78,7 +81,7 @@ namespace BankingSystem.Tests.Services
 
             result.IsFailure.Should().BeTrue();
             result.Error.Code.Should().Be("BALANCE_ERROR");
-            A.CallTo(() => _loggerService.LogErrorInConsole(A<string>.That.Contains("Error in ShowBalanceAsync")))
+            A.CallTo(() => _loggerService.LogError(A<string>.That.Contains("Error in ShowBalanceAsync")))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -141,7 +144,7 @@ namespace BankingSystem.Tests.Services
 
             result.IsFailure.Should().BeTrue();
             result.Error.Code.Should().Be("PIN_CHANGE_ERROR");
-            A.CallTo(() => _loggerService.LogErrorInConsole(A<string>.That.Contains("Error in ChangePinAsync")))
+            A.CallTo(() => _loggerService.LogError(A<string>.That.Contains("Error in ChangePinAsync")))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -204,7 +207,7 @@ namespace BankingSystem.Tests.Services
 
             result.IsFailure.Should().BeTrue();
             result.Error.Code.Should().Be("AUTH_ERROR");
-            A.CallTo(() => _loggerService.LogErrorInConsole(A<string>.That.Contains("Error in AuthorizeCardAsync")))
+            A.CallTo(() => _loggerService.LogError(A<string>.That.Contains("Error in AuthorizeCardAsync")))
                 .MustHaveHappenedOnceExactly();
         }
 

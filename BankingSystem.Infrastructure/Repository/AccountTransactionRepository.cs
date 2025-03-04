@@ -1,7 +1,7 @@
-﻿using System.Data;
+﻿using Dapper;
+using System.Data;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
-using Dapper;
 
 namespace BankingSystem.Infrastructure.Repository;
 

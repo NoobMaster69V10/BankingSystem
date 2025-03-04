@@ -1,25 +1,27 @@
-﻿using BankingSystem.Core.Helpers;
-using BankingSystem.Core.Identity;
+﻿using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
+using BankingSystem.Domain.ConfigurationSettings.Seeder;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
 using BankingSystem.Infrastructure.Data.DatabaseContext;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace BankingSystem.Infrastructure.Data.DataSeeder;
 
 public class ApplicationDataSeeder(
     IHasherService hasherService,
+    IEncryptionService encryptionService,
+    IOptions<SeederSettings> seederSettings,
     BankingSystemDbContext context,
     UserManager<IdentityPerson> userManager,
     RoleManager<IdentityRole> roleManager,
     IBankAccountRepository bankAccountRepository,
     IBankCardRepository bankCardRepository,
     IPersonRepository personRepository,
-    IConfiguration configuration,
     ILoggerService logger)
 {
+    private SeederSettings SeederSettings => seederSettings.Value;
     public async Task Seed()
     {
         await SeedData();
@@ -31,12 +33,10 @@ public class ApplicationDataSeeder(
         {
             await SeedRoles();
             await SeedUsersAndAccounts();
-
-            logger.LogSuccessInConsole("Database seeding completed successfully.");
         }
         catch (Exception ex)
         {
-            logger.LogErrorInConsole($"Error seeding database: {ex.Message}");
+            logger.LogError($"Error seeding database: {ex.Message}");
         }
     }
 
@@ -53,18 +53,21 @@ public class ApplicationDataSeeder(
 
     private async Task SeedUsersAndAccounts()
     {
-        if (context.IdentityPersons.Any()) return;
+        if (context.IdentityPersons.Any())
+        {
+            logger.LogSuccess("Database already seeded!");
+            return;
+        }
 
-        var operatorPassword = configuration["Seeder:OperatorPassword"] ?? "Password1#";
-        var managerPassword = configuration["Seeder:ManagerPassword"] ?? "Password1#";
-        var personPassword = configuration["Seeder:PersonPassword"] ?? "Password1#";
+        var operatorPassword = SeederSettings.OperatorPassword;
+        var managerPassword = SeederSettings.ManagerPassword;
+        var personPassword = SeederSettings.PersonPassword;
 
         var users = new List<(string email, string role)>
         {
-            ("testOperator@gmail.com", "Operator"),
-            ("testManager@gmail.com", "Manager"),
-            ("testperson1@gmail.com", "Person"),
-            ("testperson2@gmail.com", "Person")
+            (SeederSettings.OperatorEmail, "Operator"),
+            (SeederSettings.ManagerEmail, "Manager"),
+            (SeederSettings.PersonEmail, "Person")
         };
 
         foreach (var (email, role) in users)
@@ -105,19 +108,19 @@ public class ApplicationDataSeeder(
                 Currency = "GEL",
                 PersonId = person!.PersonId,
                 Balance = 5000,
-                IBAN = GenerateIban()
+                Iban = GenerateIban()
             };
 
             await bankAccountRepository.AddAsync(bankAccount);
 
-            var personFullInfo = await personRepository.GetByIdAsync(person.PersonId);
+            var personFullInfo = await personRepository.GetByIdAsync(person.PersonId!);
 
-            var personAccountId = personFullInfo!.BankAccounts.First().BankAccountId;
+            var personAccountId = personFullInfo!.BankAccounts!.First().BankAccountId;
 
             
             var pinHash = hasherService.Hash("1234");
 
-            var encryptedCvv = EncryptionHelper.Encrypt(GenerateCvv());
+            var encryptedCvv = encryptionService.Encrypt(GenerateCvv());
 
             var card = new BankCard
             {
@@ -131,6 +134,7 @@ public class ApplicationDataSeeder(
             };
 
             await bankCardRepository.AddAsync(card);
+            logger.LogSuccess("Database seeding completed successfully.");
         }
     }
 

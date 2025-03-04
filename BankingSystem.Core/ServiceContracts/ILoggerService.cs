@@ -2,6 +2,6 @@
 
 public interface ILoggerService
 {
-    void LogErrorInConsole(string errorMessage);
-    void LogSuccessInConsole(string message);
+    void LogError(string errorMessage);
+    void LogSuccess(string message);
 }

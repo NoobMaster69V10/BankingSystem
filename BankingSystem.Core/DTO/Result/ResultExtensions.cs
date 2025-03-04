@@ -15,7 +15,7 @@ public static class ResultExtensions
 
         return new ObjectResult(new ProblemDetails
         {
-            Status = GetStatusCode(result.Error.ErrorType),
+            Status = GetStatusCode(result.Error!.ErrorType),
             Title = GetTitle(result.Error.ErrorType),
             Type = GetType(result.Error.ErrorType),
             Extensions = { { "errors", new[] { result.Error } } }

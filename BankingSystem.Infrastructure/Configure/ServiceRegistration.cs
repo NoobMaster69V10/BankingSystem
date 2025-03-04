@@ -1,21 +1,19 @@
-﻿using BankingSystem.Domain.RepositoryContracts;
-using BankingSystem.Domain.UnitOfWorkContracts;
-using BankingSystem.Infrastructure.Repository;
+﻿using System.Data;
 using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using System.Data;
-using BankingSystem.Infrastructure.Data.DatabaseContext;
-using BankingSystem.Infrastructure.Data.DataSeeder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using BankingSystem.Infrastructure.Repository;
+using BankingSystem.Domain.UnitOfWorkContracts;
+using Microsoft.Extensions.DependencyInjection;
+using BankingSystem.Domain.RepositoryContracts;
+using BankingSystem.Domain.ExternalApiContracts;
+using BankingSystem.Infrastructure.ExternalApis;
+using BankingSystem.Infrastructure.Data.DataSeeder;
+using BankingSystem.Infrastructure.Data.DatabaseContext;
+using BankingSystem.Infrastructure.Data.DatabaseConfiguration;
 
 namespace BankingSystem.Infrastructure.Configure;
-
-using Data.DatabaseConfiguration;
-using Domain.ExternalApiContracts;
-using ExternalApis;
 using UnitOfWork;
-
 public static class ServiceRegistration
 {
     public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)

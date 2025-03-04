@@ -1,4 +1,4 @@
-using BankingSystem.Domain.Entities.Email;
+using BankingSystem.Domain.ConfigurationSettings.Email;
 
 namespace BankingSystem.Core.ServiceContracts;
 

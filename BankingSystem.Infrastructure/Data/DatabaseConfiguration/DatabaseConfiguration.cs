@@ -22,7 +22,7 @@ public class DatabaseConfiguration(IServiceProvider serviceProvider, IConfigurat
             try
             {
                 await connection.ExecuteAsync(databaseCheckQuery);
-                loggerService.LogSuccessInConsole("Database already exists!");
+                loggerService.LogSuccess("Database already exists!");
             }
             catch (Exception)
             {
@@ -45,7 +45,7 @@ public class DatabaseConfiguration(IServiceProvider serviceProvider, IConfigurat
                 await connection.ExecuteAsync(createBankCardTable);
                 await connection.ExecuteAsync(createAccountTransactionTable);
                 await connection.ExecuteAsync(createAtmTransactionTable);
-                loggerService.LogSuccessInConsole("Database created successfully!");
+                loggerService.LogSuccess("Database created successfully!");
             }
         }
     }

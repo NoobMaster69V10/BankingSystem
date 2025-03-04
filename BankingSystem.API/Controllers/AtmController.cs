@@ -1,8 +1,6 @@
 using BankingSystem.Core.DTO.AtmTransaction;
 using BankingSystem.Core.DTO.Result;
-using BankingSystem.Core.Helpers;
 using BankingSystem.Core.ServiceContracts;
-using BankingSystem.Domain.UnitOfWorkContracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankingSystem.API.Controllers;

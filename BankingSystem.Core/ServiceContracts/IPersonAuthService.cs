@@ -1,6 +1,5 @@
 ﻿using BankingSystem.Core.DTO.Person;
 using BankingSystem.Core.DTO.Result;
-using BankingSystem.Core.Identity;
 
 namespace BankingSystem.Core.ServiceContracts;
 

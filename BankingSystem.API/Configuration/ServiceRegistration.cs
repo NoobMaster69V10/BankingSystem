@@ -1,12 +1,16 @@
-﻿using System.Text;
+﻿using Serilog;
+using System.Text;
+using System.Net.Mail;
+using Microsoft.OpenApi.Models;
 using BankingSystem.Core.Identity;
-using BankingSystem.Domain.Entities;
-using BankingSystem.Domain.Entities.Email;
-using BankingSystem.Infrastructure.Data.DatabaseContext;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using BankingSystem.Domain.ConfigurationSettings.Jwt;
+using BankingSystem.Domain.ConfigurationSettings.Email;
+using BankingSystem.Domain.ConfigurationSettings.Seeder;
+using BankingSystem.Infrastructure.Data.DatabaseContext;
+using BankingSystem.Domain.ConfigurationSettings.Encryption;
 
 namespace BankingSystem.API.Configuration;
 
@@ -14,12 +18,23 @@ public static class ServiceRegistration
 {
     public static void AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
-        var emailConfig = configuration
-            .GetSection("EmailConfiguration")
-            .Get<EmailConfiguration>();
-        services.AddSingleton(emailConfig);
-        
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File("Logs/banking_system.log", rollingInterval: RollingInterval.Infinite)
+            .CreateLogger();
+
+        services.AddFluentEmail("bankingsystemcredo@gmail.com")
+            .AddSmtpSender(new SmtpClient("smtp.gmail.com")
+            {
+                Port = 587,
+                Credentials = new System.Net.NetworkCredential("bankingsystemcredo@gmail.com", "imtm pass skrt tnjq"),
+                EnableSsl = true
+            });
+
+        services.Configure<EmailConfiguration>(configuration.GetSection("EmailConfiguration"));
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+        services.Configure<EncryptionSettings>(configuration.GetSection("Encryption"));
+        services.Configure<SeederSettings>(configuration.GetSection("Seeder"));
         
         services.AddHttpClient();
         services.AddLogging();
