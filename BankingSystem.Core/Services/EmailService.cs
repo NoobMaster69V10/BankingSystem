@@ -35,7 +35,7 @@ public class EmailService : IEmailService
             HtmlBody = GetHtmlBody(message)
         };
 
-        if (message.Attachments.Any())
+        if (message.Attachments != null && message.Attachments.Any())
         {
             byte[] fileBytes;
             foreach (var attachment in message.Attachments)
@@ -45,12 +45,7 @@ public class EmailService : IEmailService
                     attachment.CopyTo(ms);
                     fileBytes = ms.ToArray();
                 }
-
-                var contentType = attachment.ContentType.Split('/');
-                var mediaType = contentType[0];
-                var subType = contentType[1];
-
-                bodyBuilder.Attachments.Add(attachment.FileName, fileBytes, new ContentType(mediaType, subType));
+                bodyBuilder.Attachments.Add(attachment.FileName, fileBytes, ContentType.Parse(attachment.ContentType));
             }
         }
 
