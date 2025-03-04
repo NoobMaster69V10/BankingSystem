@@ -15,15 +15,6 @@ builder.Services.AddControllers(options => { options.Filters.Add<ModelValidation
 
 builder.Services.AddEndpointsApiExplorer();
 
-
-builder.Services.AddFluentEmail("bankingsystemcredo@gmail.com")
-    .AddSmtpSender(new SmtpClient("smtp.gmail.com")
-    {
-        Port = 587,
-        Credentials = new System.Net.NetworkCredential("bankingsystemcredo@gmail.com", "imtm pass skrt tnjq"),
-        EnableSsl = true
-    });
-
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddCoreServices();

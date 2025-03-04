@@ -1,12 +1,13 @@
+using BankingSystem.Core.DTO.Result;
 using BankingSystem.Domain.Errors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BankingSystem.Core.DTO.Result;
+namespace BankingSystem.Core.Extensions;
 
 public static class ResultExtensions
 {
-    public static IActionResult ToProblemDetails<T>(this Result<T> result)
+    public static ActionResult<T> ToProblemDetails<T>(this Result<T> result)
     {
         if (result.IsSuccess)
         {
