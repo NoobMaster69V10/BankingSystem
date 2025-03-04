@@ -1,12 +1,14 @@
-using DotNetEnv;
-using BankingSystem.API.Middlewares;
-using BankingSystem.API.Configuration;
+using System.Net.Mail;
 using BankingSystem.API.ActionFilters;
-using BankingSystem.Core.Configuration;
-using BankingSystem.Infrastructure.Configure;
+using BankingSystem.API.Configuration;
+using DotNetEnv;
 using BankingSystem.Infrastructure.Data.DataSeeder;
+using BankingSystem.API.Middlewares;
+using BankingSystem.Core.Configuration;
+using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Entities.Email;
+using BankingSystem.Infrastructure.Configure;
 using BankingSystem.Infrastructure.Data.DatabaseConfiguration;
-using Serilog;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -15,13 +17,29 @@ builder.Services.AddControllers(options => { options.Filters.Add<ModelValidation
 
 builder.Services.AddEndpointsApiExplorer();
 
+
+builder.Services.AddFluentEmail("bankingsystemcredo@gmail.com")
+    .AddSmtpSender(new SmtpClient("smtp.gmail.com")
+    {
+        Port = 587,
+        Credentials = new System.Net.NetworkCredential("bankingsystemcredo@gmail.com", "imtm pass skrt tnjq"),
+        EnableSsl = true
+    });
+
+var emailConfig = builder.Configuration
+    .GetSection("EmailConfiguration")
+    .Get<EmailConfiguration>();
+builder.Services.AddSingleton(emailConfig);
+
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddCoreServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-builder.Host.UseSerilog();
+builder.Services.AddMemoryCache();
+
+
 
 var app = builder.Build();
 

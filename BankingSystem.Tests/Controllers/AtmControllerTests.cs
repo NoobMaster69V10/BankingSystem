@@ -25,8 +25,8 @@ public class AtmControllerTests
     public async Task ShowBalance_WhenValidC_ReturnOk()
     {
         var cardDto = new CardAuthorizationDto { CardNumber = "123456789", PinCode = "1234" };
-        var expectedResponse = new BalanceResponseDto(balance: 500.00m, cardNumber: "123456789");
-        var expectedResult = Result<BalanceResponseDto>.Success(expectedResponse);
+        var expectedResponse = new BalanceResponse(balance: 500.00m, cardNumber: "123456789");
+        var expectedResult = Result<BalanceResponse>.Success(expectedResponse);
         
         A.CallTo(() => _atmService.ShowBalanceAsync(cardDto))
             .Returns(Task.FromResult(expectedResult));
@@ -43,7 +43,7 @@ public class AtmControllerTests
     {
         var cardDto = new CardAuthorizationDto { CardNumber = "123456789", PinCode = "1234" }; 
         var expectedError = CustomError.NotFound("Card number not found");
-        var expectedResult = Result<BalanceResponseDto>.Failure(expectedError);
+        var expectedResult = Result<BalanceResponse>.Failure(expectedError);
     
         A.CallTo(() => _atmService.ShowBalanceAsync(cardDto))
             .Returns(Task.FromResult(expectedResult));
