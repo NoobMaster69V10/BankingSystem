@@ -1,6 +1,8 @@
-﻿namespace BankingSystem.Domain.ExternalApiContracts;
+﻿using BankingSystem.Domain.Enums;
+
+namespace BankingSystem.Domain.ExternalApiContracts;
 
 public interface IExchangeRateApi
 {
-    Task<decimal> GetExchangeRate(string currency);
+    Task<decimal> GetExchangeRate(Currency currency);
 }

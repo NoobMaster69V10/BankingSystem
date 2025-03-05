@@ -25,8 +25,8 @@ public class AccountTransactionService(
 
             await unitOfWork.BeginTransactionAsync();
 
-            var fromAccount = await unitOfWork.BankAccountRepository.GetByIdAsync(transactionDto.FromAccountId);
-            var toAccount = await unitOfWork.BankAccountRepository.GetByIdAsync(transactionDto.ToAccountId);
+            var fromAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.FromAccountId);
+            var toAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.ToAccountId);
 
             if (fromAccount is null)
             {
@@ -68,9 +68,9 @@ public class AccountTransactionService(
 
             toAccount.Balance += await ConvertCurrencyAsync(transactionDto.Amount, fromAccount.Currency, toAccount.Currency);
 
-            await unitOfWork.BankAccountRepository.UpdateAsync(fromAccount);
-            await unitOfWork.BankAccountRepository.UpdateAsync(toAccount);
-            await unitOfWork.TransactionRepository.AddAsync(transaction);
+            await unitOfWork.BankAccountRepository.UpdateBalanceAsync(fromAccount);
+            await unitOfWork.BankAccountRepository.UpdateBalanceAsync(toAccount);
+            await unitOfWork.TransactionRepository.AddAccountTransactionAsync(transaction);
             await unitOfWork.CommitAsync();
 
             return Result<AccountTransaction>.Success(transaction);
@@ -84,24 +84,24 @@ public class AccountTransactionService(
         }
     }
    
-    private async Task<decimal> ConvertCurrencyAsync(decimal amount, string fromCurrency, string toCurrency)
+    private async Task<decimal> ConvertCurrencyAsync(decimal amount, Currency fromCurrency, Currency toCurrency)
     {
         if (fromCurrency == toCurrency)
             return amount;
 
-        var rates = new Dictionary<string, decimal>
+        var rates = new Dictionary<Currency, decimal>
         {
-            { "USD", await exchangeRateApi.GetExchangeRate("USD") },
-            { "EUR", await exchangeRateApi.GetExchangeRate("EUR") }
+            { Currency.USD, await exchangeRateApi.GetExchangeRate(Currency.USD) },
+            { Currency.EUR, await exchangeRateApi.GetExchangeRate(Currency.EUR) }
         };
 
         return fromCurrency switch
         {
-            "GEL" when rates.ContainsKey(toCurrency) => amount / rates[toCurrency],
-            "USD" when toCurrency == "GEL" => amount * rates["USD"],
-            "EUR" when toCurrency == "GEL" => amount * rates["EUR"],
-            "USD" when toCurrency == "EUR" => amount * (rates["EUR"] / rates["USD"]),
-            "EUR" when toCurrency == "USD" => amount * (rates["USD"] / rates["EUR"]),
+            Currency.GEL when rates.ContainsKey(toCurrency) => amount / rates[toCurrency],
+            Currency.USD when toCurrency == Currency.GEL => amount * rates[Currency.USD],
+            Currency.EUR when toCurrency == Currency.GEL => amount * rates[Currency.EUR],
+            Currency.USD when toCurrency == Currency.EUR => amount * (rates[Currency.EUR] / rates[Currency.USD]),
+            Currency.EUR when toCurrency == Currency.USD => amount * (rates[Currency.USD] / rates[Currency.EUR]),
             _ => amount
         };
     }

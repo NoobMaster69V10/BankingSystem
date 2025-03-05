@@ -5,9 +5,9 @@ using BankingSystem.Domain.RepositoryContracts;
 
 namespace BankingSystem.Infrastructure.Repository;
 
-public class PersonRepository : GenericRepository<Person>, IPersonRepository
+public class PersonRepository : TransactionalRepositoryBase, IPersonRepository
 {
-    public PersonRepository(IDbConnection connection) : base(connection, "AspNetUsers") { }
+    public PersonRepository(IDbConnection connection) : base(connection) { }
     public async Task<Person?> GetByIdAsync(string id)
     {
         const string query = @"

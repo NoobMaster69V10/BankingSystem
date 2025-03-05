@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using BankingSystem.Domain.CustomValidationAttributes;
+using BankingSystem.Domain.Enums;
 
 namespace BankingSystem.Core.DTO.BankAccount;
 
@@ -16,6 +17,6 @@ public record BankAccountRegisterDto
     public decimal Balance { get; init; }
 
     [Required(ErrorMessage = "Currency is required.")]
-    [AllowedValues("GEL", "USD", "EUR", ErrorMessage = "Currency must be GEL, USD, or EUR.")]
-    public string Currency { get; init; } = string.Empty;
+    [AllowedValues(Currency.USD, Currency.EUR, Currency.GEL)]
+    public Currency Currency { get; init; }
 }

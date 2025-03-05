@@ -3,6 +3,7 @@ using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
@@ -108,7 +109,7 @@ public class AtmService : IAtmService
 
             var totalWithdrawnTodayInGel = await GetTotalWithdrawnTodayInGelAsync(bankAccount);
             decimal withdrawAmountInGel = withdrawMoneyDto.Amount;
-            if (bankAccount.Currency != "GEL")
+            if (bankAccount.Currency != Currency.GEL)
             {
                 var exchangeRate = await _exchangeRateApi.GetExchangeRate(bankAccount.Currency!);
                 if (exchangeRate <= 0)
@@ -120,41 +121,41 @@ public class AtmService : IAtmService
                 withdrawAmountInGel = withdrawMoneyDto.Amount * exchangeRate;
             }
 
-            var dailylimit = 1000;
+            var dailyLimit = 10000;
 
-            if (totalWithdrawnTodayInGel.Value + withdrawAmountInGel > dailylimit)
+            if (totalWithdrawnTodayInGel.Value + withdrawAmountInGel > dailyLimit)
             {
                 return Result<AtmTransactionResponse>.Failure(new CustomError("DailyLimitExceeded",
                     "You cannot withdraw more than 10,000 GEL per day."));
             }
 
-            var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(withdrawMoneyDto.CardNumber);
-
             var fee = withdrawMoneyDto.Amount * 0.02m;
             var totalDeduction = withdrawMoneyDto.Amount + fee;
-            if (balance < totalDeduction)
+            if (bankAccount.Balance < totalDeduction)
             {
                 return Result<AtmTransactionResponse>.Failure(new CustomError("NotEnoughBalance",
                     "Not enough balance including the transaction fee."));
             }
 
             await _unitOfWork.BeginTransactionAsync();
-            var newBalance = balance - totalDeduction;
-            await _unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, newBalance);
 
-            var atmTransaction = new AccountTransaction
+            bankAccount.Balance -= totalDeduction;
+            await _unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount);
+
+            var atmTransaction = new AtmTransaction
             {
+                AccountId = bankAccount.BankAccountId,
                 Amount = withdrawMoneyDto.Amount,
                 TransactionDate = DateTime.UtcNow, 
                 TransactionFee = fee
             };
-            await _unitOfWork.TransactionRepository.AddAccountTransactionAsync(atmTransaction);
+            await _unitOfWork.TransactionRepository.AddAtmTransactionAsync(atmTransaction);
             await _unitOfWork.CommitAsync();
 
             var response = new AtmTransactionResponse
             {
                 Amount = withdrawMoneyDto.Amount,
-                Currency = bankAccount.Currency!,
+                Currency = bankAccount.Currency,
                 Iban = bankAccount.Iban!
             };
             return Result<AtmTransactionResponse>.Success(response);
@@ -191,7 +192,7 @@ public class AtmService : IAtmService
         {
             var totalWithdrawnToday = await _unitOfWork.TransactionRepository.GetTotalWithdrawnTodayAsync(bankAccount.BankAccountId);
 
-            if (bankAccount.Currency != "GEL")
+            if (bankAccount.Currency != Currency.GEL)
             {
                 var exchangeRate = await _exchangeRateApi.GetExchangeRate(bankAccount.Currency!);
                 if (exchangeRate <= 0)

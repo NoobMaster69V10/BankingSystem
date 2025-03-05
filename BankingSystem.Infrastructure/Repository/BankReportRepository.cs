@@ -1,9 +1,11 @@
 ﻿using Dapper;
 using System.Data;
 using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.RepositoryContracts;
 using Microsoft.Extensions.Logging;
-using Currency = BankingSystem.Domain.Enums.Currency;
+using Microsoft.Identity.Client;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace BankingSystem.Infrastructure.Repository;
 
@@ -165,5 +167,15 @@ public class BankReportRepository : IBankReportRepository
             _logger.LogError(ex, "Error getting daily transactions for last {Days} days", days);
             throw;
         }
+    }
+
+    public async Task<IEnumerable<AtmTransaction>> GetAllAtmTransactionsAsync()
+    {
+        const string query = @"
+        SELECT at.Amount, ba.Currency 
+        FROM AccountTransactions at
+        JOIN BankAccounts ba ON at.FromAccountId = ba.BankAccountId";
+
+        return await _connection.QueryAsync<AtmTransaction>(query);
     }
 }

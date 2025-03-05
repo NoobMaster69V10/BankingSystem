@@ -28,7 +28,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                     CustomError.NotFound("User not found. Please check the username and try again."));
             }
 
-            var bankAccount = await unitOfWork.BankAccountRepository.GetByIdAsync(bankCardRegisterDto.BankAccountId);
+            var bankAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(bankCardRegisterDto.BankAccountId);
             if (bankAccount is null)
             {
                 return Result<BankCard>.Failure(
@@ -62,7 +62,7 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                 AccountId = bankAccount.BankAccountId
             };
 
-            await unitOfWork.BankCardRepository.AddAsync(newCard);
+            await unitOfWork.BankCardRepository.AddCardAsync(newCard);
             await unitOfWork.CommitAsync();
 
             return Result<BankCard>.Success(newCard);

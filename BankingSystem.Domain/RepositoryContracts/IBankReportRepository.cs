@@ -10,4 +10,5 @@ public interface IBankReportRepository
     Task<Dictionary<Currency, decimal>> GetTransactionIncomeAsync(DateTime? since = null);
     Task<Dictionary<Currency, decimal>> GetAverageTransactionIncomeAsync(DateTime? since = null);
     Task<IEnumerable<DailyTransactionReport>> GetDailyTransactionsAsync(int days = 30);
+    Task<IEnumerable<AtmTransaction>> GetAllAtmTransactionsAsync();
 }

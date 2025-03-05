@@ -2,9 +2,11 @@
 
 namespace BankingSystem.Domain.RepositoryContracts;
 
-public interface IBankAccountRepository : IGenericRepository<BankAccount>
+public interface IBankAccountRepository : ITransactionalRepositoryBase
 {
-    Task UpdateBalanceAsync(BankAccount? account, decimal balance);
+    Task AddBankAccountAsync(BankAccount account);
+    Task<BankAccount?> GetAccountByIdAsync(int accountId);
+    Task UpdateBalanceAsync(BankAccount? account);
     Task<BankAccount?> GetAccountByIbanAsync(string iban);
     Task<string> GetAccountCurrencyAsync(int accountId);
 }

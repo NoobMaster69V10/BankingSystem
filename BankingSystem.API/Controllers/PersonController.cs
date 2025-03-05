@@ -14,19 +14,9 @@ namespace BankingSystem.API.Controllers
     [Route("api/[controller]")]
     public class PersonController(
         IPersonAuthService personAuthService,
-        IAccountTransactionService accountTransactionService,
         IPersonService personService) : ControllerBase
     {
-        [Authorize(Roles = "Person")]
-        [HttpPost("transfer-money")]
-        public async Task<ActionResult<AccountTransaction>> TransferMoney(AccountTransactionDto transactionDto)
-        {
-            var userId = User.FindFirst("personId")!.Value;
-            var result = await accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, userId);
-
-            return result.IsFailure ? result.ToProblemDetails() : Created("transfer-money", result.Value);
-        }
-
+        
         [Authorize(Roles = "Person")]
         [HttpGet("info")]
         public async Task<ActionResult<Person>> GetPersonInfo()

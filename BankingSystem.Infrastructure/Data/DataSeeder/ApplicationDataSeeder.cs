@@ -2,6 +2,7 @@
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.ConfigurationSettings.Seeder;
 using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.RepositoryContracts;
 using BankingSystem.Infrastructure.Data.DatabaseContext;
 using Microsoft.AspNetCore.Identity;
@@ -105,13 +106,13 @@ public class ApplicationDataSeeder(
 
             var bankAccount = new BankAccount
             {
-                Currency = "GEL",
+                Currency = Currency.GEL,
                 PersonId = person!.PersonId,
                 Balance = 5000,
                 Iban = GenerateIban()
             };
 
-            await bankAccountRepository.AddAsync(bankAccount);
+            await bankAccountRepository.AddBankAccountAsync(bankAccount);
 
             var personFullInfo = await personRepository.GetByIdAsync(person.PersonId!);
 
@@ -133,7 +134,7 @@ public class ApplicationDataSeeder(
                 AccountId = personAccountId
             };
 
-            await bankCardRepository.AddAsync(card);
+            await bankCardRepository.AddCardAsync(card);
             logger.LogSuccess("Database seeding completed successfully.");
         }
     }

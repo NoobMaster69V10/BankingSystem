@@ -2,8 +2,9 @@
 
 namespace BankingSystem.Domain.RepositoryContracts;
 
-public interface IBankCardRepository : IGenericRepository<BankCard>
+public interface IBankCardRepository : ITransactionalRepositoryBase
 {
+    Task AddCardAsync(BankCard card);
     Task UpdatePinAsync(string cardNumber, string pinCode);
     Task<decimal> GetBalanceAsync(string cardNumber);
     Task<BankAccount?> GetAccountByCardAsync(string cardNumber);

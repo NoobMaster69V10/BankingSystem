@@ -18,24 +18,25 @@ public class BankReportService(
     {
         try
         {
-            var userStats = await GetUserStatisticsAsync();
-            var transactionStats = await GetTransactionStatisticsAsync();
-            var dailyTransactions = await GetDailyTransactionsAsync();
-            var atmStats = await GetAtmTransactionsStatisticsAsync();
-            
+            var userStatsTask = await GetUserStatisticsAsync();
+            var transactionStatsTask = await GetTransactionStatisticsAsync();
+            var dailyTransactionsTask = await GetDailyTransactionsAsync();
+            var atmStatsTask = await GetAtmTransactionsStatisticsAsync();
+
+
             var report = new BankManagerReport
             {
-                UserStats = userStats.Value,
-                TransactionStats = transactionStats.Value,
-                DailyTransactions = dailyTransactions.Value.ToList(),
-                AtmStats = atmStats.Value,
+                UserStats = userStatsTask.Value,
+                TransactionStats = transactionStatsTask.Value,
+                DailyTransactions = dailyTransactionsTask.Value.ToList(),
+                AtmStats = atmStatsTask.Value,
             };
-    
+
             return Result<BankManagerReport>.Success(report);
         }
         catch (Exception ex)
         {
-            logger.LogError("Error generating bank manager report\n" + ex); 
+            logger.LogError("Error generating bank manager report\n" + ex);
             return Result<BankManagerReport>.Failure(CustomError.Failure("Error generating bank manager report"));
         }
     }
@@ -122,7 +123,7 @@ public class BankReportService(
     
     private async Task<decimal> GetTotalWithdrawalsFromAtmInGelAsync()
     {
-        var transactions = await unitOfWork.AtmRepository.GetAllAtmTransactionsAsync();
+        var transactions = await unitOfWork.BankReportRepository.GetAllAtmTransactionsAsync();
 
         if (!transactions.Any())
         {
@@ -136,7 +137,7 @@ public class BankReportService(
             decimal transactionAmount = transaction.Amount;
             var currency = transaction.Currency;
 
-            if (currency != "GEL")
+            if (currency != Currency.GEL)
             {
                 var exchangeRate = await exchangeRateApi.GetExchangeRate(currency);
                 if (exchangeRate <= 0)
@@ -150,5 +151,6 @@ public class BankReportService(
             totalInGel += transactionAmount;
         }
         return totalInGel;
+        return 20m;
     }
 }

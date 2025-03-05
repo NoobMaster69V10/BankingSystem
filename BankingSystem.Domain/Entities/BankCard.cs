@@ -5,6 +5,7 @@ namespace BankingSystem.Domain.Entities;
 
 public class BankCard
 {
+    [JsonIgnore]
     public int BankCardId { get; set; }
 
     [Required(ErrorMessage = "Firstname is required.")]
