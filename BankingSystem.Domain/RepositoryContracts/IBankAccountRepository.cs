@@ -2,7 +2,7 @@
 
 namespace BankingSystem.Domain.RepositoryContracts;
 
-public interface IBankAccountRepository : ITransactionalRepositoryBase
+public interface IBankAccountRepository : IRepositoryBase
 {
     Task AddBankAccountAsync(BankAccount account);
     Task<BankAccount?> GetAccountByIdAsync(int accountId);

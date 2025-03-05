@@ -1,19 +1,8 @@
-using System.ComponentModel.DataAnnotations;
 using BankingSystem.Domain.Enums;
 
 namespace BankingSystem.Domain.Entities;
 
-public class AtmTransaction
+public class AtmTransaction : BankTransaction
 {
-    [Required]
-    public int Amount { get; set; }
-    [Required]
-    public DateTime TransactionDate { get; set; }
-    [Required]
-    public int AccountId { get; set; }
-    public Currency Currency { get; set; }
-    [Required]
-    public decimal TransactionFee { get; set; }
-    [Required] 
-    public TransactionType TransactionType { get; set; } = TransactionType.Atm;
+    public override TransactionType TransactionType => TransactionType.Atm;
 }

@@ -2,10 +2,11 @@
 using System.Data;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.RepositoryContracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace BankingSystem.Infrastructure.Repository;
 
-public class PersonRepository : TransactionalRepositoryBase, IPersonRepository
+public class PersonRepository : RepositoryBase, IPersonRepository
 {
     public PersonRepository(IDbConnection connection) : base(connection) { }
     public async Task<Person?> GetByIdAsync(string id)

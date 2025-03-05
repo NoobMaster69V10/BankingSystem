@@ -71,7 +71,7 @@ public class BankReportRepository : IBankReportRepository
             string query = @"
                 SELECT ba.Currency, COALESCE(SUM(t.TransactionFee), 0) AS Income
                 FROM AccountTransactions t
-                JOIN BankAccounts ba ON t.ToAccountId = ba.BankAccountId";
+                JOIN BankAccounts ba ON t.FromAccount = ba.BankAccountId";
 
             if (since.HasValue)
             {
@@ -103,7 +103,7 @@ public class BankReportRepository : IBankReportRepository
             string query = @"
                 SELECT ba.Currency, COALESCE(AVG(t.TransactionFee), 0) AS AvgIncome
                 FROM AccountTransactions t
-                JOIN BankAccounts ba ON t.ToAccountId = ba.BankAccountId";
+                JOIN BankAccounts ba ON t.FromAccount = ba.BankAccountId";
 
             if (since.HasValue)
             {
@@ -139,7 +139,7 @@ public class BankReportRepository : IBankReportRepository
         ba.Currency,
     COALESCE(SUM(t.Amount), 0) AS TotalAmount
     FROM AccountTransactions t
-    JOIN BankAccounts ba ON t.ToAccountId = ba.BankAccountId
+    JOIN BankAccounts ba ON t.FromAccountId = ba.BankAccountId
     WHERE t.TransactionDate >= DATEADD(DAY, @Days * -1, GETDATE())
     GROUP BY CAST(t.TransactionDate AS DATE), ba.Currency
     ORDER BY CAST(t.TransactionDate AS DATE)";

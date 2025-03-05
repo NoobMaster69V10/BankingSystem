@@ -6,6 +6,6 @@ namespace BankingSystem.Core.ServiceContracts;
 
 public interface IAccountTransactionService
 {
-    Task<Result<AccountTransaction>> TransactionBetweenAccountsAsync(AccountTransactionDto transactionDto, string userId); 
+    Task<Result<AccountTransfer>> TransactionBetweenAccountsAsync(AccountTransactionDto transactionDto, string userId); 
     
 }

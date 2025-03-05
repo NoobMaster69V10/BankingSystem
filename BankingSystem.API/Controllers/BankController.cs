@@ -32,7 +32,7 @@ public class BankController(IBankAccountService accountService, IBankCardService
 
     [Authorize(Roles = "Person")]
     [HttpPost("transfer-money")]
-    public async Task<ActionResult<AccountTransaction>> TransferMoney(AccountTransactionDto transactionDto, [FromServices]IAccountTransactionService accountTransactionService)
+    public async Task<ActionResult<AccountTransfer>> TransferMoney(AccountTransactionDto transactionDto, [FromServices]IAccountTransactionService accountTransactionService)
     {
         var userId = User.FindFirst("personId")!.Value;
         var result = await accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, userId);

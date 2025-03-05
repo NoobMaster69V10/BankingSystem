@@ -29,7 +29,7 @@ public static class ServiceRegistration
         services.AddScoped<IBankReportRepository, BankReportRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPersonRepository, PersonRepository>();
-        services.AddScoped<IAccountTransactionRepository, AccountTransactionRepository>();
+        services.AddScoped<IBankTransactionRepository, BankTransactionRepository>();
         services.AddScoped<IBankCardRepository, BankCardRepository>();
         services.AddScoped<IBankAccountRepository, BankAccountRepository>();
         services.AddScoped<IExchangeRateApi, ExchangeRateApi>();

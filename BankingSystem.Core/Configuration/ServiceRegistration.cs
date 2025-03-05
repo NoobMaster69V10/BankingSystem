@@ -15,7 +15,7 @@ public static class ServiceRegistration
         services.AddScoped<IAccountTransactionService, AccountTransactionService>();
         services.AddScoped<IPersonAuthService, PersonAuthService>();
         services.AddScoped<IPersonService, PersonService>();
-        services.AddScoped<IBankReportService, BankReportService>();
+        // services.AddScoped<IBankReportService, BankReportService>();
         services.AddScoped<ILoggerService, LoggerService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IHasherService, HashingService>(); 

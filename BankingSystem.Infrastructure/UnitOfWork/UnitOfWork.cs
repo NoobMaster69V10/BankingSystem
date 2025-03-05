@@ -11,18 +11,18 @@ public class UnitOfWork : IUnitOfWork
     private bool _disposed;
 
     public IPersonRepository PersonRepository { get; }
-    public IAccountTransactionRepository TransactionRepository { get; }
+    public IBankTransactionRepository BankTransactionRepository { get; }
     public IBankCardRepository BankCardRepository { get; }
     public IBankAccountRepository BankAccountRepository { get; }
     public IBankReportRepository BankReportRepository { get; }
 
     public UnitOfWork(IDbConnection connection, IPersonRepository personRepository,
-        IAccountTransactionRepository transactionRepository, IBankCardRepository bankCardRepository,
+        IBankTransactionRepository transactionRepository, IBankCardRepository bankCardRepository,
         IBankAccountRepository bankAccountRepository, IBankReportRepository bankReportRepository)
     {
         _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         PersonRepository = personRepository ?? throw new ArgumentNullException(nameof(personRepository));
-        TransactionRepository = transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
+        BankTransactionRepository = transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
         BankCardRepository = bankCardRepository ?? throw new ArgumentNullException(nameof(bankCardRepository));
         BankAccountRepository = bankAccountRepository ?? throw new ArgumentNullException(nameof(bankAccountRepository));
         BankReportRepository = bankReportRepository ?? throw new ArgumentNullException(nameof(bankReportRepository));
@@ -35,7 +35,7 @@ public class UnitOfWork : IUnitOfWork
         {
             _transaction = _connection.BeginTransaction();
             PersonRepository.SetTransaction(_transaction);
-            TransactionRepository.SetTransaction(_transaction);
+            BankTransactionRepository.SetTransaction(_transaction);
             BankCardRepository.SetTransaction(_transaction);
             BankAccountRepository.SetTransaction(_transaction);
         }

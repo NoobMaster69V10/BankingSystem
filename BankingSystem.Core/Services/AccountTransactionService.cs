@@ -14,13 +14,13 @@ public class AccountTransactionService(
     IExchangeRateApi exchangeRateApi,
     ILoggerService loggerService) : IAccountTransactionService
 {
-   public async Task<Result<AccountTransaction>> TransactionBetweenAccountsAsync(AccountTransactionDto transactionDto, string userId)
+   public async Task<Result<AccountTransfer>> TransactionBetweenAccountsAsync(AccountTransactionDto transactionDto, string userId)
     {
         try
         {
             if (transactionDto.FromAccountId == transactionDto.ToAccountId)
             {
-                return Result<AccountTransaction>.Failure(CustomError.Validation("It is not possible to make a transaction between the same accounts."));
+                return Result<AccountTransfer>.Failure(CustomError.Validation("It is not possible to make a transaction between the same accounts."));
             }
 
             await unitOfWork.BeginTransactionAsync();
@@ -30,17 +30,17 @@ public class AccountTransactionService(
 
             if (fromAccount is null)
             {
-                return Result<AccountTransaction>.Failure(CustomError.Validation($"Bank account with id '{transactionDto.FromAccountId}' not found!"));
+                return Result<AccountTransfer>.Failure(CustomError.Validation($"Bank account with  '{transactionDto.FromAccountId}' not found!"));
             }
 
             if (toAccount is null)
             {
-                return Result<AccountTransaction>.Failure(CustomError.Validation($"Bank account with id '{transactionDto.ToAccountId}' not found!"));
+                return Result<AccountTransfer>.Failure(CustomError.Validation($"Bank account with id '{transactionDto.ToAccountId}' not found!"));
             }
 
             if (fromAccount.PersonId != userId)
             {
-                return Result<AccountTransaction>.Failure(CustomError.Validation("You don't have permission to make transactions from this account."));
+                return Result<AccountTransfer>.Failure(CustomError.Validation("You don't have permission to make transactions from this account."));
             }
 
             decimal transactionFee = 0;
@@ -51,10 +51,10 @@ public class AccountTransactionService(
 
             if (transactionDto.Amount + transactionFee > fromAccount.Balance)
             {
-                return Result<AccountTransaction>.Failure(CustomError.Validation("Insufficient balance for this transaction."));
+                return Result<AccountTransfer>.Failure(CustomError.Validation("Insufficient balance for this transaction."));
             }
 
-            var transaction = new AccountTransaction
+            var transaction = new AccountTransfer
             {
                 FromAccountId = transactionDto.FromAccountId,
                 ToAccountId = transactionDto.ToAccountId,
@@ -70,17 +70,17 @@ public class AccountTransactionService(
 
             await unitOfWork.BankAccountRepository.UpdateBalanceAsync(fromAccount);
             await unitOfWork.BankAccountRepository.UpdateBalanceAsync(toAccount);
-            await unitOfWork.TransactionRepository.AddAccountTransactionAsync(transaction);
+            await unitOfWork.BankTransactionRepository.AddAccountTransferAsync(transaction);
             await unitOfWork.CommitAsync();
 
-            return Result<AccountTransaction>.Success(transaction);
+            return Result<AccountTransfer>.Success(transaction);
         }
         catch (Exception ex)
         {
             await unitOfWork.RollbackAsync();
             loggerService.LogError(ex.Message);
 
-            return Result<AccountTransaction>.Failure(CustomError.Failure("An error occurred during the transaction."));
+            return Result<AccountTransfer>.Failure(CustomError.Failure("An error occurred during the transaction."));
         }
     }
    

@@ -44,8 +44,8 @@ public class PersonControllerTests
     {
         SetUserContext("123");
         var transactionDto = new AccountTransactionDto();
-        var accountTransaction = new AccountTransaction();
-        var expectedResult = Result<AccountTransaction>.Success(accountTransaction);
+        var accountTransaction = new AccountTransfer();
+        var expectedResult = Result<AccountTransfer>.Success(accountTransaction);
 
         _accountTransactionServiceMock.Setup(s => s.TransactionBetweenAccountsAsync(transactionDto, "123"))
             .ReturnsAsync(expectedResult);
@@ -61,7 +61,7 @@ public class PersonControllerTests
     {
         SetUserContext("123");
         var transactionDto = new AccountTransactionDto();
-        var expectedResult = Result<AccountTransaction>.Failure(CustomError.Validation(""));
+        var expectedResult = Result<AccountTransfer>.Failure(CustomError.Validation(""));
 
         _accountTransactionServiceMock.Setup(s => s.TransactionBetweenAccountsAsync(transactionDto, "123"))
             .ReturnsAsync(expectedResult);

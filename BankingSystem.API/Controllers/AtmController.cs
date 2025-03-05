@@ -1,6 +1,5 @@
 using BankingSystem.Core.DTO.AtmTransaction;
 using BankingSystem.Core.DTO.Response;
-using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.Extensions;
 using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +24,7 @@ public class AtmController : ControllerBase
     }
 
     [HttpPost("withdraw-money")]
-    public async Task<ActionResult<AtmTransactionResponse>> WithdrawMoney([FromBody] WithdrawMoneyDto cardDto)
+    public async Task<ActionResult<AtmTransactionResponse>> WithdrawMoney(WithdrawMoneyDto cardDto)
     {
         var result = await _atmService.WithdrawMoneyAsync(cardDto);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();

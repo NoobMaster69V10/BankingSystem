@@ -4,12 +4,12 @@ using BankingSystem.Domain.RepositoryContracts;
 
 namespace BankingSystem.Infrastructure.Repository;
 
-public abstract class TransactionalRepositoryBase : ITransactionalRepositoryBase
+public abstract class RepositoryBase : IRepositoryBase
 {
     protected readonly IDbConnection Connection;
     protected IDbTransaction? Transaction;
 
-    protected TransactionalRepositoryBase(IDbConnection connection)
+    protected RepositoryBase(IDbConnection connection)
     {
         Connection = connection;
     }

@@ -60,13 +60,13 @@ public class AtmService : IAtmService
     {
         try
         {
-            if (changePinDto.CurrentPin == changePinDto.NewPin)
+            if (changePinDto.PinCode == changePinDto.NewPin)
             {
                 return Result<string>.Failure(new CustomError("PIN_SAME_ERROR",
                     "Current PIN and new PIN cannot be the same."));
             }
 
-            var authResult = await AuthorizeCardAsync(changePinDto.CardNumber, changePinDto.CurrentPin);
+            var authResult = await AuthorizeCardAsync(changePinDto.CardNumber, changePinDto.PinCode);
             if (!authResult.IsSuccess)
             {
                 if (authResult.Error != null) return Result<string>.Failure(authResult.Error);
@@ -144,12 +144,12 @@ public class AtmService : IAtmService
 
             var atmTransaction = new AtmTransaction
             {
-                AccountId = bankAccount.BankAccountId,
+                FromAccountId = bankAccount.BankAccountId,
                 Amount = withdrawMoneyDto.Amount,
                 TransactionDate = DateTime.UtcNow, 
                 TransactionFee = fee
             };
-            await _unitOfWork.TransactionRepository.AddAtmTransactionAsync(atmTransaction);
+            await _unitOfWork.BankTransactionRepository.AddAtmTransactionAsync(atmTransaction);
             await _unitOfWork.CommitAsync();
 
             var response = new AtmTransactionResponse
@@ -190,7 +190,7 @@ public class AtmService : IAtmService
     {
         try
         {
-            var totalWithdrawnToday = await _unitOfWork.TransactionRepository.GetTotalWithdrawnTodayAsync(bankAccount.BankAccountId);
+            var totalWithdrawnToday = await _unitOfWork.BankTransactionRepository.GetTotalWithdrawnTodayAsync(bankAccount.BankAccountId);
 
             if (bankAccount.Currency != Currency.GEL)
             {

@@ -5,7 +5,7 @@ using BankingSystem.Domain.RepositoryContracts;
 
 namespace BankingSystem.Infrastructure.Repository;
 
-public class BankAccountRepository : TransactionalRepositoryBase, IBankAccountRepository
+public class BankAccountRepository : RepositoryBase, IBankAccountRepository
 {
     public BankAccountRepository(IDbConnection connection) : base(connection) { }
 
