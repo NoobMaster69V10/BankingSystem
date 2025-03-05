@@ -27,7 +27,7 @@ public class PersonService(IUnitOfWork unitOfWork, ILoggerService loggerService,
             {
                 return Result<Person>.Failure(CustomError.NotFound("User not found"));
             }
-            cache.Set(cacheKey, _cacheDuration);
+            cache.Set(cacheKey, person, _cacheDuration);
             return Result<Person>.Success(person);
         }
         catch (Exception ex)

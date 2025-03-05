@@ -13,13 +13,12 @@ namespace BankingSystem.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     public class PersonController(
-        IPersonAuthService personAuthService,
-        IPersonService personService) : ControllerBase
+        IPersonAuthService personAuthService) : ControllerBase
     {
         
         [Authorize(Roles = "Person")]
         [HttpGet("info")]
-        public async Task<ActionResult<Person>> GetPersonInfo()
+        public async Task<ActionResult<Person>> GetPersonInfo([FromServices]IPersonService personService)
         {
             var personId = User.FindFirst("personId")!.Value;
 
@@ -46,13 +45,13 @@ namespace BankingSystem.API.Controllers
         public async Task<ActionResult<string>> ForgotPassword([FromBody] ForgotPasswordDto forgotPassword)
         {
             var result = await personAuthService.ForgotPasswordAsync(forgotPassword);
-            return result.IsSuccess ? Ok(result) : result.ToProblemDetails();
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
         }
         [HttpPost("reset-password")]
         public async Task<ActionResult<bool>> ResetPassword([FromBody] ResetPasswordDto resetPassword)
         {
             var result = await personAuthService.ResetPasswordAsync(resetPassword);
-            return result.IsSuccess ? Ok(result) : result.ToProblemDetails();
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
         }
     }
 }

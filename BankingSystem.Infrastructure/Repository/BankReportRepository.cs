@@ -71,7 +71,7 @@ public class BankReportRepository : IBankReportRepository
             string query = @"
                 SELECT ba.Currency, COALESCE(SUM(t.TransactionFee), 0) AS Income
                 FROM AccountTransactions t
-                JOIN BankAccounts ba ON t.FromAccount = ba.BankAccountId";
+                JOIN BankAccounts ba ON t.FromAccountId = ba.BankAccountId";
 
             if (since.HasValue)
             {
@@ -103,7 +103,7 @@ public class BankReportRepository : IBankReportRepository
             string query = @"
                 SELECT ba.Currency, COALESCE(AVG(t.TransactionFee), 0) AS AvgIncome
                 FROM AccountTransactions t
-                JOIN BankAccounts ba ON t.FromAccount = ba.BankAccountId";
+                JOIN BankAccounts ba ON t.FromAccountId = ba.BankAccountId";
 
             if (since.HasValue)
             {
@@ -133,16 +133,16 @@ public class BankReportRepository : IBankReportRepository
         try
         {
             string query = @"
-    SELECT 
-        CAST(t.TransactionDate AS DATE) AS Date, 
-        COUNT(*) AS Count,
-        ba.Currency,
-    COALESCE(SUM(t.Amount), 0) AS TotalAmount
-    FROM AccountTransactions t
-    JOIN BankAccounts ba ON t.FromAccountId = ba.BankAccountId
-    WHERE t.TransactionDate >= DATEADD(DAY, @Days * -1, GETDATE())
-    GROUP BY CAST(t.TransactionDate AS DATE), ba.Currency
-    ORDER BY CAST(t.TransactionDate AS DATE)";
+            SELECT  
+            CAST(t.TransactionDate AS DATE) AS Date, 
+            COUNT(*) AS Count,
+            ba.Currency,
+            COALESCE(SUM(t.Amount), 0) AS TotalAmount
+            FROM AccountTransactions t
+            JOIN BankAccounts ba ON t.FromAccountId = ba.BankAccountId
+            WHERE t.TransactionDate >= DATEADD(DAY, @Days * -1, GETDATE())
+            GROUP BY CAST(t.TransactionDate AS DATE), ba.Currency
+            ORDER BY CAST(t.TransactionDate AS DATE)";
 
             var results =
                 await _connection.QueryAsync<(DateTime Date, int Count, string Currency, decimal TotalAmount)>(
@@ -174,7 +174,8 @@ public class BankReportRepository : IBankReportRepository
         const string query = @"
         SELECT at.Amount, ba.Currency 
         FROM AccountTransactions at
-        JOIN BankAccounts ba ON at.FromAccountId = ba.BankAccountId";
+        JOIN BankAccounts ba ON at.FromAccountId = ba.BankAccountId
+        Where TransactionType = 0";
 
         return await _connection.QueryAsync<AtmTransaction>(query);
     }

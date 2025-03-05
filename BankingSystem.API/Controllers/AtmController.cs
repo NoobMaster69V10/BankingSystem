@@ -20,7 +20,7 @@ public class AtmController : ControllerBase
     public async Task<ActionResult<BalanceResponse>> ShowBalance(CardAuthorizationDto cardDto)
     {
         var result = await _atmService.ShowBalanceAsync(cardDto);
-        return result.IsSuccess ? Ok(result) : result.ToProblemDetails();
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
     [HttpPost("withdraw-money")]
@@ -34,6 +34,6 @@ public class AtmController : ControllerBase
     public async Task<ActionResult<string>> ChangePin(ChangePinDto cardDto)
     {
         var result = await _atmService.ChangePinAsync(cardDto);
-        return result.IsSuccess ? Ok(result) : result.ToProblemDetails();
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 }
