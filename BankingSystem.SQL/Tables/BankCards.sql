@@ -1,7 +1,5 @@
 CREATE TABLE BankCards(
 	BankCardId INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-    Firstname NVARCHAR(50) NOT NULL,
-    Lastname NVARCHAR(50) NOT NULL,
     CardNumber NVARCHAR(19) UNIQUE NOT NULL CHECK (
         LEN(CardNumber) BETWEEN 13 AND 19
         AND CardNumber NOT LIKE '%[^0-9]%'

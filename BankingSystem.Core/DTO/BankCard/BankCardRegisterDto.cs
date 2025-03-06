@@ -11,13 +11,6 @@ public record BankCardRegisterDto
     [Required(ErrorMessage = "Card number is required.")]
     [Length(13, 19)]
     public string CardNumber { get; init; } = string.Empty;
-
-    [Required(ErrorMessage = "Firstname is required.")]
-    public string Firstname { get; init; } = string.Empty;
-
-    [Required(ErrorMessage = "Lastname is required.")]
-    public string Lastname { get; init; } = string.Empty;
-
     [Required(ErrorMessage = "Expiration date is required.")]
     [CheckExpirationDateValidation]
     public DateTime ExpirationDate { get; init; }
