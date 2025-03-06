@@ -44,7 +44,7 @@ public class BankCardRepository : RepositoryBase, IBankCardRepository
 
     public async Task AddCardAsync(BankCard card)
     {
-        const string query = "INSERT INTO BankCards (CardNumber, Firstname, Lastname, PinCode, ExpirationDate, CVV, AccountId) VALUES (@CardNumber, @Firstname, @Lastname, @PinCode, @ExpirationDate, @CVV, @AccountId)";
+        const string query = "INSERT INTO BankCards (CardNumber,PinCode, ExpirationDate, CVV, AccountId) VALUES (@CardNumber, @PinCode, @ExpirationDate, @CVV, @AccountId)";
         await Connection.ExecuteAsync(query, card, Transaction);
     }
 

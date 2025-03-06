@@ -27,14 +27,12 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                 return Result<BankCard>.Failure(
                     CustomError.NotFound("User not found. Please check the username and try again."));
             }
-
             var bankAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(bankCardRegisterDto.BankAccountId);
             if (bankAccount is null)
             {
                 return Result<BankCard>.Failure(
                     CustomError.NotFound("The provided bank account does not exist. Please verify your details."));
             }
-
             if (!person.BankAccounts.Any())
             {
                 return Result<BankCard>.Failure(

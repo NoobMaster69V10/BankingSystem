@@ -119,8 +119,6 @@ public class ApplicationDataSeeder(
                 Cvv = encryptedCvv,
                 PinCode = pinHash,
                 ExpirationDate = DateTime.UtcNow.AddYears(5),
-                Firstname = user.FirstName,
-                Lastname = user.Lastname,
                 AccountId = personAccountId
             };
 

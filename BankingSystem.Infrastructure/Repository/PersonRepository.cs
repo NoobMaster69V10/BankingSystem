@@ -14,7 +14,7 @@ public class PersonRepository : RepositoryBase, IPersonRepository
         const string query = @"
                          SELECT u.Id as PersonID, u.FirstName, u.LastName, u.Email, u.IdNumber, u.BirthDate,
                             b.BankAccountId, b.IBAN, b.Balance, b.Currency, b.PersonId,
-                            bc.BankCardId, bc.Firstname, bc.Lastname, bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.AccountId
+                            bc.BankCardId, bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.AccountId
                             FROM AspNetUsers u
                             LEFT JOIN BankAccounts b ON u.Id = b.PersonId
                             LEFT JOIN BankCards bc ON b.BankAccountId = bc.AccountId
@@ -53,7 +53,7 @@ public class PersonRepository : RepositoryBase, IPersonRepository
         const string query = @"
                          SELECT u.Id as PersonID, u.FirstName, u.LastName, u.Email, u.IdNumber, u.BirthDate,
                             b.BankAccountId, b.IBAN, b.Balance, b.Currency, b.PersonId,
-                            bc.BankCardId, bc.Firstname, bc.Lastname, bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.AccountId
+                            bc.BankCardId,bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.AccountId
                             FROM AspNetUsers u
                             LEFT JOIN BankAccounts b ON u.Id = b.PersonId
                             LEFT JOIN BankCards bc ON b.BankAccountId = bc.AccountId

@@ -17,7 +17,7 @@ public class ExchangeRateApi(IHttpClientFactory httpClientFactory) : IExchangeRa
 
         if (httpResponseMessage.IsSuccessStatusCode)
         {
-            using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
+            await using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
 
             currencyResponses = await JsonSerializer.DeserializeAsync<IEnumerable<CurrencyResponse>>(contentStream);
         }
