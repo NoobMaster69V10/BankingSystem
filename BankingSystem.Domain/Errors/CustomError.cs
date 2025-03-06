@@ -21,13 +21,13 @@ namespace BankingSystem.Domain.Errors
         public static CustomError Validation(string description) =>
             new(ValidationErrorCode, description, ErrorType.Validation);
 
-        public static CustomError Conflict(string code, string description) =>
+        public static CustomError Conflict(string description) =>
             new(ConflictErrorCode, description, ErrorType.Conflict);
 
-        public static CustomError AccessUnAuthorized(string code, string description) =>
+        public static CustomError AccessUnAuthorized(string description) =>
             new(AccessDeniedErrorCode, description, ErrorType.AccessUnAuthorized);
 
-        public static CustomError AccessForbidden(string code, string description) =>
+        public static CustomError AccessForbidden(string description) =>
             new(AccessForbiddenErrorCode, description, ErrorType.AccessForbidden);
     }
 }

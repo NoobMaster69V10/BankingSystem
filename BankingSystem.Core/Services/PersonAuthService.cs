@@ -28,6 +28,15 @@ public class PersonAuthService(
             }
             if (!await userManager.CheckPasswordAsync(user, loginDto.Password))
             {
+                await userManager.AccessFailedAsync(user);
+                if (!await userManager.IsLockedOutAsync(user))
+                {
+                    var content = $"Your account has been locked. Please check your email and password." + 
+                                  "you can use the forgot password link";
+                    var message = new Message([loginDto.Email],"Locked out account information",content,null);
+                    await emailService.SendEmailAsync(message);
+                    return Result<AuthenticatedResponse>.Failure(CustomError.AccessUnAuthorized("The account has been locked."));
+                }
                 return Result<AuthenticatedResponse>.Failure(CustomError.NotFound("Invalid password"));
             }
 
@@ -36,6 +45,7 @@ public class PersonAuthService(
             {
                 Token = token
             };
+            await userManager.ResetAccessFailedCountAsync(user);
             return Result<AuthenticatedResponse>.Success(response);
         }
         catch (Exception ex)
@@ -138,6 +148,8 @@ public class PersonAuthService(
         {
             return Result<bool>.Failure(CustomError.NotFound("Invalid or expired token"));
         }
+
+        await userManager.SetLockoutEndDateAsync(user, null);
         return Result<bool>.Success(true);
     }
 
