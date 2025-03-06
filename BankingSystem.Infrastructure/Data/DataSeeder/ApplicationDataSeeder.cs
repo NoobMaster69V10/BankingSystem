@@ -39,18 +39,7 @@ public class ApplicationDataSeeder(
             logger.LogError($"Error seeding database: {ex.Message}");
         }
     }
-
-    // private async Task SeedRoles()
-    // {
-    //     var roles = new[] { "Operator", "Person", "Manager" };
-    //
-    //     foreach (var role in roles)
-    //     {
-    //         if (!await roleManager.RoleExistsAsync(role))
-    //             await roleManager.CreateAsync(new IdentityRole(role));
-    //     }
-    // }
-
+    
     private async Task SeedUsersAndAccounts()
     {
         if (context.IdentityPersons.Any())

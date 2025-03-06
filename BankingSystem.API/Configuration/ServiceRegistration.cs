@@ -1,6 +1,5 @@
 ﻿using Serilog;
 using System.Text;
-using System.Net.Mail;
 using Microsoft.OpenApi.Models;
 using BankingSystem.Core.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -26,7 +25,7 @@ public static class ServiceRegistration
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         services.Configure<EncryptionSettings>(configuration.GetSection("Encryption"));
         services.Configure<SeederSettings>(configuration.GetSection("Seeder"));
-        
+
         services.AddHttpClient();
         services.AddLogging();
         services.AddSwaggerGen(options =>
@@ -58,13 +57,16 @@ public static class ServiceRegistration
                 }
             });
         });
-        services.AddIdentity<IdentityPerson, IdentityRole>()
+        services.AddIdentity<IdentityPerson, IdentityRole>(opt =>
+            {
+                opt.User.RequireUniqueEmail = true;
+            })
             .AddEntityFrameworkStores<BankingSystemDbContext>()
             .AddDefaultTokenProviders();
-        
+
         services.Configure<DataProtectionTokenProviderOptions>(
             opt => opt.TokenLifespan = TimeSpan.FromDays(30));
-        
+
         var jwtKey = configuration["Jwt:Key"];
         var jwtIssuer = configuration["Jwt:Issuer"];
 

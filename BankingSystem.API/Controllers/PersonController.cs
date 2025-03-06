@@ -35,7 +35,7 @@ namespace BankingSystem.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> LoginPerson([FromBody] PersonLoginDto loginModel)
+        public async Task<ActionResult<AuthenticatedResponse>> LoginPerson([FromBody] PersonLoginDto loginModel)
         {
             var result = await personAuthService.AuthenticationPersonAsync(loginModel);
             return result.IsFailure ? result.ToProblemDetails() : Created("login", new { Token = result.Value });

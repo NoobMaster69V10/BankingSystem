@@ -16,28 +16,32 @@ public class PersonAuthService(
     ILoggerService loggerService,
     IEmailService emailService,IJwtTokenGenerator tokenGenerator) : IPersonAuthService
 {
-    public async Task<Result<string>> AuthenticationPersonAsync(PersonLoginDto loginDto)
+    public async Task<Result<AuthenticatedResponse>> AuthenticationPersonAsync(PersonLoginDto loginDto)
     {
         try
         {
             var user = await userManager.FindByEmailAsync(loginDto.Email);
             if (user == null)
             {
-                return Result<string>.Failure(CustomError.NotFound("Invalid email"));
+                return Result<AuthenticatedResponse>.Failure(CustomError.NotFound("Invalid email"));
 
             }
             if (!await userManager.CheckPasswordAsync(user, loginDto.Password))
             {
-                return Result<string>.Failure(CustomError.NotFound("Invalid password"));
+                return Result<AuthenticatedResponse>.Failure(CustomError.NotFound("Invalid password"));
             }
 
             var token = await tokenGenerator.GenerateJwtToken(user);
-            return Result<string>.Success(token);
+            var response = new AuthenticatedResponse
+            {
+                Token = token
+            };
+            return Result<AuthenticatedResponse>.Success(response);
         }
         catch (Exception ex)
         {
             loggerService.LogError(ex.Message);
-            return Result<string>.Failure(CustomError.Failure("Error occurred while authenticating person"));
+            return Result<AuthenticatedResponse>.Failure(CustomError.Failure("Error occurred while authenticating person"));
         }
     }
 
