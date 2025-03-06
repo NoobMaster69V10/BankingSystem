@@ -40,11 +40,11 @@ public class AtmService : IAtmService
             }
 
             var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardDto.CardNumber);
-            var response = new BalanceResponse(
-                balance: balance,
-                cardNumber: cardDto.CardNumber
-            );
-
+            var response = new BalanceResponse
+            {
+                CardNumber = cardDto.CardNumber,
+                Balance = balance,
+            };
             return Result<BalanceResponse>.Success(response);
         }
         catch (Exception ex)
@@ -98,7 +98,8 @@ public class AtmService : IAtmService
 
             if (withdrawMoneyDto.Amount <= 0)
             {
-                return Result<AtmTransactionResponse>.Failure(new CustomError("AmountLessOrEqualZero", "Amount must be greater than 0."));
+                return Result<AtmTransactionResponse>.Failure(new CustomError("AmountLessOrEqualZero",
+                    "Amount must be greater than 0."));
             }
 
             var bankAccount = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(withdrawMoneyDto.CardNumber);
@@ -111,7 +112,7 @@ public class AtmService : IAtmService
             decimal withdrawAmountInGel = withdrawMoneyDto.Amount;
             if (bankAccount.Currency != Currency.GEL)
             {
-                var exchangeRate = await _exchangeRateApi.GetExchangeRate(bankAccount.Currency!);
+                var exchangeRate = await _exchangeRateApi.GetExchangeRate(bankAccount.Currency);
                 if (exchangeRate <= 0)
                 {
                     return Result<AtmTransactionResponse>.Failure(new CustomError("ExchangeRateError",
@@ -146,7 +147,7 @@ public class AtmService : IAtmService
             {
                 FromAccountId = bankAccount.BankAccountId,
                 Amount = withdrawMoneyDto.Amount,
-                TransactionDate = DateTime.UtcNow, 
+                TransactionDate = DateTime.UtcNow,
                 TransactionFee = fee
             };
             await _unitOfWork.BankTransactionRepository.AddAtmTransactionAsync(atmTransaction);
@@ -163,7 +164,40 @@ public class AtmService : IAtmService
         catch (Exception ex)
         {
             _loggerService.LogError($"Error in WithdrawMoneyAsync: {ex}");
-            return Result<AtmTransactionResponse>.Failure(CustomError.Failure("An error occurred during the transaction."));
+            return Result<AtmTransactionResponse>.Failure(
+                CustomError.Failure("An error occurred during the transaction."));
+        }
+    }
+
+    public async Task<Result<BalanceResponse>> DepositMoneyAsync(DepositMoneyDto cardDto)
+    {
+        try
+        {
+            if (cardDto.Amount <= 0)
+            {
+                return Result<BalanceResponse>.Failure(new CustomError("AmountLessOrEqualZero",
+                    "Amount must be greater than 0."));
+            }
+
+            var bankAccount = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(cardDto.CardNumber);
+            if (bankAccount == null)
+            {
+                return Result<BalanceResponse>.Failure(CustomError.NotFound("Bank account not found."));
+            }
+            bankAccount.Balance += cardDto.Amount;
+            await _unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount);
+            var response = new BalanceResponse
+            {
+                CardNumber = cardDto.CardNumber,
+                Balance = bankAccount.Balance
+            };
+
+            return Result<BalanceResponse>.Success(response);
+        }
+        catch (Exception e)
+        {
+            _loggerService.LogError($"Error in WithdrawMoneyAsync:{e}");
+            return Result<BalanceResponse>.Failure(CustomError.NotFound("Error during transaction."));
         }
     }
 
@@ -190,11 +224,12 @@ public class AtmService : IAtmService
     {
         try
         {
-            var totalWithdrawnToday = await _unitOfWork.BankTransactionRepository.GetTotalWithdrawnTodayAsync(bankAccount.BankAccountId);
+            var totalWithdrawnToday =
+                await _unitOfWork.BankTransactionRepository.GetTotalWithdrawnTodayAsync(bankAccount.BankAccountId);
 
             if (bankAccount.Currency != Currency.GEL)
             {
-                var exchangeRate = await _exchangeRateApi.GetExchangeRate(bankAccount.Currency!);
+                var exchangeRate = await _exchangeRateApi.GetExchangeRate(bankAccount.Currency);
                 if (exchangeRate <= 0)
                 {
                     return Result<decimal>.Failure(
@@ -212,5 +247,4 @@ public class AtmService : IAtmService
             return Result<decimal>.Failure(new CustomError("Error", "Error during getting money"));
         }
     }
-
 }

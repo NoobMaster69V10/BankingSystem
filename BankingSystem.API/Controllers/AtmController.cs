@@ -36,4 +36,11 @@ public class AtmController : ControllerBase
         var result = await _atmService.ChangePinAsync(cardDto);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
+
+    [HttpPost("deposit-money")]
+    public async Task<ActionResult<BalanceResponse>> DepositMoney(DepositMoneyDto cardDto)
+    {
+        var result = await _atmService.DepositMoneyAsync(cardDto);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
+    }
 }

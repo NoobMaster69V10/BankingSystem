@@ -4,10 +4,5 @@ public record BalanceResponse
 {
     public decimal Balance { get; set; }
     public string CardNumber { get; set; }
-
-    public BalanceResponse(decimal balance, string cardNumber)
-    {
-        Balance = balance;
-        CardNumber = cardNumber;
-    }
+    
 }
