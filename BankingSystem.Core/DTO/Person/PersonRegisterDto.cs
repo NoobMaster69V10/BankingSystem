@@ -32,4 +32,6 @@ public record PersonRegisterDto
 
     [AllowedValues("Operator", "Person","Manager",ErrorMessage = "Role must be either 'Operator' or 'Person'.")]
     public string Role { get; set; } = "Person";
+
+    public string? ClientUri { get; set; }
 }

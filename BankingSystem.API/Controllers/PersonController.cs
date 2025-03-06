@@ -1,7 +1,5 @@
-﻿using BankingSystem.Core.DTO.AccountTransaction;
-using BankingSystem.Core.DTO.Person;
+﻿using BankingSystem.Core.DTO.Person;
 using BankingSystem.Core.DTO.Response;
-using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.Extensions;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
@@ -28,29 +26,36 @@ namespace BankingSystem.API.Controllers
 
         [Authorize(Roles = "Operator")]
         [HttpPost("register")]
-        public async Task<ActionResult<RegisterResponse>> RegisterUser([FromBody] PersonRegisterDto registerModel)
+        public async Task<ActionResult<RegisterResponse>> RegisterUser(PersonRegisterDto registerModel)
         {
             var result = await personAuthService.RegisterPersonAsync(registerModel);
             return result.IsFailure ? result.ToProblemDetails() : Created("register", result.Value);
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<AuthenticatedResponse>> LoginPerson([FromBody] PersonLoginDto loginModel)
+        public async Task<ActionResult<AuthenticatedResponse>> LoginPerson(PersonLoginDto loginModel)
         {
             var result = await personAuthService.AuthenticationPersonAsync(loginModel);
             return result.IsFailure ? result.ToProblemDetails() : Created("login", new { Token = result.Value });
         }
         
         [HttpPost("forgot-password")]
-        public async Task<ActionResult<string>> ForgotPassword([FromBody] ForgotPasswordDto forgotPassword)
+        public async Task<ActionResult<string>> ForgotPassword(ForgotPasswordDto forgotPassword)
         {
             var result = await personAuthService.ForgotPasswordAsync(forgotPassword);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
         }
         [HttpPost("reset-password")]
-        public async Task<ActionResult<bool>> ResetPassword([FromBody] ResetPasswordDto resetPassword)
+        public async Task<ActionResult<bool>> ResetPassword(ResetPasswordDto resetPassword)
         {
             var result = await personAuthService.ResetPasswordAsync(resetPassword);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
+        }
+
+        [HttpPost("emailconfirmation")]
+        public async Task<ActionResult<string>> EmailConfirmation(EmailConfirmationDto emailConfirmationDto)
+        {
+            var result = await personAuthService.EmailConfirmationAsync(emailConfirmationDto);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
         }
     }

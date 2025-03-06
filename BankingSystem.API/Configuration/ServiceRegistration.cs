@@ -60,6 +60,7 @@ public static class ServiceRegistration
         services.AddIdentity<IdentityPerson, IdentityRole>(opt =>
             {
                 opt.User.RequireUniqueEmail = true;
+                opt.SignIn.RequireConfirmedEmail = true;
             })
             .AddEntityFrameworkStores<BankingSystemDbContext>()
             .AddDefaultTokenProviders();

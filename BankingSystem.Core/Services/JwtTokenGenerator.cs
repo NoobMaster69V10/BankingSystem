@@ -31,7 +31,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 
         var claims = new List<Claim>
         {
-            new Claim("personId", person.Id)
+            new("personId", person.Id)
         };
 
         claims.AddRange(roleClaims);

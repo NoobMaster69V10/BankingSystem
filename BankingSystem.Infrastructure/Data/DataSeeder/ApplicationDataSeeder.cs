@@ -89,7 +89,9 @@ public class ApplicationDataSeeder(
                     user.Lastname = "Person";
                     break;
             }
-
+            
+            await userManager.ConfirmEmailAsync(user, await userManager.GenerateEmailConfirmationTokenAsync(user));
+            
             var person = await personRepository.GetByUsernameAsync(email);
 
             var bankAccount = new BankAccount

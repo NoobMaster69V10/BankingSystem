@@ -96,7 +96,7 @@ public class EmailService : IEmailService
                                         <!-- Body Content -->
                                         <p style='font-size: 16px; color: #555; line-height: 1.5;'>Hello,</p>
                                         <p style='font-size: 16px; color: #555; line-height: 1.5;'>We received a request to reset your password for your Banking System account. If you didn't make this request, you can safely ignore this email.</p>
-                                        <p style='font-size: 16px; color: #555; line-height: 1.5;'>To reset your password, click the button below:</p>
+                                        <p style='font-size: 16px; color: #555; line-height: 1.5;'>click the button below:</p>
                                         <div style='text-align: center; margin: 30px 0;'>
                                             <a href='{message.Content}' style='background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-size: 18px; font-weight: bold; display: inline-block;'>Reset Password</a>
                                         </div>

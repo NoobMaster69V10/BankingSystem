@@ -67,7 +67,16 @@ public class PersonAuthService(
                 return Result<RegisterResponse>.Failure(new CustomError("UNEXPECTED_ERROR",
                     string.Join(" ", result.Errors.Select(e => e.Description))));
             }
-
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(person);
+            var param = new Dictionary<string, string?>
+            {
+                { "token", token },
+                { "email", person.Email }
+            };
+            var callback = QueryHelpers.AddQueryString(registerDto.ClientUri!, param);
+            var message = new Message([person.Email], "Email Confirmation Token", callback,null);
+            await emailService.SendEmailAsync(message);
+            
             var role = string.IsNullOrEmpty(registerDto.Role) ? "Person" : registerDto.Role;
 
             if (!await roleManager.RoleExistsAsync(role))
@@ -112,7 +121,7 @@ public class PersonAuthService(
             { "email", forgotPasswordDto.Email }
         };
         var callback = QueryHelpers.AddQueryString(forgotPasswordDto.ClientUri, param!);
-        var message = new Message([user.Email],"Reset Your password",callback,null!);
+        var message = new Message([user.Email],"EmailConfirmation",callback,null!);
         await emailService.SendEmailAsync(message);
         return Result<string>.Success("Email sent successfully.");
     }
@@ -130,5 +139,20 @@ public class PersonAuthService(
             return Result<bool>.Failure(CustomError.NotFound("Invalid or expired token"));
         }
         return Result<bool>.Success(true);
+    }
+
+    public async  Task<Result<string>> EmailConfirmationAsync(EmailConfirmationDto emailConfirmationDto)
+    {
+        var user = await userManager.FindByEmailAsync(emailConfirmationDto.Email);
+        if (user is null)
+        {
+            return Result<string>.Failure(CustomError.NotFound("Invalid email confirmation request"));
+        }
+        var confirmResult = await userManager.ConfirmEmailAsync(user, emailConfirmationDto.Token);
+        if (!confirmResult.Succeeded)
+        {
+            return Result<string>.Failure(CustomError.Validation("Invalid email confirmation request"));
+        }
+        return Result<string>.Success("Email sent successfully.");
     }
 }
