@@ -125,7 +125,7 @@ public class BankReportService(
             var stats = new AtmTransactionsStatistics
             {
                 TotalWithdrawnAmount = await GetTotalWithdrawalsFromAtmInGelAsync(), 
-                Currency = Currency.GEL
+                Currency = Currency.GEL.ToString()
             };
             return Result<AtmTransactionsStatistics>.Success(stats);
         }

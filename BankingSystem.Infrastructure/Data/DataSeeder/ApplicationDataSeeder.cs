@@ -32,7 +32,6 @@ public class ApplicationDataSeeder(
     {
         try
         {
-            await SeedRoles();
             await SeedUsersAndAccounts();
         }
         catch (Exception ex)
@@ -41,16 +40,16 @@ public class ApplicationDataSeeder(
         }
     }
 
-    private async Task SeedRoles()
-    {
-        var roles = new[] { "Operator", "Person", "Manager" };
-
-        foreach (var role in roles)
-        {
-            if (!await roleManager.RoleExistsAsync(role))
-                await roleManager.CreateAsync(new IdentityRole(role));
-        }
-    }
+    // private async Task SeedRoles()
+    // {
+    //     var roles = new[] { "Operator", "Person", "Manager" };
+    //
+    //     foreach (var role in roles)
+    //     {
+    //         if (!await roleManager.RoleExistsAsync(role))
+    //             await roleManager.CreateAsync(new IdentityRole(role));
+    //     }
+    // }
 
     private async Task SeedUsersAndAccounts()
     {

@@ -22,15 +22,6 @@ public static class ServiceRegistration
             .WriteTo.Console()
             .WriteTo.File("Logs/banking_system.log", rollingInterval: RollingInterval.Infinite)
             .CreateLogger();
-
-        services.AddFluentEmail("bankingsystemcredo@gmail.com")
-            .AddSmtpSender(new SmtpClient("smtp.gmail.com")
-            {
-                Port = 587,
-                Credentials = new System.Net.NetworkCredential("bankingsystemcredo@gmail.com", "imtm pass skrt tnjq"),
-                EnableSsl = true
-            });
-
         services.Configure<EmailConfiguration>(configuration.GetSection("EmailConfiguration"));
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         services.Configure<EncryptionSettings>(configuration.GetSection("Encryption"));

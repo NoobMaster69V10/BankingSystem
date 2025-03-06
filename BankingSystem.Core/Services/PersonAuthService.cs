@@ -64,7 +64,7 @@ public class PersonAuthService(
                     string.Join(" ", result.Errors.Select(e => e.Description))));
             }
 
-            string role = string.IsNullOrEmpty(registerDto.Role) ? "Person" : registerDto.Role;
+            var role = string.IsNullOrEmpty(registerDto.Role) ? "Person" : registerDto.Role;
 
             if (!await roleManager.RoleExistsAsync(role))
             {

@@ -26,8 +26,10 @@ public record PersonRegisterDto
     [Required(ErrorMessage = "Password is required.")]
     [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
     public string Password { get; init; } = string.Empty;
+    
+    [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+    public string ConfirmPassword { get; set; }
 
-    [AllowedValues("Operator", "Person", ErrorMessage = "Role must be either 'Operator' or 'Person'.")]
-    [JsonIgnore]
+    [AllowedValues("Operator", "Person","Manager",ErrorMessage = "Role must be either 'Operator' or 'Person'.")]
     public string Role { get; set; } = "Person";
 }

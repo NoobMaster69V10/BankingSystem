@@ -5,5 +5,5 @@ namespace BankingSystem.Domain.Statistics;
 public class AtmTransactionsStatistics
 {
     public decimal TotalWithdrawnAmount { get; set; } = new();
-    public Currency Currency { get; set; }
+    public string Currency { get; set; }
 }

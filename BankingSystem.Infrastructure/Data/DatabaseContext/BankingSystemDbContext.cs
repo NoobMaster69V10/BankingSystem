@@ -1,4 +1,5 @@
 ﻿using BankingSystem.Core.Identity;
+using BankingSystem.Infrastructure.Configure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
@@ -9,4 +10,10 @@ public class BankingSystemDbContext : IdentityDbContext<IdentityPerson>
     public BankingSystemDbContext(DbContextOptions<BankingSystemDbContext> options) : base(options) { }
 
     public DbSet<IdentityPerson> IdentityPersons { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        builder.ApplyConfiguration(new RoleConfiguration());
+    }
 }
