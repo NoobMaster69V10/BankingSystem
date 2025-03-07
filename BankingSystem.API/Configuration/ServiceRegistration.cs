@@ -18,10 +18,7 @@ public static class ServiceRegistration
 {
     public static void AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console()
-            .WriteTo.File("Logs/banking_system.log", rollingInterval: RollingInterval.Infinite)
-            .CreateLogger();
+        
         services.Configure<EmailConfiguration>(configuration.GetSection("EmailConfiguration"));
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         services.Configure<EncryptionSettings>(configuration.GetSection("Encryption"));

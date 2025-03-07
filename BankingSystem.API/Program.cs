@@ -7,6 +7,7 @@ using BankingSystem.API.Middlewares;
 using BankingSystem.Core.Configuration;
 using BankingSystem.Infrastructure.Configure;
 using BankingSystem.Infrastructure.Data.DatabaseConfiguration;
+using Serilog;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -21,8 +22,7 @@ builder.Services.AddCoreServices();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddMemoryCache();
-
-
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 

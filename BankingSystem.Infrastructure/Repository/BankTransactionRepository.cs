@@ -8,9 +8,7 @@ namespace BankingSystem.Infrastructure.Repository;
 
 public class BankTransactionRepository : RepositoryBase, IBankTransactionRepository
 {
-    public BankTransactionRepository(IDbConnection connection) : base(connection)
-    {
-    }
+    public BankTransactionRepository(IDbConnection connection) : base(connection) { }
 
     public async Task AddAccountTransferAsync(AccountTransfer transferObj)
     {

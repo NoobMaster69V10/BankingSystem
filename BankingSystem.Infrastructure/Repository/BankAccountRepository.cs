@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using System.Data;
 using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.RepositoryContracts;
 
 namespace BankingSystem.Infrastructure.Repository;
@@ -12,7 +13,7 @@ public class BankAccountRepository : RepositoryBase, IBankAccountRepository
     public async Task AddBankAccountAsync(BankAccount account)
     {
         const string query = "INSERT INTO BankAccounts (IBAN, Balance, Currency, PersonId) VALUES (@Iban, @Balance, @Currency, @PersonId)";
-        await Connection.ExecuteAsync(query, new{ account.Iban, account.Balance, Currency = account.Currency.ToString(), account.PersonId}, Transaction);
+        await Connection.ExecuteAsync(query, account, Transaction);
     }
 
     public async Task<BankAccount?> GetAccountByIdAsync(int accountId)
@@ -35,10 +36,10 @@ public class BankAccountRepository : RepositoryBase, IBankAccountRepository
                 IBAN = iban 
             });
     }
-    public async Task<string> GetAccountCurrencyAsync(int accountId)
+    public async Task<Currency> GetAccountCurrencyAsync(int accountId)
     {
-        const string query = "SELECT Currency FROM BankAccounts WHERE BankAccountId = @AccountId";
-        var result = await Connection.QueryFirstOrDefaultAsync<string>(query, new { AccountId = accountId });
+        const string query = "SELECT Currency FROM BankAccounts WHERE BankAccountId = @BankAccountId";
+        var result = await Connection.QueryFirstOrDefaultAsync<Currency>(query, new { BankAccountId = accountId });
         return result!;
     }
 }

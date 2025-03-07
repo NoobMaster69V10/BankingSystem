@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace BankingSystem.Domain.Entities;
 
@@ -7,17 +6,9 @@ public class BankCard
 {
     [JsonIgnore]
     public int BankCardId { get; set; }
-    
-
-    [Required(ErrorMessage = "Card number is required.")]
-    [CreditCard(ErrorMessage = "Invalid card number format.")]
-    public string? CardNumber { get; set; }
-
-    [Required(ErrorMessage = "Expiration date is required.")]
+    public string CardNumber { get; set; } = string.Empty;
     public DateTime ExpirationDate { get; set; }
-    public  string? Cvv { get; set; }
-    public string? PinCode { get; set; }
-
-    [Required(ErrorMessage = "Account ID is required.")]
+    public string Cvv { get; set; } = string.Empty;
+    public string PinCode { get; set; } = string.Empty;
     public int AccountId { get; set; }
 }

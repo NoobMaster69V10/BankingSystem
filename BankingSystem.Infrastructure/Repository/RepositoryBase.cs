@@ -1,5 +1,4 @@
-﻿using Dapper;
-using System.Data;
+﻿using System.Data;
 using BankingSystem.Domain.RepositoryContracts;
 
 namespace BankingSystem.Infrastructure.Repository;

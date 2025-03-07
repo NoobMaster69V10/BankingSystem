@@ -66,7 +66,7 @@ public class ApplicationDataSeeder(
                 UserName = email,
                 Email = email,
                 FirstName = email.Split("@")[0],
-                Lastname = "",
+                Lastname = email.Split("@")[1],
                 BirthDate = DateTime.UtcNow.AddYears(-30),
                 IdNumber = "01010034023"
             };

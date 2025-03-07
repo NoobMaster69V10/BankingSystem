@@ -2,6 +2,7 @@
 using BankingSystem.Core.Services;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace BankingSystem.Core.Configuration;
 
@@ -9,6 +10,10 @@ public static class ServiceRegistration
 {
     public static void AddCoreServices(this IServiceCollection services)
     {
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File("Logs/banking_system.log", rollingInterval: RollingInterval.Infinite)
+            .CreateLogger();
         services.AddScoped<IBankAccountService, BankAccountService>();
         services.AddScoped<IBankCardService, BankCardService>();
         services.AddScoped<IAtmService, AtmService>();

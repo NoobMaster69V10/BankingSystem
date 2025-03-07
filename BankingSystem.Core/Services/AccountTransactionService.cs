@@ -60,8 +60,7 @@ public class AccountTransactionService(
                 ToAccountId = transactionDto.ToAccountId,
                 Amount = transactionDto.Amount,
                 TransactionDate = DateTime.UtcNow,
-                TransactionFee = transactionFee,
-                TransactionType = TransactionType.AccountTransfer
+                TransactionFee = transactionFee
             };
 
             fromAccount.Balance -= (transactionDto.Amount + transactionFee);
