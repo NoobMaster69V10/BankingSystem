@@ -34,18 +34,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<DatabaseConfiguration>();
-    await db.ConfigureDatabase();
-}
-
-using (var scope = app.Services.CreateScope())
-{
-    var seeder = scope.ServiceProvider.GetRequiredService<ApplicationDataSeeder>();
-    await seeder.Seed();
-}
-
 app.UseExceptionHandler();
 
 app.UseAuthentication();

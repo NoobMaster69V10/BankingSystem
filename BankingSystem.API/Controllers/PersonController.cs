@@ -36,7 +36,7 @@ namespace BankingSystem.API.Controllers
         public async Task<ActionResult<AuthenticatedResponse>> LoginPerson(PersonLoginDto loginModel)
         {
             var result = await personAuthService.AuthenticationPersonAsync(loginModel);
-            return result.IsFailure ? result.ToProblemDetails() : Created("login", new { Token = result.Value });
+            return result.IsFailure ? result.ToProblemDetails() : Created("login", result.Value);
         }
         
         [HttpPost("forgot-password")]
@@ -52,7 +52,7 @@ namespace BankingSystem.API.Controllers
             return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
         }
 
-        [HttpPost("emailconfirmation")]
+        [HttpPost("email-confirmation")]
         public async Task<ActionResult<string>> EmailConfirmation(EmailConfirmationDto emailConfirmationDto)
         {
             var result = await personAuthService.EmailConfirmationAsync(emailConfirmationDto);

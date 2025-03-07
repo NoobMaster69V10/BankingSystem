@@ -10,37 +10,19 @@ using Microsoft.Extensions.Options;
 
 namespace BankingSystem.Infrastructure.Data.DataSeeder;
 
-public class ApplicationDataSeeder(
+public class DatabaseSeeder(
     IHasherService hasherService,
     IEncryptionService encryptionService,
     IOptions<SeederSettings> seederSettings,
     BankingSystemDbContext context,
     UserManager<IdentityPerson> userManager,
-    RoleManager<IdentityRole> roleManager,
     IBankAccountRepository bankAccountRepository,
     IBankCardRepository bankCardRepository,
     IPersonRepository personRepository,
-    ILoggerService logger)
+    ILoggerService logger) : IDatabaseSeeder
 {
     private SeederSettings SeederSettings => seederSettings.Value;
-    public async Task Seed()
-    {
-        await SeedData();
-    }
-
-    private async Task SeedData()
-    {
-        try
-        {
-            await SeedUsersAndAccounts();
-        }
-        catch (Exception ex)
-        {
-            logger.LogError($"Error seeding database: {ex.Message}");
-        }
-    }
-    
-    private async Task SeedUsersAndAccounts()
+    public async Task SeedDataAsync()
     {
         if (context.IdentityPersons.Any())
         {
@@ -89,9 +71,9 @@ public class ApplicationDataSeeder(
                     user.Lastname = "Person";
                     break;
             }
-            
+
             await userManager.ConfirmEmailAsync(user, await userManager.GenerateEmailConfirmationTokenAsync(user));
-            
+
             var person = await personRepository.GetByUsernameAsync(email);
 
             var bankAccount = new BankAccount
@@ -104,11 +86,11 @@ public class ApplicationDataSeeder(
 
             await bankAccountRepository.AddBankAccountAsync(bankAccount);
 
-            var personFullInfo = await personRepository.GetByIdAsync(person.PersonId!);
+            var personFullInfo = await personRepository.GetByIdAsync(person.PersonId);
 
-            var personAccountId = personFullInfo!.BankAccounts!.First().BankAccountId;
+            var personAccountId = personFullInfo!.BankAccounts.First().BankAccountId;
 
-            
+
             var pinHash = hasherService.Hash("1234");
 
             var encryptedCvv = encryptionService.Encrypt(GenerateCvv());

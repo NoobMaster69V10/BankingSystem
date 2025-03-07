@@ -7,12 +7,13 @@ using BankingSystem.Domain.UnitOfWorkContracts;
 using Microsoft.Extensions.DependencyInjection;
 using BankingSystem.Domain.RepositoryContracts;
 using BankingSystem.Domain.ExternalApiContracts;
+using BankingSystem.Infrastructure.Data.DatabaseConfiguration;
 using BankingSystem.Infrastructure.ExternalApis;
 using BankingSystem.Infrastructure.Data.DataSeeder;
 using BankingSystem.Infrastructure.Data.DatabaseContext;
-using BankingSystem.Infrastructure.Data.DatabaseConfiguration;
 
 namespace BankingSystem.Infrastructure.Configure;
+
 using UnitOfWork;
 public static class ServiceRegistration
 {
@@ -33,7 +34,9 @@ public static class ServiceRegistration
         services.AddScoped<IBankCardRepository, BankCardRepository>();
         services.AddScoped<IBankAccountRepository, BankAccountRepository>();
         services.AddScoped<IExchangeRateApi, ExchangeRateApi>();
-        services.AddTransient<ApplicationDataSeeder>();
-        services.AddScoped<DatabaseConfiguration>();
+        services.AddScoped<IDatabaseConfiguration, DatabaseConfiguration>();
+        services.AddHostedService<DatabaseConfiguratorBackground>();
+        services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
+        services.AddHostedService<DatabaseSeederBackground>();
     }
 }

@@ -1,48 +1,58 @@
-﻿using Dapper;
-using System.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using BankingSystem.Core.ServiceContracts;
-using Microsoft.Extensions.DependencyInjection;
+﻿using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Infrastructure.Data.DatabaseContext;
+using Microsoft.Extensions.DependencyInjection;
+using System.Data;
+using Dapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace BankingSystem.Infrastructure.Data.DatabaseConfiguration;
 
-public class DatabaseConfiguration(IServiceProvider serviceProvider, IConfiguration configuration, ILoggerService loggerService)
+public class DatabaseConfiguration : IDatabaseConfiguration
 {
-    public async Task ConfigureDatabase()
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILoggerService _loggerService;
+    public DatabaseConfiguration(IServiceProvider serviceProvider, ILoggerService loggerService)
     {
-        //var databaseName = _configuration.GetConnectionString("DefaultConnection")!.Split("=")[2].Split(";")[0];
+        _loggerService = loggerService;
+        _serviceProvider = serviceProvider;
+    }
+    
+    public async Task ConfigureDatabaseAsync()
+    {
         var databaseName = Environment.GetEnvironmentVariable("CONNECTION_STRING")!.Split("=")[2].Split(";")[0];
 
         var databaseCheckQuery = $"SELECT CASE WHEN EXISTS (SELECT name FROM sys.databases WHERE name = '{databaseName}') THEN 1 ELSE 0 END";
-        var connection = serviceProvider.GetRequiredService<IDbConnection>();
-        using (connection)
+        using var scope = _serviceProvider.CreateScope();
+        var scopedProvider = scope.ServiceProvider;
+
+        try
         {
-            try
-            {
-                await connection.ExecuteAsync(databaseCheckQuery);
-                loggerService.LogSuccess("Database already exists!");
-            }
-            catch (Exception)
-            {
-                var dbContext = serviceProvider.GetRequiredService<BankingSystemDbContext>();
-                await dbContext.Database.MigrateAsync();
+            var connection = scopedProvider.GetRequiredService<IDbConnection>();
+            await connection.ExecuteAsync(databaseCheckQuery);
 
-                var createBankAccountTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                    @"..\BankingSystem.SQL\Tables\BankAccounts.sql"));
+            _loggerService.LogError("Database already exists!");
+        }
+        catch (Exception ex)
+        {
+            var dbContext = scopedProvider.GetRequiredService<BankingSystemDbContext>();
+            await dbContext.Database.MigrateAsync();
 
-                var createBankCardTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                    @"..\BankingSystem.SQL\Tables\BankCards.sql"));
+            var connection = scopedProvider.GetRequiredService<IDbConnection>();
 
-                var createAccountTransactionTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                    @"..\BankingSystem.SQL\Tables\AccountTransactions.sql"));
-                
-                await connection.ExecuteAsync(createBankAccountTable);
-                await connection.ExecuteAsync(createBankCardTable);
-                await connection.ExecuteAsync(createAccountTransactionTable);
-                loggerService.LogSuccess("Database created successfully!");
-            }
+            var createBankAccountTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
+                @"..\BankingSystem.SQL\Tables\BankAccounts.sql"));
+
+            var createBankCardTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
+                @"..\BankingSystem.SQL\Tables\BankCards.sql"));
+
+            var createAccountTransactionTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
+                @"..\BankingSystem.SQL\Tables\AccountTransactions.sql"));
+
+            await connection.ExecuteAsync(createBankAccountTable);
+            await connection.ExecuteAsync(createBankCardTable);
+            await connection.ExecuteAsync(createAccountTransactionTable);
+
+            _loggerService.LogSuccess("Database migration completed successfully!");
         }
     }
 }
