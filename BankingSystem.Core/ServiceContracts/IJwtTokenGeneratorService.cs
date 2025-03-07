@@ -2,7 +2,7 @@ using BankingSystem.Core.Identity;
 
 namespace BankingSystem.Core.ServiceContracts;
 
-public interface IJwtTokenGenerator
+public interface IJwtTokenGeneratorService
 {
     Task<string> GenerateJwtToken(IdentityPerson person);
 }

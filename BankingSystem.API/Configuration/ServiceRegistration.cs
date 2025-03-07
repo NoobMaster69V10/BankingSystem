@@ -1,5 +1,4 @@
-﻿using Serilog;
-using System.Text;
+﻿using System.Text;
 using BankingSystem.API.CustomValidators;
 using Microsoft.OpenApi.Models;
 using BankingSystem.Core.Identity;
@@ -18,7 +17,6 @@ public static class ServiceRegistration
 {
     public static void AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
-        
         services.Configure<EmailConfiguration>(configuration.GetSection("EmailConfiguration"));
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         services.Configure<EncryptionSettings>(configuration.GetSection("Encryption"));
@@ -37,7 +35,7 @@ public static class ServiceRegistration
                 Scheme = "Bearer",
                 BearerFormat = "JWT",
                 In = ParameterLocation.Header,
-                Description = "Enter 'Bearer {token}' in the field below."
+                Description = "Enter '{token}' in the field below."
             });
 
             options.AddSecurityRequirement(new OpenApiSecurityRequirement

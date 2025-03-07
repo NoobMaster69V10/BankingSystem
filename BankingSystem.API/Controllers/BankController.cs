@@ -1,10 +1,8 @@
 ﻿using BankingSystem.Core.DTO.AccountTransaction;
 using BankingSystem.Core.DTO.BankAccount;
 using BankingSystem.Core.DTO.BankCard;
-using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.Extensions;
 using BankingSystem.Core.ServiceContracts;
-using BankingSystem.Core.Services;
 using BankingSystem.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

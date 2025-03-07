@@ -14,7 +14,7 @@ public class PersonAuthService(
     UserManager<IdentityPerson> userManager,
     RoleManager<IdentityRole> roleManager,
     ILoggerService loggerService,
-    IEmailService emailService,IJwtTokenGenerator tokenGenerator) : IPersonAuthService
+    IEmailService emailService,IJwtTokenGeneratorService tokenGenerator) : IPersonAuthService
 {
     public async Task<Result<AuthenticatedResponse>> AuthenticationPersonAsync(PersonLoginDto loginDto)
     {
@@ -33,7 +33,7 @@ public class PersonAuthService(
                 {
                     var content = $"Your account has been locked. Please check your email and password." + 
                                   "you can use the forgot password link";
-                    var message = new Message([loginDto.Email],"Locked out account information",content,null);
+                    var message = new Message([loginDto.Email],"Locked out account information",content,null!);
                     await emailService.SendEmailAsync(message);
                     return Result<AuthenticatedResponse>.Failure(CustomError.AccessUnAuthorized("The account has been locked."));
                 }
@@ -84,7 +84,7 @@ public class PersonAuthService(
                 { "email", person.Email }
             };
             var callback = QueryHelpers.AddQueryString(registerDto.ClientUri!, param);
-            var message = new Message([person.Email], "Email Confirmation Token", callback,null);
+            var message = new Message([person.Email], "Email Confirmation Token", callback,null!);
             await emailService.SendEmailAsync(message);
             
             var role = string.IsNullOrEmpty(registerDto.Role) ? "Person" : registerDto.Role;

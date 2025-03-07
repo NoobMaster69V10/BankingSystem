@@ -25,12 +25,13 @@ public static class ServiceRegistration
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IHasherService, HashingService>(); 
         services.AddScoped<IEmailService, EmailService>();
-        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IJwtTokenGeneratorService, JwtTokenGeneratorService>();
         services.Configure<FormOptions>(o => {
             o.ValueLengthLimit = int.MaxValue;
             o.MultipartBodyLengthLimit = int.MaxValue;
             o.MemoryBufferThreshold = int.MaxValue;
         });
         services.AddScoped<IEncryptionService, EncryptionService>();
+        services.AddScoped<IExchangeService, ExchangeService>();
     }
 }

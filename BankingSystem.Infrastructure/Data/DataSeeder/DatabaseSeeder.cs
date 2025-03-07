@@ -86,7 +86,9 @@ public class DatabaseSeeder(
 
             await bankAccountRepository.AddBankAccountAsync(bankAccount);
 
-            var personFullInfo = await personRepository.GetByIdAsync(person.PersonId);
+            var cancellationToken = new CancellationToken();
+
+            var personFullInfo = await personRepository.GetByIdAsync(person.PersonId, cancellationToken);
 
             var personAccountId = personFullInfo!.BankAccounts.First().BankAccountId;
 

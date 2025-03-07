@@ -7,11 +7,11 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace BankingSystem.Core.Services;
 
-public class PersonService(IUnitOfWork unitOfWork, ILoggerService loggerService,IMemoryCache cache) : IPersonService
+public class PersonService(IUnitOfWork unitOfWork, ILoggerService loggerService, IMemoryCache cache) : IPersonService
 {
     private readonly TimeSpan _cacheDuration = TimeSpan.FromSeconds(60);
 
-    public async Task<Result<Person>> GetPersonById(string personId)
+    public async Task<Result<Person>> GetPersonById(string personId, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -21,7 +21,13 @@ public class PersonService(IUnitOfWork unitOfWork, ILoggerService loggerService,
                 return Result<Person>.Success(cachedReport);
             }
             
-            var person = await unitOfWork.PersonRepository.GetByIdAsync(personId);
+            var person = await unitOfWork.PersonRepository.GetByIdAsync(personId, cancellationToken);
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Cancellation requested");
+            }
 
             if (string.IsNullOrEmpty(personId) || person is null)
             {

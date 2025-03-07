@@ -10,12 +10,12 @@ using BankingSystem.Domain.ConfigurationSettings.Jwt;
 
 namespace BankingSystem.Core.Services;
 
-public class JwtTokenGenerator : IJwtTokenGenerator
+public class JwtTokenGeneratorService : IJwtTokenGeneratorService
 {
     private readonly JwtSettings _jwtSettings;
     private readonly UserManager<IdentityPerson> _userManager;
 
-    public JwtTokenGenerator(IOptions<JwtSettings> jwtSettings, UserManager<IdentityPerson> userManager)
+    public JwtTokenGeneratorService(IOptions<JwtSettings> jwtSettings, UserManager<IdentityPerson> userManager)
     {
         _jwtSettings = jwtSettings.Value;
         _userManager = userManager;
