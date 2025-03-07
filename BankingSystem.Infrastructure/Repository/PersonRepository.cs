@@ -83,10 +83,10 @@ public class PersonRepository : RepositoryBase, IPersonRepository
                     userDictionary.Add(currentUser.PersonId, currentUser);
                 }
 
-                if (currentUser.BankAccounts.All(a => a.BankAccountId != bankAccount.BankAccountId))
+                if (bankAccount != null! && currentUser.BankAccounts.All(a => a.BankAccountId != bankAccount.BankAccountId))
                     currentUser.BankAccounts.Add(bankAccount);
 
-                if (currentUser.Cards.All(c => c.BankCardId != bankCard.BankCardId))
+                if (bankCard != null! && currentUser.Cards.All(c => c.BankCardId != bankCard.BankCardId))
                     currentUser.Cards.Add(bankCard);
 
                 return currentUser;

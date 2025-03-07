@@ -10,24 +10,26 @@ namespace BankingSystem.Core.Services;
 public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerService, IHasherService hasherService, IEncryptionService encryptionService)
     : IBankCardService
 {
-    public async Task<Result<BankCard>> CreateBankCardAsync(BankCardRegisterDto bankCardRegisterDto)
+    public async Task<Result<BankCard>> CreateBankCardAsync(BankCardRegisterDto bankCardRegisterDto, CancellationToken cancellationToken = default)
     {
         try
         {
-            if (await unitOfWork.BankCardRepository.GetCardAsync(bankCardRegisterDto.CardNumber) is not null)
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
+
+            if (await unitOfWork.BankCardRepository.GetCardAsync(bankCardRegisterDto.CardNumber, cancellationToken) is not null)
             {
                 return Result<BankCard>.Failure(
                     CustomError.Validation(
                         "A card with this number already exists. Please use a different card number."));
             }
 
-            var person = await unitOfWork.PersonRepository.GetByUsernameAsync(bankCardRegisterDto.Username);
+            var person = await unitOfWork.PersonRepository.GetByUsernameAsync(bankCardRegisterDto.Username, cancellationToken);
             if (person is null)
             {
                 return Result<BankCard>.Failure(
                     CustomError.NotFound("User not found. Please check the username and try again."));
             }
-            var bankAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(bankCardRegisterDto.BankAccountId);
+            var bankAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(bankCardRegisterDto.BankAccountId, cancellationToken);
             if (bankAccount is null)
             {
                 return Result<BankCard>.Failure(
@@ -58,8 +60,8 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
                 AccountId = bankAccount.BankAccountId
             };
 
-            await unitOfWork.BankCardRepository.AddCardAsync(newCard);
-            await unitOfWork.CommitAsync();
+            await unitOfWork.BankCardRepository.AddCardAsync(newCard, cancellationToken);
+            await unitOfWork.CommitAsync(cancellationToken);
 
             return Result<BankCard>.Success(newCard);
         }
@@ -73,11 +75,11 @@ public class BankCardService(IUnitOfWork unitOfWork, ILoggerService loggerServic
         }
     }
 
-    public async Task<Result<bool>> ValidateCardAsync(string cardNumber, string pinCode)
+    public async Task<Result<bool>> ValidateCardAsync(string cardNumber, string pinCode, CancellationToken cancellationToken = default)
     {
         try
         {
-            var card = await unitOfWork.BankCardRepository.GetCardDetailsAsync(cardNumber);
+            var card = await unitOfWork.BankCardRepository.GetCardDetailsAsync(cardNumber, cancellationToken);
 
             if (card == null)
             {

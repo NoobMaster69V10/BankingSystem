@@ -9,17 +9,17 @@ namespace BankingSystem.Core.Services;
 
 public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerService) : IBankAccountService
 {
-    public async Task<Result<BankAccount>> CreateBankAccountAsync(BankAccountRegisterDto bankAccountRegisterDto)
+    public async Task<Result<BankAccount>> CreateBankAccountAsync(BankAccountRegisterDto bankAccountRegisterDto, CancellationToken cancellationToken)
     {
         try
         {
-            var bankAccount = await unitOfWork.BankAccountRepository.GetAccountByIbanAsync(bankAccountRegisterDto.Iban);
+            var bankAccount = await unitOfWork.BankAccountRepository.GetAccountByIbanAsync(bankAccountRegisterDto.Iban, cancellationToken);
             if (bankAccount != null)
             {
                 return Result<BankAccount>.Failure(CustomError.Validation("Bank account already exists."));
             }
 
-            var person = await unitOfWork.PersonRepository.GetByUsernameAsync(bankAccountRegisterDto.Username);
+            var person = await unitOfWork.PersonRepository.GetByUsernameAsync(bankAccountRegisterDto.Username, cancellationToken);
             if (person == null)
             {
                 return Result<BankAccount>.Failure(CustomError.NotFound("User not found."));
@@ -33,7 +33,7 @@ public class BankAccountService(IUnitOfWork unitOfWork, ILoggerService loggerSer
                 Currency = bankAccountRegisterDto.Currency
             };
 
-            await unitOfWork.BankAccountRepository.AddBankAccountAsync(account);
+            await unitOfWork.BankAccountRepository.AddBankAccountAsync(account, cancellationToken);
 
             return Result<BankAccount>.Success(account);
         }

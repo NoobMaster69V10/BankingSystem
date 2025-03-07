@@ -5,9 +5,9 @@ namespace BankingSystem.Domain.RepositoryContracts;
 
 public interface IBankAccountRepository : IRepositoryBase
 {
-    Task AddBankAccountAsync(BankAccount account);
-    Task<BankAccount?> GetAccountByIdAsync(int accountId);
-    Task UpdateBalanceAsync(BankAccount? account);
-    Task<BankAccount?> GetAccountByIbanAsync(string iban);
-    Task<Currency> GetAccountCurrencyAsync(int accountId);
+    Task AddBankAccountAsync(BankAccount account, CancellationToken cancellationToken = default);
+    Task<BankAccount?> GetAccountByIdAsync(int accountId, CancellationToken cancellationToken = default);
+    Task UpdateBalanceAsync(BankAccount? account, CancellationToken cancellationToken = default);
+    Task<BankAccount?> GetAccountByIbanAsync(string iban, CancellationToken cancellationToken = default);
+    Task<Currency> GetAccountCurrencyAsync(int accountId, CancellationToken cancellationToken = default);
 }

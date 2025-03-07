@@ -4,8 +4,6 @@ using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.RepositoryContracts;
 using Microsoft.Extensions.Logging;
-using Microsoft.Identity.Client;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace BankingSystem.Infrastructure.Repository;
 

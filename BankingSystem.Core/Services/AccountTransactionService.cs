@@ -12,7 +12,7 @@ public class AccountTransactionService(
     IExchangeService exchangeService,
     ILoggerService loggerService) : IAccountTransactionService
 {
-   public async Task<Result<AccountTransfer>> TransactionBetweenAccountsAsync(AccountTransactionDto transactionDto, string userId)
+   public async Task<Result<AccountTransfer>> TransactionBetweenAccountsAsync(AccountTransactionDto transactionDto, string userId, CancellationToken cancellationToken)
     {
         try
         {
@@ -21,10 +21,10 @@ public class AccountTransactionService(
                 return Result<AccountTransfer>.Failure(CustomError.Validation("It is not possible to make a transaction between the same accounts."));
             }
 
-            await unitOfWork.BeginTransactionAsync();
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
 
-            var fromAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.FromAccountId);
-            var toAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.ToAccountId);
+            var fromAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.FromAccountId, cancellationToken);
+            var toAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.ToAccountId, cancellationToken);
 
             if (fromAccount is null)
             {
@@ -65,10 +65,10 @@ public class AccountTransactionService(
 
             toAccount.Balance += await exchangeService.ConvertCurrencyAsync(transactionDto.Amount, fromAccount.Currency, toAccount.Currency);
 
-            await unitOfWork.BankAccountRepository.UpdateBalanceAsync(fromAccount);
-            await unitOfWork.BankAccountRepository.UpdateBalanceAsync(toAccount);
-            await unitOfWork.BankTransactionRepository.AddAccountTransferAsync(transaction);
-            await unitOfWork.CommitAsync();
+            await unitOfWork.BankAccountRepository.UpdateBalanceAsync(fromAccount, cancellationToken);
+            await unitOfWork.BankAccountRepository.UpdateBalanceAsync(toAccount, cancellationToken);
+            await unitOfWork.BankTransactionRepository.AddAccountTransferAsync(transaction, cancellationToken);
+            await unitOfWork.CommitAsync(cancellationToken);
 
             return Result<AccountTransfer>.Success(transaction);
         }

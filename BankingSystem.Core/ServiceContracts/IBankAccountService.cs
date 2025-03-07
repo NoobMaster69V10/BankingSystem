@@ -6,5 +6,5 @@ namespace BankingSystem.Core.ServiceContracts;
 
 public interface IBankAccountService
 {
-    Task<Result<BankAccount>> CreateBankAccountAsync(BankAccountRegisterDto bankAccountRegisterDto);
+    Task<Result<BankAccount>> CreateBankAccountAsync(BankAccountRegisterDto bankAccountRegisterDto, CancellationToken cancellationToken);
 }
