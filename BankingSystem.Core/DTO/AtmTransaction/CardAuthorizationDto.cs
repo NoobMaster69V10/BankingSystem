@@ -1,16 +1,26 @@
-using System.ComponentModel.DataAnnotations;
-using BankingSystem.Domain.CustomValidationAttributes;
+
+using BankingSystem.Domain.RepositoryContracts;
+using FluentValidation;
 
 namespace BankingSystem.Core.DTO.AtmTransaction;
 
 public record CardAuthorizationDto
 {
-    [Required(ErrorMessage = "Card number is required.")]
-    [CreditCard(ErrorMessage = "Invalid card number format.")]
     public string CardNumber { get; init; } = string.Empty;
-
-    [Required(ErrorMessage = "Current PIN code is required.")]
-    [StringLength(4, MinimumLength = 4, ErrorMessage = "PIN code must be exactly 4 digits.")]
-    [RegularExpression(@"^\d{4}$", ErrorMessage = "PIN code must contain only digits.")]
     public string PinCode { get; init; } = string.Empty;
+}
+
+internal sealed class CardAuthorizationDtoValidator : AbstractValidator<CardAuthorizationDto>
+{
+    public CardAuthorizationDtoValidator(IBankAccountRepository bankAccountRepository) 
+    {
+        RuleFor(x => x.CardNumber)
+            .NotEmpty().WithMessage("Card number is required.")
+            .CreditCard().WithMessage("Invalid card number format.");
+        
+        RuleFor(x => x.PinCode)
+            .NotEmpty().WithMessage("PIN code is required.")
+            .Length(4).WithMessage("PIN code must be exactly 4 digits.")
+            .Matches(@"^\d{4}$").WithMessage("PIN code must contain only digits.");
+    }
 }

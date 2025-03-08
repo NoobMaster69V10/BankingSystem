@@ -18,31 +18,22 @@ public class AccountTransactionService(
     {
         try
         {
-            if (transactionDto.FromAccountId == transactionDto.ToAccountId)
-            {
-                return Result<AccountTransfer>.Failure(CustomError.Validation("It is not possible to make a transaction between the same accounts."));
-            }
-
             await unitOfWork.BeginTransactionAsync();
 
             var fromAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.FromAccountId);
-            var toAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.ToAccountId);
-
             if (fromAccount is null)
             {
                 return Result<AccountTransfer>.Failure(CustomError.Validation($"Bank account with  '{transactionDto.FromAccountId}' not found!"));
             }
-
-            if (toAccount is null)
-            {
-                return Result<AccountTransfer>.Failure(CustomError.Validation($"Bank account with id '{transactionDto.ToAccountId}' not found!"));
-            }
-
             if (fromAccount.PersonId != userId)
             {
                 return Result<AccountTransfer>.Failure(CustomError.Validation("You don't have permission to make transactions from this account."));
             }
-
+            var toAccount = await unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.ToAccountId);
+            if (toAccount is null)
+            {
+                return Result<AccountTransfer>.Failure(CustomError.Validation($"Bank account with id '{transactionDto.ToAccountId}' not found!"));
+            }
             decimal transactionFee = 0;
             if (fromAccount.PersonId != toAccount.PersonId)
             {

@@ -60,12 +60,6 @@ public class AtmService : IAtmService
     {
         try
         {
-            if (changePinDto.PinCode == changePinDto.NewPin)
-            {
-                return Result<string>.Failure(new CustomError("PIN_SAME_ERROR",
-                    "Current PIN and new PIN cannot be the same."));
-            }
-
             var authResult = await AuthorizeCardAsync(changePinDto.CardNumber, changePinDto.PinCode);
             if (!authResult.IsSuccess)
             {
@@ -90,18 +84,6 @@ public class AtmService : IAtmService
     {
         try
         {
-            if (withdrawMoneyDto.Amount % 1 != 0)
-            {
-                return Result<AtmTransactionResponse>.Failure(new CustomError("InvalidAmount",
-                    "Withdrawals must be in whole numbers (paper money only)."));
-            }
-
-            if (withdrawMoneyDto.Amount <= 0)
-            {
-                return Result<AtmTransactionResponse>.Failure(new CustomError("AmountLessOrEqualZero",
-                    "Amount must be greater than 0."));
-            }
-
             var bankAccount = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(withdrawMoneyDto.CardNumber);
             if (bankAccount == null)
             {
@@ -173,12 +155,6 @@ public class AtmService : IAtmService
     {
         try
         {
-            if (cardDto.Amount <= 0)
-            {
-                return Result<BalanceResponse>.Failure(new CustomError("AmountLessOrEqualZero",
-                    "Amount must be greater than 0."));
-            }
-
             var bankAccount = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(cardDto.CardNumber);
             if (bankAccount == null)
             {

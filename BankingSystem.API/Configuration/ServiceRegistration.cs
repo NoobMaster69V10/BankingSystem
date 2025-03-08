@@ -1,6 +1,4 @@
-﻿using Serilog;
-using System.Text;
-using BankingSystem.API.CustomValidators;
+﻿using System.Text;
 using Microsoft.OpenApi.Models;
 using BankingSystem.Core.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -60,13 +58,11 @@ public static class ServiceRegistration
                 opt.User.RequireUniqueEmail = true;
                 opt.SignIn.RequireConfirmedEmail = true;
                 opt.Lockout.AllowedForNewUsers = true;
-                opt.Lockout.DefaultLockoutTimeSpan  = TimeSpan.FromMinutes(1);
+                opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
                 opt.Lockout.MaxFailedAccessAttempts = 3;
             })
             .AddEntityFrameworkStores<BankingSystemDbContext>()
-            .AddDefaultTokenProviders()
-            .AddPasswordValidator<CustomPasswordValidator<IdentityPerson>>();
-
+            .AddDefaultTokenProviders();
         services.Configure<DataProtectionTokenProviderOptions>(
             opt => opt.TokenLifespan = TimeSpan.FromDays(30));
 

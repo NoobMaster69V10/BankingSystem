@@ -30,7 +30,7 @@ public class AtmController : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
-    [HttpPost("change-pin")]
+    [HttpPatch("change-pin")]
     public async Task<ActionResult<string>> ChangePin(ChangePinDto cardDto)
     {
         var result = await _atmService.ChangePinAsync(cardDto);

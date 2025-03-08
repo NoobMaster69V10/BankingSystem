@@ -25,3 +25,4 @@ public record BankCardRegisterDto
     [Required(ErrorMessage = "BankAccountId is required.")]
     public int BankAccountId { get; init; }
 }
+
