@@ -145,6 +145,7 @@ public class PersonAuthService(
 
     public async Task<Result<bool>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
     {
+        var decodedToken = System.Web.HttpUtility.UrlDecode(resetPasswordDto.Token);
         var user = await userManager.FindByEmailAsync(resetPasswordDto.Email);
         if (user == null)
         {
@@ -152,7 +153,7 @@ public class PersonAuthService(
         }
 
         var resetPasswordResult =
-            await userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.NewPassword);
+            await userManager.ResetPasswordAsync(user, decodedToken, resetPasswordDto.NewPassword);
         if (!resetPasswordResult.Succeeded)
         {
             return Result<bool>.Failure(CustomError.NotFound("Invalid or expired token"));
