@@ -12,7 +12,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         _logger = logger;
     }
 
-    public async  ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         _logger.LogError(exception,"Exception occured: {Message}",exception.Message);
         var problemDetails = new ProblemDetails
@@ -21,7 +21,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             Title = "Internal Server Error",
             Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1"
         };
-        httpContext.Response.StatusCode =StatusCodes.Status500InternalServerError;
+        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
         return true;
     }

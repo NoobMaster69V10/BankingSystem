@@ -13,7 +13,7 @@ public class PersonAuthServiceTests
     private readonly Mock<ILoggerService> _loggerServiceMock;
     private readonly IPersonAuthService _personAuthService;
     private readonly Mock<IEmailService> _emailServiceMock;
-    private readonly Mock<IJwtTokenGenerator> _jwtTokenGeneratorMock;
+    private readonly Mock<IJwtTokenGeneratorService> _jwtTokenGeneratorMock;
     private readonly Mock<UserManager<IdentityPerson>> _userManagerMock;
     private readonly Mock<RoleManager<IdentityRole>> _roleManagerMock;
     
@@ -35,7 +35,7 @@ public class PersonAuthServiceTests
             Mock.Of<IRoleStore<IdentityRole>>(), null, null, null, null);
         _loggerServiceMock = new Mock<ILoggerService>();
         _emailServiceMock = new Mock<IEmailService>();
-        _jwtTokenGeneratorMock = new Mock<IJwtTokenGenerator>();
+        _jwtTokenGeneratorMock = new Mock<IJwtTokenGeneratorService>();
 
         _personAuthService = new PersonAuthService(
             _userManagerMock.Object,

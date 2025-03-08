@@ -10,36 +10,46 @@ public class BankAccountRepository : RepositoryBase, IBankAccountRepository
 {
     public BankAccountRepository(IDbConnection connection) : base(connection) { }
 
-    public async Task AddBankAccountAsync(BankAccount account)
+    public async Task AddBankAccountAsync(BankAccount account, CancellationToken cancellationToken = default)
     {
         const string query = "INSERT INTO BankAccounts (IBAN, Balance, Currency, PersonId) VALUES (@Iban, @Balance, @Currency, @PersonId)";
-        await Connection.ExecuteAsync(query, account, Transaction);
+
+        var parameters = new CommandDefinition(query, account, cancellationToken: cancellationToken, transaction: Transaction);
+
+        await Connection.ExecuteAsync(parameters);
     }
 
-    public async Task<BankAccount?> GetAccountByIdAsync(int accountId)
+    public async Task<BankAccount?> GetAccountByIdAsync(int accountId, CancellationToken cancellationToken = default)
     {
         const string query = "SELECT * FROM BankAccounts WHERE BankAccountId = @BankAccountId";
-        return await Connection.QueryFirstOrDefaultAsync<BankAccount?>(query, new { BankAccountId = accountId }, Transaction);
+
+        var parameters = new CommandDefinition(query, new { BankAccountId = accountId }, cancellationToken: cancellationToken, transaction: Transaction);
+
+        return await Connection.QueryFirstOrDefaultAsync<BankAccount?>(parameters);
     }
 
-    public async Task UpdateBalanceAsync(BankAccount? account)
+    public async Task UpdateBalanceAsync(BankAccount? account, CancellationToken cancellationToken = default)
     {
         const string query = "UPDATE BankAccounts SET Balance = @Balance WHERE BankAccountId = @BankAccountId";
-        await Connection.ExecuteAsync(query, account, Transaction);
+
+        var parameters = new CommandDefinition(query, account, cancellationToken: cancellationToken, transaction: Transaction);
+
+        await Connection.ExecuteAsync(parameters);
     }
 
-    public async Task<BankAccount?> GetAccountByIbanAsync(string iban)
+    public async Task<BankAccount?> GetAccountByIbanAsync(string iban, CancellationToken cancellationToken = default)
     {
-        return await Connection.QueryFirstOrDefaultAsync<BankAccount?>(
-            "select * from BankAccounts where IBAN = @iban", new
-            {
-                IBAN = iban 
-            });
+        const string query = "SELECT * FROM BankAccounts WHERE IBAN = @IBAN";
+        var parameters = new CommandDefinition(query, new { IBAN = iban }, cancellationToken: cancellationToken, transaction: Transaction);
+
+        return await Connection.QueryFirstOrDefaultAsync<BankAccount?>(parameters);
     }
-    public async Task<Currency> GetAccountCurrencyAsync(int accountId)
+    public async Task<Currency> GetAccountCurrencyAsync(int accountId, CancellationToken cancellationToken = default)
     {
         const string query = "SELECT Currency FROM BankAccounts WHERE BankAccountId = @BankAccountId";
-        var result = await Connection.QueryFirstOrDefaultAsync<Currency>(query, new { BankAccountId = accountId });
-        return result!;
+
+        var parameters = new CommandDefinition(query, new { BankAccountId = accountId }, cancellationToken: cancellationToken, transaction: Transaction);
+
+        return await Connection.QueryFirstOrDefaultAsync<Currency>(parameters);
     }
 }

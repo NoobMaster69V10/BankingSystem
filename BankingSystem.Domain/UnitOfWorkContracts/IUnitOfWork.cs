@@ -8,7 +8,7 @@ public interface IUnitOfWork : IAsyncDisposable
     public IBankCardRepository BankCardRepository { get; }
     public IBankAccountRepository BankAccountRepository { get; }
     public IBankReportRepository BankReportRepository { get; }
-    Task BeginTransactionAsync();
-    Task CommitAsync();
+    Task BeginTransactionAsync(CancellationToken cancellationToken = default);
+    Task CommitAsync(CancellationToken cancellationToken = default);
     Task RollbackAsync();
 }

@@ -16,11 +16,11 @@ namespace BankingSystem.API.Controllers
         
         [Authorize(Roles = "Person")]
         [HttpGet("info")]
-        public async Task<ActionResult<Person>> GetPersonInfo([FromServices]IPersonService personService)
+        public async Task<ActionResult<Person>> GetPersonInfo([FromServices]IPersonService personService, CancellationToken cancellationToken)
         {
             var personId = User.FindFirst("personId")!.Value;
 
-            var result = await personService.GetPersonById(personId);
+            var result = await personService.GetPersonById(personId, cancellationToken);
             return result.IsFailure ? result.ToProblemDetails() : Ok(result.Value);
         }
 

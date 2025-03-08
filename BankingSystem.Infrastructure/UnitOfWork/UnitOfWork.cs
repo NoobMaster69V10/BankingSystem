@@ -29,47 +29,42 @@ public class UnitOfWork : IUnitOfWork
         _connection.Open();
     }
 
-    public Task BeginTransactionAsync()
+    public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
         if (_transaction == null)
         {
-            _transaction = _connection.BeginTransaction();
+
+            _transaction = await Task.Run(() => _connection.BeginTransaction(), cancellationToken);
             PersonRepository.SetTransaction(_transaction);
             BankTransactionRepository.SetTransaction(_transaction);
             BankCardRepository.SetTransaction(_transaction);
             BankAccountRepository.SetTransaction(_transaction);
         }
-
-        return Task.CompletedTask;
     }
 
-    public Task CommitAsync()
+    public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
         if (_transaction != null)
         {
-            _transaction.Commit();
-            return DisposeTransactionAsync();
+            await Task.Run(() => _transaction.Commit(), cancellationToken);
+            await DisposeTransactionAsync();
         }
 
-        return Task.CompletedTask;
     }
 
-    public Task RollbackAsync()
+    public async Task RollbackAsync()
     {
         if (_transaction != null)
         {
-            _transaction.Rollback();
-            return DisposeTransactionAsync();
+            await Task.Run(() => _transaction.Rollback());
+            await DisposeTransactionAsync();
         }
-
-        return Task.CompletedTask;
     }
 
-    private Task DisposeTransactionAsync()
+    private async Task DisposeTransactionAsync()
     {
-        _transaction?.Dispose();
+        await Task.Run(() => _transaction?.Dispose());
         _transaction = null;
-        return Task.CompletedTask;
     }
 
     public async ValueTask DisposeAsync()
