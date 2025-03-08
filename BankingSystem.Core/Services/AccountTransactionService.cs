@@ -9,7 +9,7 @@ namespace BankingSystem.Core.Services;
 
 public class AccountTransactionService(
     IUnitOfWork unitOfWork,
-    ExchangeService exchangeService,
+    IExchangeService exchangeService,
     ILoggerService loggerService) : IAccountTransactionService
 {
    public async Task<Result<AccountTransfer>> TransactionBetweenAccountsAsync(AccountTransactionDto transactionDto, string userId, CancellationToken cancellationToken)
