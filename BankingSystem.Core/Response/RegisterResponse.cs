@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace BankingSystem.Core.DTO.Response;
+namespace BankingSystem.Core.Response;
 
 public record RegisterResponse
 {

@@ -1,6 +1,7 @@
 ﻿using BankingSystem.Core.DTO.Person;
 using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.Extensions;
+using BankingSystem.Core.Response;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -52,10 +53,10 @@ namespace BankingSystem.API.Controllers
             return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
         }
 
-        [HttpPost("email-confirmation")]
-        public async Task<ActionResult<string>> EmailConfirmation(EmailConfirmationDto emailConfirmationDto)
+        [HttpGet("email-confirmation")]
+        public async Task<ActionResult<string>> EmailConfirmation([FromQuery] string token,[FromQuery] string email)
         {
-            var result = await personAuthService.EmailConfirmationAsync(emailConfirmationDto);
+            var result = await personAuthService.EmailConfirmationAsync(token,email);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
         }
     }

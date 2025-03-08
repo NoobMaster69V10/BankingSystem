@@ -4,6 +4,7 @@ using BankingSystem.Core.DTO.AccountTransaction;
 using BankingSystem.Core.DTO.Person;
 using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.DTO.Result;
+using BankingSystem.Core.Response;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Errors;

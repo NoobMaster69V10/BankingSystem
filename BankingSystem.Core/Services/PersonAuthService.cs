@@ -7,6 +7,7 @@ using BankingSystem.Core.DTO.Person;
 using BankingSystem.Domain.ConfigurationSettings.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using BankingSystem.Core.DTO.Response;
+using BankingSystem.Core.Response;
 
 namespace BankingSystem.Core.Services;
 
@@ -14,7 +15,8 @@ public class PersonAuthService(
     UserManager<IdentityPerson> userManager,
     RoleManager<IdentityRole> roleManager,
     ILoggerService loggerService,
-    IEmailService emailService,IJwtTokenGeneratorService tokenGenerator) : IPersonAuthService
+    IEmailService emailService,
+    IJwtTokenGeneratorService tokenGenerator) : IPersonAuthService
 {
     public async Task<Result<AuthenticatedResponse>> AuthenticationPersonAsync(PersonLoginDto loginDto)
     {
@@ -24,19 +26,21 @@ public class PersonAuthService(
             if (user == null)
             {
                 return Result<AuthenticatedResponse>.Failure(CustomError.NotFound("Invalid email"));
-
             }
+
             if (!await userManager.CheckPasswordAsync(user, loginDto.Password))
             {
                 await userManager.AccessFailedAsync(user);
                 if (!await userManager.IsLockedOutAsync(user))
                 {
-                    var content = $"Your account has been locked. Please check your email and password." + 
+                    var content = $"Your account has been locked. Please check your email and password." +
                                   "you can use the forgot password link";
-                    var message = new Message([loginDto.Email],"Locked out account information",content,null!);
+                    var message = new Message([loginDto.Email], "Locked out account information", content, null!);
                     await emailService.SendEmailAsync(message);
-                    return Result<AuthenticatedResponse>.Failure(CustomError.AccessUnAuthorized("The account has been locked."));
+                    return Result<AuthenticatedResponse>.Failure(
+                        CustomError.AccessUnAuthorized("The account has been locked."));
                 }
+
                 return Result<AuthenticatedResponse>.Failure(CustomError.NotFound("Invalid password"));
             }
 
@@ -51,7 +55,8 @@ public class PersonAuthService(
         catch (Exception ex)
         {
             loggerService.LogError(ex.Message);
-            return Result<AuthenticatedResponse>.Failure(CustomError.Failure("Error occurred while authenticating person"));
+            return Result<AuthenticatedResponse>.Failure(
+                CustomError.Failure("Error occurred while authenticating person"));
         }
     }
 
@@ -77,6 +82,7 @@ public class PersonAuthService(
                 return Result<RegisterResponse>.Failure(new CustomError("UNEXPECTED_ERROR",
                     string.Join(" ", result.Errors.Select(e => e.Description))));
             }
+
             var token = await userManager.GenerateEmailConfirmationTokenAsync(person);
             var param = new Dictionary<string, string?>
             {
@@ -84,9 +90,9 @@ public class PersonAuthService(
                 { "email", person.Email }
             };
             var callback = QueryHelpers.AddQueryString(registerDto.ClientUri!, param);
-            var message = new Message([person.Email], "Email Confirmation Token", callback,null!);
+            var message = new Message([person.Email], "Email Confirmation", callback, null!);
             await emailService.SendEmailAsync(message);
-            
+
             var role = string.IsNullOrEmpty(registerDto.Role) ? "Person" : registerDto.Role;
 
             if (!await roleManager.RoleExistsAsync(role))
@@ -124,6 +130,7 @@ public class PersonAuthService(
         {
             return Result<string>.Failure(CustomError.NotFound("Invalid email"));
         }
+
         var token = await userManager.GeneratePasswordResetTokenAsync(user);
         var param = new Dictionary<string, string>
         {
@@ -131,11 +138,11 @@ public class PersonAuthService(
             { "email", forgotPasswordDto.Email }
         };
         var callback = QueryHelpers.AddQueryString(forgotPasswordDto.ClientUri, param!);
-        var message = new Message([user.Email],"EmailConfirmation",callback,null!);
+        var message = new Message([user.Email], "EmailConfirmation", callback, null!);
         await emailService.SendEmailAsync(message);
         return Result<string>.Success("Email sent successfully.");
     }
-    
+
     public async Task<Result<bool>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
     {
         var user = await userManager.FindByEmailAsync(resetPasswordDto.Email);
@@ -143,7 +150,9 @@ public class PersonAuthService(
         {
             return Result<bool>.Failure(CustomError.NotFound("User not found"));
         }
-        var resetPasswordResult = await userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.NewPassword);
+
+        var resetPasswordResult =
+            await userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.NewPassword);
         if (!resetPasswordResult.Succeeded)
         {
             return Result<bool>.Failure(CustomError.NotFound("Invalid or expired token"));
@@ -153,18 +162,24 @@ public class PersonAuthService(
         return Result<bool>.Success(true);
     }
 
-    public async  Task<Result<string>> EmailConfirmationAsync(EmailConfirmationDto emailConfirmationDto)
+    public async Task<Result<string>> EmailConfirmationAsync(string token, string email)
     {
-        var user = await userManager.FindByEmailAsync(emailConfirmationDto.Email);
+        var decodedToken = System.Web.HttpUtility.UrlDecode(token);
+
+        var user = await userManager.FindByEmailAsync(email);
         if (user is null)
         {
-            return Result<string>.Failure(CustomError.NotFound("Invalid email confirmation request"));
+            return Result<string>.Failure(CustomError.NotFound("User Not Found"));
         }
-        var confirmResult = await userManager.ConfirmEmailAsync(user, emailConfirmationDto.Token);
+
+        var confirmResult = await userManager.ConfirmEmailAsync(user, decodedToken);
         if (!confirmResult.Succeeded)
         {
+            var errors = string.Join(", ", confirmResult.Errors.Select(e => $"{e.Code}: {e.Description}"));
+            loggerService.LogError($"Email confirmation failed: {errors}");
             return Result<string>.Failure(CustomError.Validation("Invalid email confirmation request"));
         }
-        return Result<string>.Success("Email sent successfully.");
+
+        return Result<string>.Success("Email Confirmed successfully.");
     }
 }
