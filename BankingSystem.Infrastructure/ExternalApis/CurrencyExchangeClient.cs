@@ -2,7 +2,7 @@
 using BankingSystem.Domain.ExternalApiContracts;
 
 namespace BankingSystem.Infrastructure.ExternalApis;
-public class ExchangeRateApi(IHttpClientFactory httpClientFactory) : IExchangeRateApi
+public class CurrencyExchangeClient(IHttpClientFactory httpClientFactory) : ICurrencyExchangeClient
 {
     public async Task<decimal> GetExchangeRate(Domain.Enums.Currency currency)
     {

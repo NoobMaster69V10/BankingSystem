@@ -33,7 +33,7 @@ public static class ServiceRegistration
         services.AddScoped<IBankTransactionRepository, BankTransactionRepository>();
         services.AddScoped<IBankCardRepository, BankCardRepository>();
         services.AddScoped<IBankAccountRepository, BankAccountRepository>();
-        services.AddScoped<IExchangeRateApi, ExchangeRateApi>();
+        services.AddScoped<ICurrencyExchangeClient, CurrencyExchangeClient>();
         services.AddScoped<IDatabaseConfiguration, DatabaseConfiguration>();
         services.AddHostedService<DatabaseConfiguratorBackground>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();

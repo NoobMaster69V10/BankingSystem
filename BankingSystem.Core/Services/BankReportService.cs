@@ -11,7 +11,7 @@ namespace BankingSystem.Core.Services;
 
 public class BankReportService(
     IUnitOfWork unitOfWork,
-    IExchangeRateApi exchangeRateApi,
+    ICurrencyExchangeClient currencyExchangeClient,
     ILoggerService logger) : IBankReportService
 {
     public async Task<Result<BankManagerReport>> GetBankManagerReportAsync()
@@ -154,7 +154,7 @@ public class BankReportService(
     
             if (currency != Currency.GEL)
             {
-                var exchangeRate = await exchangeRateApi.GetExchangeRate(currency);
+                var exchangeRate = await currencyExchangeClient.GetExchangeRate(currency);
                 if (exchangeRate <= 0)
                 {
                     throw new Exception("Invalid exchange rate");

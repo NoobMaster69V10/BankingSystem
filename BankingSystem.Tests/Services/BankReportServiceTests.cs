@@ -11,14 +11,14 @@ namespace BankingSystem.Tests.Services;
 public class BankReportServiceTests
 {
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly Mock<IExchangeRateApi> _exchangeRateApiMock;
+    private readonly Mock<ICurrencyExchangeClient> _exchangeRateApiMock;
     private readonly Mock<ILoggerService> _loggerMock;
     private readonly BankReportService _bankReportService;
 
     public BankReportServiceTests()
     {
         _unitOfWorkMock = new Mock<IUnitOfWork>();
-        _exchangeRateApiMock = new Mock<IExchangeRateApi>();
+        _exchangeRateApiMock = new Mock<ICurrencyExchangeClient>();
         _loggerMock = new Mock<ILoggerService>();
 
         _bankReportService = new BankReportService(

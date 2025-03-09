@@ -17,7 +17,7 @@ namespace BankingSystem.Tests.Services
         private readonly ILoggerService _loggerService;
         private readonly AtmService _atmService;
         private readonly IHasherService _hasherService;
-        private readonly IExchangeRateApi _exchangeRateApi;
+        private readonly ICurrencyExchangeClient _currencyExchangeClient;
 
         public AtmServiceTests()
         {
@@ -25,8 +25,8 @@ namespace BankingSystem.Tests.Services
             _bankCardService = A.Fake<IBankCardService>();
             _loggerService = A.Fake<ILoggerService>();
             _hasherService = A.Fake<IHasherService>();
-            _exchangeRateApi = A.Fake<IExchangeRateApi>();
-            _atmService = new AtmService(_unitOfWork, _bankCardService, _loggerService, _hasherService, _exchangeRateApi);
+            _currencyExchangeClient = A.Fake<ICurrencyExchangeClient>();
+            _atmService = new AtmService(_unitOfWork, _bankCardService, _loggerService, _hasherService, _currencyExchangeClient);
         }
 
         #region ShowBalanceAsync Tests

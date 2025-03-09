@@ -16,16 +16,16 @@ public class AtmService : IAtmService
     private readonly IBankCardService _bankCardService;
     private readonly ILoggerService _loggerService;
     private readonly IHasherService _hasherService;
-    private readonly IExchangeRateApi _exchangeRateApi;
+    private readonly ICurrencyExchangeClient _currencyExchangeClient;
 
     public AtmService(IUnitOfWork unitOfWork, IBankCardService bankCardService, ILoggerService loggerService,
-        IHasherService hasherService, IExchangeRateApi exchangeRateApi)
+        IHasherService hasherService, ICurrencyExchangeClient currencyExchangeClient)
     {
         _unitOfWork = unitOfWork;
         _bankCardService = bankCardService;
         _loggerService = loggerService;
         _hasherService = hasherService;
-        _exchangeRateApi = exchangeRateApi;
+        _currencyExchangeClient = currencyExchangeClient;
     }
 
 
@@ -94,7 +94,7 @@ public class AtmService : IAtmService
             decimal withdrawAmountInGel = withdrawMoneyDto.Amount;
             if (bankAccount.Currency != Currency.GEL)
             {
-                var exchangeRate = await _exchangeRateApi.GetExchangeRate(bankAccount.Currency);
+                var exchangeRate = await _currencyExchangeClient.GetExchangeRate(bankAccount.Currency);
                 if (exchangeRate <= 0)
                 {
                     return Result<AtmTransactionResponse>.Failure(new CustomError("ExchangeRateError",
@@ -205,7 +205,7 @@ public class AtmService : IAtmService
 
             if (bankAccount.Currency != Currency.GEL)
             {
-                var exchangeRate = await _exchangeRateApi.GetExchangeRate(bankAccount.Currency);
+                var exchangeRate = await _currencyExchangeClient.GetExchangeRate(bankAccount.Currency);
                 if (exchangeRate <= 0)
                 {
                     return Result<decimal>.Failure(

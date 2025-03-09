@@ -2,7 +2,7 @@
 
 namespace BankingSystem.Domain.ExternalApiContracts;
 
-public interface IExchangeRateApi
+public interface ICurrencyExchangeClient
 {
     Task<decimal> GetExchangeRate(Currency currency);
 }
