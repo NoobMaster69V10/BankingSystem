@@ -1,4 +1,5 @@
-﻿using BankingSystem.Core.Identity;
+﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.Identity;
 using Microsoft.AspNetCore.Identity;
 using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.ServiceContracts;
@@ -6,8 +7,9 @@ using BankingSystem.Domain.Errors;
 using BankingSystem.Core.DTO.Person;
 using BankingSystem.Domain.ConfigurationSettings.Email;
 using Microsoft.AspNetCore.WebUtilities;
-using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.Response;
+using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.UnitOfWorkContracts;
 
 namespace BankingSystem.Core.Services;
 
@@ -16,7 +18,8 @@ public class PersonAuthService(
     RoleManager<IdentityRole> roleManager,
     ILoggerService loggerService,
     IEmailService emailService,
-    IJwtTokenGeneratorService tokenGenerator) : IPersonAuthService
+    IJwtTokenGeneratorService tokenGenerator,
+    IUnitOfWork unitOfWork) : IPersonAuthService
 {
     public async Task<Result<AuthenticatedResponse>> AuthenticationPersonAsync(PersonLoginDto loginDto)
     {
@@ -43,11 +46,26 @@ public class PersonAuthService(
 
                 return Result<AuthenticatedResponse>.Failure(CustomError.NotFound("Invalid password"));
             }
-
-            var token = await tokenGenerator.GenerateJwtToken(user);
+            var token = await tokenGenerator.GenerateAccessTokenAsync(user);
+            var refreshToken = new RefreshToken
+            {
+                Token = tokenGenerator.GenerateRefreshToken(),
+                ExpiresOnUtc = DateTime.UtcNow.AddDays(7),
+                PersonId = user.Id
+            };
+            var existedPerson = await unitOfWork.RefreshTokenRepository.CheckPersonIdAsync(user.Id);
+            if (existedPerson == null)
+            {
+                await unitOfWork.RefreshTokenRepository.AddRefreshTokenAsync(refreshToken);
+            }
+            else
+            {
+                await unitOfWork.RefreshTokenRepository.UpdateRefreshTokenAsync(refreshToken);
+            } 
             var response = new AuthenticatedResponse
             {
-                Token = token
+                Token = token,
+                RefreshToken = refreshToken.Token
             };
             await userManager.ResetAccessFailedCountAsync(user);
             return Result<AuthenticatedResponse>.Success(response);
@@ -183,4 +201,60 @@ public class PersonAuthService(
 
         return Result<string>.Success("Email Confirmed successfully.");
     }
+    public async Task<Result<AuthenticatedResponse>> RefreshTokenAsync(RefreshTokenDto refreshTokenDto)
+{
+    try
+    {
+        var principal = tokenGenerator.GetPrincipalFromExpiredToken(refreshTokenDto.Token);
+        var personId = principal.FindFirst("personId")?.Value;
+        
+        if (string.IsNullOrEmpty(personId))
+        {
+            return Result<AuthenticatedResponse>.Failure(
+                CustomError.AccessUnAuthorized("Invalid Request"));
+        }
+
+        var storedRefreshToken = await unitOfWork.RefreshTokenRepository
+            .GetDataByToken(refreshTokenDto.RefreshToken);
+        
+        if (storedRefreshToken == null || 
+            storedRefreshToken.PersonId != personId || 
+            storedRefreshToken.ExpiresOnUtc <= DateTime.UtcNow)
+        {
+            loggerService.LogError("Invalid refresh token");
+            return Result<AuthenticatedResponse>.Failure(
+                CustomError.AccessUnAuthorized("Invalid Request"));
+        }
+        var user = await userManager.FindByIdAsync(personId);
+        if (user == null)
+        {
+            return Result<AuthenticatedResponse>.Failure(
+                CustomError.NotFound("User not found"));
+        }
+
+        var newAccessToken = await tokenGenerator.GenerateAccessTokenAsync(user);
+        var newRefreshToken = new RefreshToken
+        {
+            Token = tokenGenerator.GenerateRefreshToken(),
+            ExpiresOnUtc = DateTime.UtcNow.AddDays(7),
+            PersonId = user.Id
+        };
+        storedRefreshToken.Token = newRefreshToken.Token;
+        storedRefreshToken.ExpiresOnUtc = newRefreshToken.ExpiresOnUtc;
+        await unitOfWork.RefreshTokenRepository.UpdateRefreshTokenAsync(storedRefreshToken);
+        var response = new AuthenticatedResponse
+        {
+            Token = newAccessToken,
+            RefreshToken = newRefreshToken.Token
+        };
+        
+        return Result<AuthenticatedResponse>.Success(response);
+    }
+    catch (Exception ex)
+    {
+        loggerService.LogError(ex.Message);
+        return Result<AuthenticatedResponse>.Failure(
+            CustomError.Failure("Error occurred while refreshing token"));
+    }
+}
 }

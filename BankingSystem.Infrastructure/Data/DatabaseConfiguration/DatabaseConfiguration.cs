@@ -47,10 +47,13 @@ public class DatabaseConfiguration : IDatabaseConfiguration
 
             var createAccountTransactionTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
                 @"..\BankingSystem.SQL\Tables\AccountTransactions.sql"));
+            var createRefreshTokenTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
+                @"..\BankingSystem.SQL\Tables\RefreshTokens.sql"));
 
             await connection.ExecuteAsync(createBankAccountTable);
             await connection.ExecuteAsync(createBankCardTable);
             await connection.ExecuteAsync(createAccountTransactionTable);
+            await connection.ExecuteAsync(createRefreshTokenTable);
 
             _loggerService.LogSuccess("Database migration completed successfully!");
         }

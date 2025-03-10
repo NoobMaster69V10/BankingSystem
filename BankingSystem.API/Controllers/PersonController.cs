@@ -1,5 +1,5 @@
-﻿using BankingSystem.Core.DTO.Person;
-using BankingSystem.Core.DTO.Response;
+﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.Person;
 using BankingSystem.Core.Extensions;
 using BankingSystem.Core.Response;
 using BankingSystem.Core.ServiceContracts;
@@ -58,6 +58,13 @@ namespace BankingSystem.API.Controllers
         {
             var result = await personAuthService.EmailConfirmationAsync(token,email);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
+        }
+        
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<AuthenticatedResponse>> RefreshToken([FromBody] RefreshTokenDto refreshToken)
+        {
+            var result = await personAuthService.RefreshTokenAsync(refreshToken);
+            return result.IsFailure ? result.ToProblemDetails() : Created("refresh-token", result.Value);
         }
     }
 }

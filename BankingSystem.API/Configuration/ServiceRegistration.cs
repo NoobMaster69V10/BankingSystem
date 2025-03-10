@@ -84,7 +84,8 @@ public static class ServiceRegistration
                     ValidateIssuer = true,
                     ValidIssuer = jwtIssuer,
                     ValidateAudience = false,
-                    ValidateLifetime = true
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
                 };
             });
     }

@@ -35,6 +35,7 @@ public static class ServiceRegistration
         services.AddScoped<IBankAccountRepository, BankAccountRepository>();
         services.AddScoped<ICurrencyExchangeClient, CurrencyExchangeClient>();
         services.AddScoped<IDatabaseConfiguration, DatabaseConfiguration>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddHostedService<DatabaseConfiguratorBackground>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         services.AddHostedService<DatabaseSeederBackground>();

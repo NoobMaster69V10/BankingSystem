@@ -9,7 +9,8 @@ public class UnitOfWork : IUnitOfWork
     private readonly IDbConnection _connection;
     private IDbTransaction? _transaction;
     private bool _disposed;
-
+    
+    public IRefreshTokenRepository RefreshTokenRepository { get; }
     public IPersonRepository PersonRepository { get; }
     public IBankTransactionRepository BankTransactionRepository { get; }
     public IBankCardRepository BankCardRepository { get; }
@@ -18,7 +19,7 @@ public class UnitOfWork : IUnitOfWork
 
     public UnitOfWork(IDbConnection connection, IPersonRepository personRepository,
         IBankTransactionRepository transactionRepository, IBankCardRepository bankCardRepository,
-        IBankAccountRepository bankAccountRepository, IBankReportRepository bankReportRepository)
+        IBankAccountRepository bankAccountRepository, IBankReportRepository bankReportRepository, IRefreshTokenRepository refreshTokenRepository)
     {
         _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         PersonRepository = personRepository ?? throw new ArgumentNullException(nameof(personRepository));
@@ -26,6 +27,7 @@ public class UnitOfWork : IUnitOfWork
         BankCardRepository = bankCardRepository ?? throw new ArgumentNullException(nameof(bankCardRepository));
         BankAccountRepository = bankAccountRepository ?? throw new ArgumentNullException(nameof(bankAccountRepository));
         BankReportRepository = bankReportRepository ?? throw new ArgumentNullException(nameof(bankReportRepository));
+        RefreshTokenRepository = refreshTokenRepository;
         _connection.Open();
     }
 
