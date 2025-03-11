@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Text;
 using Microsoft.OpenApi.Models;
 using BankingSystem.Core.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -25,8 +26,14 @@ public static class ServiceRegistration
         services.AddLogging();
         services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-
+            options.SwaggerDoc("v1", new OpenApiInfo { 
+                Title = "Banking System API", 
+                Version = "v1",
+                Description = "API for managing bank accounts, cards, and transactions"
+            });
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            options.IncludeXmlComments(xmlPath);
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Name = "Authorization",

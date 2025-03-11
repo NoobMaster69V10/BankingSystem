@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankingSystem.API.Controllers;
-
+[ApiController]
+[Route("api/[controller]")]
 public class ReportController(IBankReportService bankReportService) : ControllerBase
 {
     [Authorize(Roles = "Manager")]

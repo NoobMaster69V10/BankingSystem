@@ -37,7 +37,7 @@ public class JwtTokenGeneratorService : IJwtTokenGeneratorService
 
         claims.AddRange(roleClaims);
 
-        var expiration = DateTime.UtcNow.AddSeconds(_jwtSettings.ExpirationMinutes);
+        var expiration = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationMinutes);
 
         var tokenGenerator = new JwtSecurityToken(
             _jwtSettings.Issuer,
