@@ -48,7 +48,7 @@ public class DatabaseConfiguration : IDatabaseConfiguration
             var createAccountTransactionTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
                 @"..\BankingSystem.SQL\Tables\AccountTransactions.sql"));
             var createRefreshTokenTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                @"..\BankingSystem.SQL\Tables\RefreshTokens.sql"));
+                @"..\BankingSystem.SQL\Tables\RefreshToken.sql"));
 
             await connection.ExecuteAsync(createBankAccountTable);
             await connection.ExecuteAsync(createBankCardTable);
