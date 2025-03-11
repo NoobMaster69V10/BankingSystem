@@ -81,6 +81,5 @@ public class JwtTokenGeneratorService : IJwtTokenGeneratorService
         }
 
         return principal;
-        
     }
 }

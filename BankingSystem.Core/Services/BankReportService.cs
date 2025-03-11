@@ -28,10 +28,10 @@ public class BankReportService(
             {
                 var report = new BankManagerReport
                 {
-                    UserStats = userStatsTask.Result.Value,
-                    TransactionStats = transactionStatsTask.Result.Value,
-                    DailyTransactions = dailyTransactionsTask.Result.Value.ToList(),
-                    AtmStats = atmStatsTask.Result.Value,
+                    UserStats = userStatsTask.Result.Value!,
+                    TransactionStats = transactionStatsTask.Result.Value!,
+                    DailyTransactions = dailyTransactionsTask.Result.Value!.ToList(),
+                    AtmStats = atmStatsTask.Result.Value!
                 };
 
                 return Result<BankManagerReport>.Success(report);
@@ -53,13 +53,22 @@ public class BankReportService(
             var startOfLastYear = new DateTime(now.Year - 1, 1, 1);
             var thirtyDaysAgo = now.AddDays(-30);
 
+            var totalUsers = unitOfWork.BankReportRepository.GetUserCountAsync();
+            var registeredThisYear = unitOfWork.BankReportRepository.GetUserCountAsync(startOfThisYear);
+            var registeredLastYear = unitOfWork.BankReportRepository.GetUserCountAsync(startOfLastYear);
+            var startOfThisYearCount = unitOfWork.BankReportRepository.GetUserCountAsync(startOfThisYear);
+            var registeredLast30Days = unitOfWork.BankReportRepository.GetUserCountAsync(thirtyDaysAgo);
+
+            await Task.WhenAll(totalUsers, registeredLastYear, registeredLastYear, registeredLast30Days,
+                registeredThisYear, startOfThisYearCount);
+
+
             var stats = new UserStatistics
             {
-                TotalUsers = await unitOfWork.BankReportRepository.GetUserCountAsync(),
-                RegisteredThisYear = await unitOfWork.BankReportRepository.GetUserCountAsync(startOfThisYear),
-                RegisteredLastYear = await unitOfWork.BankReportRepository.GetUserCountAsync(startOfLastYear) -
-                                     await unitOfWork.BankReportRepository.GetUserCountAsync(startOfThisYear),
-                RegisteredLast30Days = await unitOfWork.BankReportRepository.GetUserCountAsync(thirtyDaysAgo)
+                TotalUsers = totalUsers.Result,
+                RegisteredThisYear = registeredThisYear.Result,
+                RegisteredLastYear = registeredLastYear.Result - startOfThisYearCount.Result,
+                RegisteredLast30Days = registeredLast30Days.Result
             };
 
             return Result<UserStatistics>.Success(stats);
@@ -72,7 +81,7 @@ public class BankReportService(
     }
     
   public async Task<Result<TransactionStatistics>> GetTransactionStatisticsAsync()
-{
+  {
     try
     {
         var now = DateTime.Now;
@@ -109,7 +118,7 @@ public class BankReportService(
         logger.LogError("Error generating transaction statistics\n" + ex);
         return Result<TransactionStatistics>.Failure(CustomError.Failure("Error generating transaction statistics"));
     }
-}
+  }
 
 
     public async Task<Result<IEnumerable<DailyTransactionReport>>> GetDailyTransactionsAsync(int days = 30)
