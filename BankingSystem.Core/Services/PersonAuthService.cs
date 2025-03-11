@@ -34,7 +34,7 @@ public class PersonAuthService(
             if (!await userManager.CheckPasswordAsync(user, loginDto.Password))
             {
                 await userManager.AccessFailedAsync(user);
-                if (!await userManager.IsLockedOutAsync(user))
+                if (await userManager.IsLockedOutAsync(user))
                 {
                     var content = $"Your account has been locked. Please check your email and password." +
                                   "you can use the forgot password link";
