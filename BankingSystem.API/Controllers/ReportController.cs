@@ -15,6 +15,7 @@ namespace BankingSystem.API.Controllers;
 /// Access is restricted to users with the Manager role.
 /// </remarks>
 [ApiController]
+[Authorize(Roles = "Manager")]
 [Route("api/[controller]")]
 public class ReportController(IBankReportService bankReportService) : ControllerBase
 {
@@ -25,7 +26,6 @@ public class ReportController(IBankReportService bankReportService) : Controller
     /// <response code="200">Returns the user statistics data.</response>
     /// <response code="401">If the user is not authenticated.</response>
     /// <response code="403">If the user is not a Manager.</response>
-    [Authorize(Roles = "Manager")]
     [HttpGet("users-count")]
     [ProducesResponseType(typeof(UserStatistics), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -43,7 +43,6 @@ public class ReportController(IBankReportService bankReportService) : Controller
     /// <response code="200">Returns the manager dashboard data.</response>
     /// <response code="401">If the user is not authenticated.</response>
     /// <response code="403">If the user is not a Manager.</response>
-    [Authorize(Roles = "Manager")]
     [HttpGet("manager-dashboard")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -61,7 +60,6 @@ public class ReportController(IBankReportService bankReportService) : Controller
     /// <response code="200">Returns the transaction statistics.</response>
     /// <response code="401">If the user is not authenticated.</response>
     /// <response code="403">If the user is not a Manager.</response>
-    [Authorize(Roles = "Manager")]
     [HttpGet("transactions-count")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -80,7 +78,6 @@ public class ReportController(IBankReportService bankReportService) : Controller
     /// <response code="200">Returns the daily transaction chart data.</response>
     /// <response code="401">If the user is not authenticated.</response>
     /// <response code="403">If the user is not a Manager.</response>
-    [Authorize(Roles = "Manager")]
     [HttpGet("transactions-chart")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -98,7 +95,6 @@ public class ReportController(IBankReportService bankReportService) : Controller
     /// <response code="200">Returns the ATM transaction statistics.</response>
     /// <response code="401">If the user is not authenticated.</response>
     /// <response code="403">If the user is not a Manager.</response>
-    [Authorize(Roles = "Manager")]
     [HttpGet("atm-transactions")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

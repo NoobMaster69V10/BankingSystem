@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using BankingSystem.Core.Response;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.UnitOfWorkContracts;
+using Sprache;
 
 namespace BankingSystem.Core.Services;
 
@@ -148,7 +149,10 @@ public class PersonAuthService(
         {
             return Result<string>.Failure(CustomError.NotFound("Invalid email"));
         }
-
+        if (!user.EmailConfirmed)
+        {
+            return Result<string>.Failure(CustomError.Validation("Email not confirmed"));
+        }
         var token = await userManager.GeneratePasswordResetTokenAsync(user);
         var param = new Dictionary<string, string>
         {
