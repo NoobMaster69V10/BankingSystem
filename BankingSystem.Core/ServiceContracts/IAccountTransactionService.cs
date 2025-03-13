@@ -1,5 +1,5 @@
 ﻿using BankingSystem.Core.DTO.AccountTransaction;
-using BankingSystem.Core.DTO.Result;
+using BankingSystem.Core.Result;
 using BankingSystem.Domain.Entities;
 
 namespace BankingSystem.Core.ServiceContracts;

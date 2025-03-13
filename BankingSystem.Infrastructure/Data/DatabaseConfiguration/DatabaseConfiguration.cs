@@ -32,7 +32,7 @@ public class DatabaseConfiguration : IDatabaseConfiguration
 
             _loggerService.LogError("Database already exists!");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             var dbContext = scopedProvider.GetRequiredService<BankingSystemDbContext>();
             await dbContext.Database.MigrateAsync();

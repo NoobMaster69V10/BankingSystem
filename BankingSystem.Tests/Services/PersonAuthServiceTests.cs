@@ -2,6 +2,7 @@
 using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
+using BankingSystem.Domain.UnitOfWorkContracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -10,10 +11,7 @@ namespace BankingSystem.Tests.Services;
 
 public class PersonAuthServiceTests
 {
-    private readonly Mock<ILoggerService> _loggerServiceMock;
     private readonly IPersonAuthService _personAuthService;
-    private readonly Mock<IEmailService> _emailServiceMock;
-    private readonly Mock<IJwtTokenGeneratorService> _jwtTokenGeneratorMock;
     private readonly Mock<UserManager<IdentityPerson>> _userManagerMock;
     private readonly Mock<RoleManager<IdentityRole>> _roleManagerMock;
     
@@ -26,35 +24,37 @@ public class PersonAuthServiceTests
             { "Jwt:Audience", "http://localhost:4200" },
             { "Jwt:EXPIRATION_MINUTES", "60" }
         };
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(inMemorySettings)
+        new ConfigurationBuilder()
+            .AddInMemoryCollection(inMemorySettings!)
             .Build();
         _userManagerMock = new Mock<UserManager<IdentityPerson>>(
-            Mock.Of<IUserStore<IdentityPerson>>(), null, null, null, null, null, null, null, null);
+            Mock.Of<IUserStore<IdentityPerson>>(), null!, null!, null!, null!, null!, null!, null!, null!);
         _roleManagerMock = new Mock<RoleManager<IdentityRole>>(
-            Mock.Of<IRoleStore<IdentityRole>>(), null, null, null, null);
-        _loggerServiceMock = new Mock<ILoggerService>();
-        _emailServiceMock = new Mock<IEmailService>();
-        _jwtTokenGeneratorMock = new Mock<IJwtTokenGeneratorService>();
+            Mock.Of<IRoleStore<IdentityRole>>(), null!, null!, null!, null!);
+        Mock<ILoggerService> loggerServiceMock = new();
+        Mock<IEmailService> emailServiceMock = new();
+        Mock<IJwtTokenGeneratorService> jwtTokenGeneratorMock = new();
+        Mock<IUnitOfWork> unitOfWorkMock = new();
 
         _personAuthService = new PersonAuthService(
+            unitOfWorkMock.Object,
             _userManagerMock.Object,
             _roleManagerMock.Object,
-            _loggerServiceMock.Object,
-            _emailServiceMock.Object,
-            _jwtTokenGeneratorMock.Object
+            emailServiceMock.Object,
+            jwtTokenGeneratorMock.Object,
+            loggerServiceMock.Object
         );
     }
 
     [Fact]
     public async Task AuthenticationPersonAsync_ShouldReturnFailure_WhenPersonNotFound()
     {
-        _userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync((IdentityPerson)null);
+        _userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync((IdentityPerson)null!);
 
         var result = await _personAuthService.AuthenticationPersonAsync(new PersonLoginDto());
 
         Assert.False(result.IsSuccess);
-        Assert.Equal("Invalid email", result.Error.Message);
+        Assert.Equal("Invalid email", result.Error!.Message);
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class PersonAuthServiceTests
         var result = await _personAuthService.AuthenticationPersonAsync(new PersonLoginDto { Email = "test@gmail.com", Password = "pass123" });
 
         Assert.False(result.IsSuccess);
-        Assert.Equal("Invalid password", result.Error.Message);
+        Assert.Equal("Invalid password", result.Error!.Message);
     }
 
     [Fact]
@@ -114,11 +114,11 @@ public class PersonAuthServiceTests
     [Fact]
     public async Task ForgotPasswordAsync_ShouldReturnFailure_WhenUserIsNull()
     {
-        _userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync((IdentityPerson)null);
+        _userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync((IdentityPerson)null!);
 
         var result = await _personAuthService.ForgotPasswordAsync(new ForgotPasswordDto());
         Assert.False(result.IsSuccess);
-        Assert.Equal("Invalid email", result.Error.Message);
+        Assert.Equal("Invalid email", result.Error!.Message);
     }
 
 }

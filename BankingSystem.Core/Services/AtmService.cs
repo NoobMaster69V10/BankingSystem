@@ -1,6 +1,6 @@
 using BankingSystem.Core.DTO.AtmTransaction;
-using BankingSystem.Core.DTO.Response;
-using BankingSystem.Core.DTO.Result;
+using BankingSystem.Core.Response;
+using BankingSystem.Core.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Enums;

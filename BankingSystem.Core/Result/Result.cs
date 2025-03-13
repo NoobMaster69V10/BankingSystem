@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using BankingSystem.Domain.Errors;
 
-namespace BankingSystem.Core.DTO.Result;
+namespace BankingSystem.Core.Result;
 
 public class Result<T>
 {
