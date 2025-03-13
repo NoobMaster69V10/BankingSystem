@@ -17,8 +17,14 @@ namespace BankingSystem.API.Controllers;
 [ApiController]
 [Authorize(Roles = "Manager")]
 [Route("api/[controller]")]
-public class ReportController(IBankReportService bankReportService) : ControllerBase
+public class ReportController : ControllerBase
 {
+    private readonly IBankReportService _bankReportService;
+
+    public ReportController(IBankReportService bankReportService)
+    {
+        _bankReportService = bankReportService;
+    }
     /// <summary>
     /// Retrieves statistics about user accounts in the system.
     /// </summary>
@@ -32,7 +38,7 @@ public class ReportController(IBankReportService bankReportService) : Controller
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<UserStatistics>> GetUserStatistics()
     {
-        var result = await bankReportService.GetUserStatisticsAsync();
+        var result = await _bankReportService.GetUserStatisticsAsync();
         return result.IsSuccess ? Ok(result) : result.ToProblemDetails();
     }
 
@@ -49,7 +55,7 @@ public class ReportController(IBankReportService bankReportService) : Controller
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<BankManagerReport>> GetManagerDashboard()
     {
-        var result = await bankReportService.GetBankManagerReportAsync();
+        var result = await _bankReportService.GetBankManagerReportAsync();
         return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { RegisteredCount = result.Value});
     }
     
@@ -66,7 +72,7 @@ public class ReportController(IBankReportService bankReportService) : Controller
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<TransactionStatistics>> GetTransactionsCount()
     {
-        var result = await bankReportService.GetTransactionStatisticsAsync();
+        var result = await _bankReportService.GetTransactionStatisticsAsync();
         return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsCount = result.Value });
     }
     
@@ -84,7 +90,7 @@ public class ReportController(IBankReportService bankReportService) : Controller
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<IEnumerable<DailyTransactionReport>>> GetTransactionsChartForLastMonth([FromQuery]int days = 30)
     {
-        var result = await bankReportService.GetDailyTransactionsAsync(days);
+        var result = await _bankReportService.GetDailyTransactionsAsync(days);
         return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsChart = result.Value });
     }
     
@@ -101,7 +107,7 @@ public class ReportController(IBankReportService bankReportService) : Controller
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<AtmTransactionsStatistics>> GetAtmTransactionsChart()
     {
-        var result = await bankReportService.GetAtmTransactionsStatisticsAsync();
+        var result = await _bankReportService.GetAtmTransactionsStatisticsAsync();
         return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsChart = result.Value });
     }
 }

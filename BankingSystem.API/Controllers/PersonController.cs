@@ -17,9 +17,15 @@ namespace BankingSystem.API.Controllers
     /// </remarks>
     [ApiController]
     [Route("api/[controller]")]
-    public class PersonController(
-        IPersonAuthService personAuthService) : ControllerBase
+    public class PersonController : ControllerBase
     {
+        private readonly IPersonAuthService _personAuthService;
+
+        public PersonController(IPersonAuthService personAuthService)
+        {
+            _personAuthService = personAuthService;
+        }
+
         /// <summary>
         /// Retrieves personal information for the authenticated user.
         /// </summary>
@@ -66,7 +72,7 @@ namespace BankingSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<RegisterResponse>> RegisterUser(PersonRegisterDto registerModel)
         {
-            var result = await personAuthService.RegisterPersonAsync(registerModel);
+            var result = await _personAuthService.RegisterPersonAsync(registerModel);
             return result.IsFailure ? result.ToProblemDetails() : Created("register", result.Value);
         }
 
@@ -82,7 +88,7 @@ namespace BankingSystem.API.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<AuthenticatedResponse>> LoginPerson(PersonLoginDto loginModel)
         {
-            var result = await personAuthService.AuthenticationPersonAsync(loginModel);
+            var result = await _personAuthService.AuthenticationPersonAsync(loginModel);
             return result.IsFailure ? result.ToProblemDetails() : Created("login", result.Value);
         }
         
@@ -98,7 +104,7 @@ namespace BankingSystem.API.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<string>> ForgotPassword(ForgotPasswordDto forgotPassword)
         {
-            var result = await personAuthService.ForgotPasswordAsync(forgotPassword);
+            var result = await _personAuthService.ForgotPasswordAsync(forgotPassword);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
         }
 
@@ -114,7 +120,7 @@ namespace BankingSystem.API.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<bool>> ResetPassword(ResetPasswordDto resetPassword)
         {
-            var result = await personAuthService.ResetPasswordAsync(resetPassword);
+            var result = await _personAuthService.ResetPasswordAsync(resetPassword);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
         }
 
@@ -131,7 +137,7 @@ namespace BankingSystem.API.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<string>> EmailConfirmation([FromQuery] string token,[FromQuery] string email)
         {
-            var result = await personAuthService.EmailConfirmationAsync(token,email);
+            var result = await _personAuthService.EmailConfirmationAsync(token,email);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
         }
         
@@ -147,7 +153,7 @@ namespace BankingSystem.API.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<AuthenticatedResponse>> RefreshToken([FromBody] RefreshTokenDto refreshToken)
         {
-            var result = await personAuthService.RefreshTokenAsync(refreshToken);
+            var result = await _personAuthService.RefreshTokenAsync(refreshToken);
             return result.IsFailure ? result.ToProblemDetails() : Created("refresh-token", result.Value);
         }
     }

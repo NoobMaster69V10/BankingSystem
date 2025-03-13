@@ -18,8 +18,17 @@ namespace BankingSystem.API.Controllers;
 /// </remarks>
 [ApiController]
 [Route("api/[controller]")]
-public class BankController(IBankAccountService accountService, IBankCardService cardService) : ControllerBase
+public class BankController : ControllerBase
 {
+    private readonly IBankAccountService _accountService;
+    private readonly IBankCardService _cardService;
+
+    public BankController(IBankAccountService accountService, IBankCardService cardService)
+    {
+        _accountService = accountService;
+        _cardService = cardService;
+    }
+
     /// <summary>
     /// Creates a new bank account for a customer.
     /// </summary>
@@ -38,7 +47,7 @@ public class BankController(IBankAccountService accountService, IBankCardService
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<BankAccount>> CreateBankAccount(BankAccountRegisterDto bankAccountRegisterDto, CancellationToken cancellationToken)
     {   
-        var result = await accountService.CreateBankAccountAsync(bankAccountRegisterDto, cancellationToken);
+        var result = await _accountService.CreateBankAccountAsync(bankAccountRegisterDto, cancellationToken);
         return result.IsSuccess ? Created("account", result.Value) : result.ToProblemDetails();
     }
 
@@ -60,7 +69,7 @@ public class BankController(IBankAccountService accountService, IBankCardService
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<BankCard>>CreateBankCard(BankCardRegisterDto cardRegisterDto, CancellationToken cancellationToken)
     {
-        var result = await cardService.CreateBankCardAsync(cardRegisterDto, cancellationToken);
+        var result = await _cardService.CreateBankCardAsync(cardRegisterDto, cancellationToken);
         return result.IsSuccess ? Created("card", result.Value) : result.ToProblemDetails();
     }
 

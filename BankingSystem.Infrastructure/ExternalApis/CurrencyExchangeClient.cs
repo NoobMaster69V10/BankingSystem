@@ -2,15 +2,22 @@
 using BankingSystem.Domain.ExternalApiContracts;
 
 namespace BankingSystem.Infrastructure.ExternalApis;
-public class CurrencyExchangeClient(IHttpClientFactory httpClientFactory) : ICurrencyExchangeClient
+public class CurrencyExchangeClient : ICurrencyExchangeClient
 {
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public CurrencyExchangeClient(IHttpClientFactory httpClientFactory)
+    {
+        _httpClientFactory = httpClientFactory;
+    }
+
     public async Task<decimal> GetExchangeRate(Domain.Enums.Currency currency)
     {
         var httpRequestMessage = new HttpRequestMessage(
             HttpMethod.Get,
             $"https://nbg.gov.ge/gw/api/ct/monetarypolicy/currencies/ka/json/?currencies={currency.ToString()}");
 
-        var client = httpClientFactory.CreateClient();
+        var client = _httpClientFactory.CreateClient();
         var httpResponseMessage = await client.SendAsync(httpRequestMessage);
 
         IEnumerable<CurrencyResponse>? currencyResponses = new List<CurrencyResponse>();

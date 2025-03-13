@@ -10,23 +10,40 @@ using Microsoft.Extensions.Options;
 
 namespace BankingSystem.Infrastructure.Data.DataSeeder;
 
-public class DatabaseSeeder(
-    IHasherService hasherService,
-    IEncryptionService encryptionService,
-    IOptions<SeederSettings> seederSettings,
-    BankingSystemDbContext context,
-    UserManager<IdentityPerson> userManager,
-    IBankAccountRepository bankAccountRepository,
-    IBankCardRepository bankCardRepository,
-    IPersonRepository personRepository,
-    ILoggerService logger) : IDatabaseSeeder
+public class DatabaseSeeder : IDatabaseSeeder
 {
-    private SeederSettings SeederSettings => seederSettings.Value;
+    private readonly IOptions<SeederSettings> _seederSettings;
+    private readonly BankingSystemDbContext _context;
+    private readonly UserManager<IdentityPerson> _userManager;
+    private readonly IPersonRepository _personRepository;
+    private readonly IBankAccountRepository _bankAccountRepository;
+    private readonly IBankCardRepository _bankCardRepository;
+    private readonly IHasherService _hasherService;
+    private readonly IEncryptionService _encryptionService;
+    private readonly ILoggerService _logger;
+
+    public DatabaseSeeder(IHasherService hasherService, IEncryptionService encryptionService,
+        IOptions<SeederSettings> seederSettings, BankingSystemDbContext context,
+        UserManager<IdentityPerson> userManager, IBankAccountRepository bankAccountRepository,
+        IBankCardRepository bankCardRepository, IPersonRepository personRepository, ILoggerService logger)
+    {
+        _seederSettings = seederSettings;
+        _context = context;
+        _userManager = userManager;
+        _personRepository = personRepository;
+        _bankAccountRepository = bankAccountRepository;
+        _bankCardRepository = bankCardRepository;
+        _hasherService = hasherService;
+        _encryptionService = encryptionService;
+        _logger = logger;
+    }
+
+    private SeederSettings SeederSettings => _seederSettings.Value;
     public async Task SeedDataAsync()
     {
-        if (context.IdentityPersons.Any())
+        if (_context.IdentityPersons.Any())
         {
-            logger.LogSuccess("Database already seeded!");
+            _logger.LogSuccess("Database already seeded!");
             return;
         }
 
@@ -56,25 +73,25 @@ public class DatabaseSeeder(
             switch (role)
             {
                 case "Operator":
-                    await userManager.CreateAsync(user, operatorPassword);
-                    await userManager.AddToRoleAsync(user, role);
+                    await _userManager.CreateAsync(user, operatorPassword);
+                    await _userManager.AddToRoleAsync(user, role);
                     user.Lastname = "Operator";
                     break;
                 case "Manager":
-                    await userManager.CreateAsync(user, managerPassword);
-                    await userManager.AddToRoleAsync(user, role);
+                    await _userManager.CreateAsync(user, managerPassword);
+                    await _userManager.AddToRoleAsync(user, role);
                     user.Lastname = "Manager";
                     break;
                 case "Person":
-                    await userManager.CreateAsync(user, personPassword);
-                    await userManager.AddToRoleAsync(user, role);
+                    await _userManager.CreateAsync(user, personPassword);
+                    await _userManager.AddToRoleAsync(user, role);
                     user.Lastname = "Person";
                     break;
             }
 
-            await userManager.ConfirmEmailAsync(user, await userManager.GenerateEmailConfirmationTokenAsync(user));
+            await _userManager.ConfirmEmailAsync(user, await _userManager.GenerateEmailConfirmationTokenAsync(user));
 
-            var person = await personRepository.GetByUsernameAsync(email);
+            var person = await _personRepository.GetByUsernameAsync(email);
 
             var bankAccount = new BankAccount
             {
@@ -84,18 +101,18 @@ public class DatabaseSeeder(
                 Iban = GenerateIban()
             };
 
-            await bankAccountRepository.AddBankAccountAsync(bankAccount);
+            await _bankAccountRepository.AddBankAccountAsync(bankAccount);
 
             var cancellationToken = new CancellationToken();
 
-            var personFullInfo = await personRepository.GetByIdAsync(person.PersonId, cancellationToken);
+            var personFullInfo = await _personRepository.GetByIdAsync(person.PersonId, cancellationToken);
 
             var personAccountId = personFullInfo!.BankAccounts.First().BankAccountId;
 
 
-            var pinHash = hasherService.Hash("1234");
+            var pinHash = _hasherService.Hash("1234");
 
-            var encryptedCvv = encryptionService.Encrypt(GenerateCvv());
+            var encryptedCvv = _encryptionService.Encrypt(GenerateCvv());
 
             var card = new BankCard
             {
@@ -106,8 +123,8 @@ public class DatabaseSeeder(
                 AccountId = personAccountId
             };
 
-            await bankCardRepository.AddCardAsync(card);
-            logger.LogSuccess("Database seeding completed successfully.");
+            await _bankCardRepository.AddCardAsync(card);
+            _logger.LogSuccess("Database seeding completed successfully.");
         }
     }
 

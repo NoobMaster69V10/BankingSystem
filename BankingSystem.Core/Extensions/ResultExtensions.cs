@@ -1,4 +1,4 @@
-using BankingSystem.Core.DTO.Result;
+using BankingSystem.Core.Result;
 using BankingSystem.Domain.Errors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

@@ -1,8 +1,9 @@
 using BankingSystem.API.Controllers;
 using BankingSystem.Core.DTO.AtmTransaction;
-using BankingSystem.Core.DTO.Response;
-using BankingSystem.Core.DTO.Result;
+using BankingSystem.Core.Response;
+using BankingSystem.Core.Result;
 using BankingSystem.Core.ServiceContracts;
+using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.Errors;
 using FakeItEasy;
 using FluentAssertions;
@@ -25,7 +26,7 @@ public class AtmControllerTests
     public async Task ShowBalance_WhenValidC_ReturnOk()
     {
         var cardDto = new CardAuthorizationDto { CardNumber = "123456789", PinCode = "1234" };
-        var expectedResponse = new BalanceResponse(balance: 500.00m, cardNumber: "123456789");
+        var expectedResponse = new BalanceResponse{Balance = 500.00m, CardNumber = "123456789"};
         var expectedResult = Result<BalanceResponse>.Success(expectedResponse);
 
         A.CallTo(() => _atmService.ShowBalanceAsync(cardDto))
@@ -64,7 +65,7 @@ public class AtmControllerTests
     public async Task WithDrawMoney_WhenValidCard_ReturnOk()
     {
         var withdrawDto = new WithdrawMoneyDto { CardNumber = "5127 8809 9999 9990", PinCode = "1234", Amount = 500 };
-        var expectedResult = Result<AtmTransactionResponse>.Success(new AtmTransactionResponse { Amount = 500, Currency = "USD", Iban = "US123456789" });
+        var expectedResult = Result<AtmTransactionResponse>.Success(new AtmTransactionResponse { Amount = 500, Currency = Currency.USD, Iban = "US123456789" });
         A.CallTo(() => _atmService.WithdrawMoneyAsync(withdrawDto))
             .Returns(Task.FromResult(expectedResult));
 
@@ -130,7 +131,7 @@ public class AtmControllerTests
     [Fact]
     public async Task ChangePin_WhenValidCard_ReturnOk()
     {
-        var changePinDto = new ChangePinDto { CardNumber = "123456789", CurrentPin = "1234", NewPin = "5678" };
+        var changePinDto = new ChangePinDto { CardNumber = "123456789", PinCode = "1234", NewPin = "5678" };
         var expectedResult = Result<string>.Success("Pin changed successfully");
         A.CallTo(() => _atmService.ChangePinAsync(changePinDto))
             .Returns(Task.FromResult(expectedResult));
@@ -145,7 +146,7 @@ public class AtmControllerTests
     [Fact]
     public async Task ChangePin_WhenInvalidCard_ReturnNotFound()
     {
-        var changePinDto = new ChangePinDto { CardNumber = "123456789", CurrentPin = "1234", NewPin = "5678" };
+        var changePinDto = new ChangePinDto { CardNumber = "123456789", PinCode = "1234", NewPin = "5678" };
         var expectedError = CustomError.NotFound("Card number not found");
         var expectedResult = Result<string>.Failure(expectedError);
         A.CallTo(() => _atmService.ChangePinAsync(changePinDto))

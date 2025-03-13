@@ -1,5 +1,4 @@
 ﻿using BankingSystem.Core.Identity;
-using BankingSystem.Domain.Entities;
 using BankingSystem.Infrastructure.Configure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

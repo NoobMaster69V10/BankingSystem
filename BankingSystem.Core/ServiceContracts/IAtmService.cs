@@ -1,7 +1,6 @@
 using BankingSystem.Core.DTO.AtmTransaction;
-using BankingSystem.Core.DTO.Response;
-using BankingSystem.Core.DTO.Result;
-using Sprache;
+using BankingSystem.Core.Response;
+using BankingSystem.Core.Result;
 
 namespace BankingSystem.Core.ServiceContracts;
 

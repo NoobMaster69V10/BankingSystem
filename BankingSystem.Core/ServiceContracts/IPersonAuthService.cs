@@ -1,7 +1,7 @@
 ﻿using BankingSystem.Core.DTO;
 using BankingSystem.Core.DTO.Person;
-using BankingSystem.Core.DTO.Result;
 using BankingSystem.Core.Response;
+using BankingSystem.Core.Result;
 
 namespace BankingSystem.Core.ServiceContracts;
 

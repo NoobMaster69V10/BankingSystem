@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using BankingSystem.Domain.Enums;
 
-namespace BankingSystem.Core.DTO.Response;
+namespace BankingSystem.Core.Response;
 
 public class AtmTransactionResponse
 {

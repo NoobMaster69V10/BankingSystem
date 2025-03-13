@@ -1,6 +1,6 @@
 using BankingSystem.Core.DTO.AtmTransaction;
-using BankingSystem.Core.DTO.Response;
 using BankingSystem.Core.Extensions;
+using BankingSystem.Core.Response;
 using BankingSystem.Core.ServiceContracts;
 using Microsoft.AspNetCore.Mvc;
 

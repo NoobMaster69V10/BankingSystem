@@ -7,10 +7,9 @@ namespace BankingSystem.Infrastructure.Repository;
 
 public class RefreshTokenRepository : IRefreshTokenRepository
 {
-    IDbConnection _connection;
+    private readonly IDbConnection _connection;
 
-    public RefreshTokenRepository(
-        IDbConnection connection)
+    public RefreshTokenRepository(IDbConnection connection)
     {
         _connection = connection ?? throw new ArgumentNullException(nameof(connection));
     }
