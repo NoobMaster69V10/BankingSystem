@@ -3,7 +3,7 @@ using BankingSystem.Core.Identity;
 
 namespace BankingSystem.Core.ServiceContracts;
 
-public interface IJwtTokenGeneratorService
+public interface IAuthTokenGeneratorService
 {
     Task<string> GenerateAccessTokenAsync(IdentityPerson person);
     string GenerateRefreshToken();

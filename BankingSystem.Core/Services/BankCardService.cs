@@ -1,4 +1,5 @@
 ﻿using BankingSystem.Core.DTO.BankCard;
+using BankingSystem.Core.Response;
 using BankingSystem.Core.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
@@ -86,6 +87,36 @@ public class BankCardService : IBankCardService
                     "An unexpected error occurred while processing your request. Please try again later."));
         }
     }
+
+    public async Task<Result<CardRemovalResponse>> RemoveBankCardAsync(string cardNumber,string userId,
+        CancellationToken cancellationToken = default)
+    {
+        var bankAccount = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(cardNumber, cancellationToken);
+        if (bankAccount is null)
+        {
+            return Result<CardRemovalResponse>.Failure(CustomError.NotFound("Card number not found"));
+        }
+        if (userId != bankAccount.PersonId)
+        {
+            return Result<CardRemovalResponse>.Failure(CustomError.AccessForbidden("You do not have permission to remove this card"));
+        }
+        try
+        {
+            await _unitOfWork.BankCardRepository.RemoveCardAsync(cardNumber, cancellationToken);
+            var cardRemovalResponse = new CardRemovalResponse
+            {
+                CardNumber = cardNumber,
+                Message = "Card removed successfully"
+            };
+            return Result<CardRemovalResponse>.Success(cardRemovalResponse);
+        }
+        catch (Exception e)
+        {
+            _loggerService.LogError($"[RemoveBankCardAsync] An error occurred: {e.Message}");
+            return Result<CardRemovalResponse>.Failure(CustomError.Failure("An error occurred while removing the card"));
+        }
+    }
+
 
     public async Task<Result<bool>> ValidateCardAsync(string cardNumber, string pinCode, CancellationToken cancellationToken = default)
     {

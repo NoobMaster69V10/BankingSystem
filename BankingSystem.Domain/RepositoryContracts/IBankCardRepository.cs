@@ -10,5 +10,5 @@ public interface IBankCardRepository : IRepositoryBase
     Task<BankAccount?> GetAccountByCardAsync(string cardNumber, CancellationToken cancellationToken = default);
     Task<BankCard?> GetCardAsync(string cardNumber, CancellationToken cancellationToken = default);
     Task<(string PinCode,DateTime ExpiryDate, string Cvv)?> GetCardDetailsAsync(string cardNumber, CancellationToken cancellationToken = default);
-    
+    Task RemoveCardAsync(string cardNumber, CancellationToken cancellationToken = default);
 }

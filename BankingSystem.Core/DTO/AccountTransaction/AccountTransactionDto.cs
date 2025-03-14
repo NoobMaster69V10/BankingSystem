@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 
 namespace BankingSystem.Core.DTO.AccountTransaction;
-public record AccountTransactionDto
+public record AccountTransactionDto 
 {
     public decimal Amount { get; init; }
     public int FromAccountId { get; init; }

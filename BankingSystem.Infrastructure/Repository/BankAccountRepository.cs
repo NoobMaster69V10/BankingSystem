@@ -52,4 +52,11 @@ public class BankAccountRepository : RepositoryBase, IBankAccountRepository
 
         return await Connection.QueryFirstOrDefaultAsync<Currency>(parameters);
     }
+
+    public async Task RemoveBankAccountAsync(string iban, CancellationToken cancellationToken = default)
+    {
+        const string query = "DELETE FROM BankAccounts WHERE IBAN = @IBAN";
+        var parameters = new CommandDefinition(query, new { IBAN = iban }, cancellationToken: cancellationToken, transaction: Transaction);
+        await Connection.ExecuteAsync(parameters);
+    }
 }

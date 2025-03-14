@@ -10,4 +10,5 @@ public interface IBankAccountRepository : IRepositoryBase
     Task UpdateBalanceAsync(BankAccount? account, CancellationToken cancellationToken = default);
     Task<BankAccount?> GetAccountByIbanAsync(string iban, CancellationToken cancellationToken = default);
     Task<Currency> GetAccountCurrencyAsync(int accountId, CancellationToken cancellationToken = default);
+    Task RemoveBankAccountAsync(string iban, CancellationToken cancellationToken = default);
 }

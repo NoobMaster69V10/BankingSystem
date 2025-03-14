@@ -20,10 +20,12 @@ namespace BankingSystem.API.Controllers
     public class PersonController : ControllerBase
     {
         private readonly IPersonAuthService _personAuthService;
+        private readonly IPersonService _personService;
 
-        public PersonController(IPersonAuthService personAuthService)
+        public PersonController(IPersonAuthService personAuthService, IPersonService personService)
         {
             _personAuthService = personAuthService;
+            _personService = personService;
         }
 
         /// <summary>
@@ -43,12 +45,11 @@ namespace BankingSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Person>> GetPersonInfo(
-            [FromServices]IPersonService personService, 
             CancellationToken cancellationToken)
         {
             var personId = User.FindFirst("personId")!.Value;
 
-            var result = await personService.GetPersonById(personId, cancellationToken);
+            var result = await _personService.GetPersonById(personId, cancellationToken);
             return result.IsFailure ? result.ToProblemDetails() : Ok(result.Value);
         }
 
@@ -151,7 +152,7 @@ namespace BankingSystem.API.Controllers
         [HttpPost("refresh-token")]
         [ProducesResponseType(typeof(AuthenticatedResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<AuthenticatedResponse>> RefreshToken([FromBody] RefreshTokenDto refreshToken)
+        public async Task<ActionResult<AuthenticatedResponse>> RefreshToken(RefreshTokenDto refreshToken)
         {
             var result = await _personAuthService.RefreshTokenAsync(refreshToken);
             return result.IsFailure ? result.ToProblemDetails() : Created("refresh-token", result.Value);

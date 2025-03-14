@@ -33,7 +33,7 @@ public class PersonAuthServiceTests
             Mock.Of<IRoleStore<IdentityRole>>(), null!, null!, null!, null!);
         Mock<ILoggerService> loggerServiceMock = new();
         Mock<IEmailService> emailServiceMock = new();
-        Mock<IJwtTokenGeneratorService> jwtTokenGeneratorMock = new();
+        Mock<IAuthTokenGeneratorService> jwtTokenGeneratorMock = new();
         Mock<IUnitOfWork> unitOfWorkMock = new();
 
         _personAuthService = new PersonAuthService(

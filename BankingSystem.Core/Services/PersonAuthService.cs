@@ -19,10 +19,10 @@ public class PersonAuthService : IPersonAuthService
     private readonly UserManager<IdentityPerson> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IEmailService _emailService;
-    private readonly IJwtTokenGeneratorService _tokenGenerator;
+    private readonly IAuthTokenGeneratorService _tokenGenerator;
     private readonly ILoggerService _loggerService;
 
-    public PersonAuthService(IUnitOfWork unitOfWork, UserManager<IdentityPerson> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService, IJwtTokenGeneratorService tokenGenerator, ILoggerService loggerService)
+    public PersonAuthService(IUnitOfWork unitOfWork, UserManager<IdentityPerson> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService, IAuthTokenGeneratorService tokenGenerator, ILoggerService loggerService)
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;

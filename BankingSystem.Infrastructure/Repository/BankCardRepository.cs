@@ -93,4 +93,12 @@ public class  BankCardRepository : RepositoryBase, IBankCardRepository
 
         return await Connection.QuerySingleOrDefaultAsync<BankAccount>(parameters);
     }
+    public async Task RemoveCardAsync(string cardNumber, CancellationToken cancellationToken = default)
+    {
+        const string query = "DELETE FROM BankCards WHERE CardNumber = @CardNumber";
+
+        var parameters = new CommandDefinition(query, new { CardNumber = cardNumber }, cancellationToken: cancellationToken, transaction: Transaction);
+
+        await Connection.ExecuteAsync(parameters);
+    }
 }

@@ -2,6 +2,7 @@
 using BankingSystem.Core.DTO.BankAccount;
 using BankingSystem.Core.DTO.BankCard;
 using BankingSystem.Core.Extensions;
+using BankingSystem.Core.Response;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -99,5 +100,21 @@ public class BankController : ControllerBase
         var result = await accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, userId, cancellationToken);
 
         return result.IsFailure ? result.ToProblemDetails() : Created("transfer-money", result.Value);
+    }
+    [HttpDelete("card-delete")]
+    [Authorize]
+    public async Task<ActionResult<CardRemovalResponse>> RemoveBankCard(string cardNumber,CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst("personId")!.Value;
+        var result = await _cardService.RemoveBankCardAsync(cardNumber,userId,cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
+    }
+    [HttpDelete("account-delete")]
+    [Authorize]
+    public async Task<ActionResult<AccountRemovalResponse>> RemoveBankAccount(string iban,CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst("personId")!.Value;
+        var result = await _accountService.RemoveBankAccountAsync(iban,userId,cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 }
