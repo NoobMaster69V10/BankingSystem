@@ -10,6 +10,7 @@ using BankingSystem.Core.Response;
 using BankingSystem.Core.Result;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.UnitOfWorkContracts;
+using Microsoft.AspNetCore.Http;
 
 namespace BankingSystem.Core.Services;
 
@@ -21,14 +22,16 @@ public class PersonAuthService : IPersonAuthService
     private readonly IEmailService _emailService;
     private readonly IAuthTokenGeneratorService _tokenGenerator;
     private readonly ILoggerService _loggerService;
+    private readonly IHttpContextAccessor _contextAccessor;
 
-    public PersonAuthService(IUnitOfWork unitOfWork, UserManager<IdentityPerson> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService, IAuthTokenGeneratorService tokenGenerator, ILoggerService loggerService)
+    public PersonAuthService(IUnitOfWork unitOfWork, UserManager<IdentityPerson> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService, IAuthTokenGeneratorService tokenGenerator, IHttpContextAccessor contextAccessor, ILoggerService loggerService)
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
         _roleManager = roleManager;
         _emailService = emailService;
         _tokenGenerator = tokenGenerator;
+        _contextAccessor = contextAccessor;
         _loggerService = loggerService;
     }
 
@@ -119,7 +122,9 @@ public class PersonAuthService : IPersonAuthService
                 { "token", token },
                 { "email", person.Email }
             };
-            var callback = QueryHelpers.AddQueryString(registerDto.ClientUri!, param);
+
+            var currentUrl = _contextAccessor.HttpContext?.Request.Host.Value;
+            var callback = QueryHelpers.AddQueryString($"https://{currentUrl}/api/Person/email-confirmation", param);
             var message = new Message([person.Email], "Email Confirmation", callback, null!);
             await _emailService.SendEmailAsync(message);
 
@@ -195,7 +200,7 @@ public class PersonAuthService : IPersonAuthService
 
     public async Task<Result<string>> EmailConfirmationAsync(string token, string email)
     {
-        var decodedToken = System.Web.HttpUtility.UrlDecode(token);
+        //var decodedToken = System.Web.HttpUtility.UrlDecode(token);
 
         var user = await _userManager.FindByEmailAsync(email);
         if (user is null)
@@ -203,7 +208,7 @@ public class PersonAuthService : IPersonAuthService
             return Result<string>.Failure(CustomError.NotFound("User Not Found"));
         }
 
-        var confirmResult = await _userManager.ConfirmEmailAsync(user, decodedToken);
+        var confirmResult = await _userManager.ConfirmEmailAsync(user, token);
         if (!confirmResult.Succeeded)
         {
             var errors = string.Join(", ", confirmResult.Errors.Select(e => $"{e.Code}: {e.Description}"));
