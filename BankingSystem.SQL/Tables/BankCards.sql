@@ -10,5 +10,7 @@ CREATE TABLE BankCards
     PinCode        NVARCHAR(128) NOT NULL,
     IsActive      BIT                NOT NULL DEFAULT 1,
     AccountId      INT  NOT NULL,
-    FOREIGN KEY (AccountId) REFERENCES BankAccounts (BankAccountId) ON DELETE CASCADE
+    FOREIGN KEY (AccountId) REFERENCES BankAccounts (BankAccountId) ON DELETE CASCADE,
+
+    INDEX IX_BankCards_CardNumber NONCLUSTERED (CardNumber)
 )

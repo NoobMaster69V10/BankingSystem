@@ -58,6 +58,7 @@
     <Folder Include="Properties" />
     <Folder Include="Tables\" />
     <Folder Include="StoredProcedures" />
+    <Folder Include="Triggers\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\AccountTransactions.sql" />

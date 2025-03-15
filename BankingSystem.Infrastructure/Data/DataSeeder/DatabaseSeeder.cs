@@ -96,7 +96,7 @@ public class DatabaseSeeder : IDatabaseSeeder
 
             if (role == "Person")
             {
-                var person = await _personRepository.GetByUsernameAsync(users[2].email);
+                var person = await _personRepository.GetByUsernameAsync(email);
 
                 var bankAccount = new BankAccount
                 {

@@ -33,10 +33,8 @@ public class AtmController : ControllerBase
     /// <param name="cardDto">The card authorization details including card number and PIN.</param>
     /// <returns>The current balance information.</returns>
     /// <response code="200">Returns the account balance information.</response>
-    /// <response code="400">If the card information is invalid or authorization fails.</response>
     [HttpPost("balance")]
     [ProducesResponseType(typeof(BalanceResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<BalanceResponse>> ShowBalance(CardAuthorizationDto cardDto)
     {
         var result = await _atmService.ShowBalanceAsync(cardDto);
@@ -49,10 +47,8 @@ public class AtmController : ControllerBase
     /// <param name="cardDto">The withdrawal details including card number, PIN, and amount.</param>
     /// <returns>The transaction response with updated balance.</returns>
     /// <response code="200">Returns the transaction details and updated balance.</response>
-    /// <response code="400">If withdrawal fails due to insufficient funds, invalid PIN, or other errors.</response>
     [HttpPost("withdraw-money")]
     [ProducesResponseType(typeof(AtmTransactionResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AtmTransactionResponse>> WithdrawMoney(WithdrawMoneyDto cardDto)
     {
         var result = await _atmService.WithdrawMoneyAsync(cardDto);
@@ -60,15 +56,13 @@ public class AtmController : ControllerBase
     }
 
     /// <summary>
-    /// Changes the PIN number for a bank card.
+    /// Changes the PIN for a bank card.
     /// </summary>
     /// <param name="cardDto">The PIN change details including card number, current PIN, and new PIN.</param>
     /// <returns>A confirmation message if PIN change is successful.</returns>
     /// <response code="200">Returns confirmation of PIN change.</response>
-    /// <response code="400">If PIN change fails due to invalid current PIN or other validation errors.</response>
     [HttpPatch("change-pin")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<string>> ChangePin(ChangePinDto cardDto)
     {
         var result = await _atmService.ChangePinAsync(cardDto);
@@ -81,10 +75,8 @@ public class AtmController : ControllerBase
     /// <param name="cardDto">The deposit details including card number, PIN, and amount.</param>
     /// <returns>The updated balance after deposit.</returns>
     /// <response code="200">Returns the updated balance information.</response>
-    /// <response code="400">If deposit fails due to invalid card information or other errors.</response>
     [HttpPost("deposit-money")]
     [ProducesResponseType(typeof(BalanceResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<BalanceResponse>> DepositMoney(DepositMoneyDto cardDto)
     {
         var result = await _atmService.DepositMoneyAsync(cardDto);

@@ -30,12 +30,8 @@ public class ReportController : ControllerBase
     /// </summary>
     /// <returns>User statistics including registration counts and account types.</returns>
     /// <response code="200">Returns the user statistics data.</response>
-    /// <response code="401">If the user is not authenticated.</response>
-    /// <response code="403">If the user is not a Manager.</response>
     [HttpGet("users-count")]
     [ProducesResponseType(typeof(UserStatistics), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<UserStatistics>> GetUserStatistics()
     {
         var result = await _bankReportService.GetUserStatisticsAsync();
@@ -47,12 +43,8 @@ public class ReportController : ControllerBase
     /// </summary>
     /// <returns>Dashboard summary for bank managers.</returns>
     /// <response code="200">Returns the manager dashboard data.</response>
-    /// <response code="401">If the user is not authenticated.</response>
-    /// <response code="403">If the user is not a Manager.</response>
     [HttpGet("manager-dashboard")]
-    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(BankManagerReport), StatusCodes.Status200OK)]
     public async Task<ActionResult<BankManagerReport>> GetManagerDashboard()
     {
         var result = await _bankReportService.GetBankManagerReportAsync();
@@ -64,12 +56,8 @@ public class ReportController : ControllerBase
     /// </summary>
     /// <returns>Transaction count statistics grouped by type.</returns>
     /// <response code="200">Returns the transaction statistics.</response>
-    /// <response code="401">If the user is not authenticated.</response>
-    /// <response code="403">If the user is not a Manager.</response>
     [HttpGet("transactions-count")]
-    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(TransactionStatistics), StatusCodes.Status200OK)]
     public async Task<ActionResult<TransactionStatistics>> GetTransactionsCount()
     {
         var result = await _bankReportService.GetTransactionStatisticsAsync();
@@ -82,12 +70,8 @@ public class ReportController : ControllerBase
     /// <param name="days">The number of past days to include in the report (default: 30).</param>
     /// <returns>A collection of daily transaction reports.</returns>
     /// <response code="200">Returns the daily transaction chart data.</response>
-    /// <response code="401">If the user is not authenticated.</response>
-    /// <response code="403">If the user is not a Manager.</response>
     [HttpGet("transactions-chart")]
-    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(IEnumerable<DailyTransactionReport>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<DailyTransactionReport>>> GetTransactionsChartForLastMonth([FromQuery]int days = 30)
     {
         var result = await _bankReportService.GetDailyTransactionsAsync(days);
@@ -99,12 +83,8 @@ public class ReportController : ControllerBase
     /// </summary>
     /// <returns>ATM transaction statistics including withdrawals, deposits, and other operations.</returns>
     /// <response code="200">Returns the ATM transaction statistics.</response>
-    /// <response code="401">If the user is not authenticated.</response>
-    /// <response code="403">If the user is not a Manager.</response>
     [HttpGet("atm-transactions")]
-    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(AtmTransactionsStatistics), StatusCodes.Status200OK)]
     public async Task<ActionResult<AtmTransactionsStatistics>> GetAtmTransactionsChart()
     {
         var result = await _bankReportService.GetAtmTransactionsStatisticsAsync();
