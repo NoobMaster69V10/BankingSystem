@@ -54,7 +54,8 @@ public class PersonAuthService : IPersonAuthService
                     var content = $"Your account has been locked. Please check your email and password." +
                                   "you can use the forgot password link";
                     var message = new Message([loginDto.Email], "Locked out account information", content, null!);
-                    await _emailService.SendEmailAsync(message);
+                    await _emailService.SendEmailAsync(message, "Reset Password");
+
                     return Result<AuthenticatedResponse>.Failure(
                         CustomError.AccessUnAuthorized("The account has been locked."));
                 }
@@ -126,7 +127,11 @@ public class PersonAuthService : IPersonAuthService
             var currentUrl = _contextAccessor.HttpContext?.Request.Host.Value;
             var callback = QueryHelpers.AddQueryString($"https://{currentUrl}/api/Person/email-confirmation", param);
             var message = new Message([person.Email], "Email Confirmation", callback, null!);
-            await _emailService.SendEmailAsync(message);
+
+            _ = Task.Run(async () =>
+            {
+                await _emailService.SendEmailAsync(message, "Confirm Account");
+            });
 
             var role = string.IsNullOrEmpty(registerDto.Role) ? "Person" : registerDto.Role;
 
@@ -174,7 +179,7 @@ public class PersonAuthService : IPersonAuthService
         };
         var callback = QueryHelpers.AddQueryString(forgotPasswordDto.ClientUri, param!);
         var message = new Message([user.Email!], "EmailConfirmation", callback, null!);
-        await _emailService.SendEmailAsync(message);
+        await _emailService.SendEmailAsync(message, "Reset Password");
         return Result<string>.Success("Email sent successfully.");
     }
 

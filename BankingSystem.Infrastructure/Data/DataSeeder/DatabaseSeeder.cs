@@ -55,8 +55,10 @@ public class DatabaseSeeder : IDatabaseSeeder
         {
             (SeederSettings.OperatorEmail, "Operator"),
             (SeederSettings.ManagerEmail, "Manager"),
-            (SeederSettings.PersonEmail, "Person")
+            (SeederSettings.PersonEmail1, "Person"),
+            (SeederSettings.PersonEmail2, "Person")
         };
+
 
         foreach (var (email, role) in users)
         {
@@ -91,41 +93,47 @@ public class DatabaseSeeder : IDatabaseSeeder
 
             await _userManager.ConfirmEmailAsync(user, await _userManager.GenerateEmailConfirmationTokenAsync(user));
 
-            var person = await _personRepository.GetByUsernameAsync(email);
 
-            var bankAccount = new BankAccount
+            if (role == "Person")
             {
-                Currency = Currency.GEL,
-                PersonId = person!.PersonId,
-                Balance = 5000,
-                Iban = GenerateIban()
-            };
+                var person = await _personRepository.GetByUsernameAsync(users[2].email);
 
-            await _bankAccountRepository.AddBankAccountAsync(bankAccount);
+                var bankAccount = new BankAccount
+                {
+                    Currency = Currency.GEL,
+                    PersonId = person!.PersonId,
+                    Balance = 5000,
+                    Iban = GenerateIban()
+                };
 
-            var cancellationToken = new CancellationToken();
+                await _bankAccountRepository.AddBankAccountAsync(bankAccount);
 
-            var personFullInfo = await _personRepository.GetByIdAsync(person.PersonId, cancellationToken);
+                var cancellationToken = new CancellationToken();
 
-            var personAccountId = personFullInfo!.BankAccounts.First().BankAccountId;
+                var personFullInfo = await _personRepository.GetByIdAsync(person.PersonId, cancellationToken);
+
+                var personAccountId = personFullInfo!.BankAccounts.First().BankAccountId;
 
 
-            var pinHash = _hasherService.Hash("1234");
+                var pinHash = _hasherService.Hash("1234");
 
-            var encryptedCvv = _encryptionService.Encrypt(GenerateCvv());
+                var encryptedCvv = _encryptionService.Encrypt(GenerateCvv());
 
-            var card = new BankCard
-            {
-                CardNumber = GenerateCardNumber(),
-                Cvv = encryptedCvv,
-                PinCode = pinHash,
-                ExpirationDate = DateTime.UtcNow.AddYears(5),
-                AccountId = personAccountId
-            };
+                var card = new BankCard
+                {
+                    CardNumber = GenerateCardNumber(),
+                    Cvv = encryptedCvv,
+                    PinCode = pinHash,
+                    ExpirationDate = DateTime.UtcNow.AddYears(5),
+                    AccountId = personAccountId
+                };
 
-            await _bankCardRepository.AddCardAsync(card);
-            _logger.LogSuccess("Database seeding completed successfully.");
+                await _bankCardRepository.AddCardAsync(card, cancellationToken);
+            }
         }
+
+        
+        _logger.LogSuccess("Database seeding completed successfully.");
     }
 
     private string GenerateIban() => $"GE{new Random().Next(100000000, 999999999)}{new Random().Next(100000000, 999999999)}";

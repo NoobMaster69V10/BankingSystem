@@ -17,13 +17,13 @@ public class EmailService : IEmailService
         _loggerService = loggerService;
     }
 
-    public async Task SendEmailAsync(Message message)
+    public async Task SendEmailAsync(Message message, string buttonText)
     {
-        var emailMessage = CreateEmailMessage(message);
+        var emailMessage = CreateEmailMessage(message, buttonText);
         await SendAsync(emailMessage);
     }
 
-    private MimeMessage CreateEmailMessage(Message message)
+    private MimeMessage CreateEmailMessage(Message message, string buttonText)
     {
         var emailMessage = new MimeMessage();
         emailMessage.From.Add(new MailboxAddress("BankingSystem", _emailConfig.From));
@@ -32,14 +32,14 @@ public class EmailService : IEmailService
 
         var bodyBuilder = new BodyBuilder
         {
-            HtmlBody = GetHtmlBody(message)
+            HtmlBody = GetHtmlBody(message, buttonText)
         };
 
-        if (message.Attachments != null && message.Attachments.Any())
+        if (message.Attachments != null! && message.Attachments.Any())
         {
-            byte[] fileBytes;
             foreach (var attachment in message.Attachments)
             {
+                byte[] fileBytes;
                 using (var ms = new MemoryStream())
                 {
                     attachment.CopyTo(ms);
@@ -71,11 +71,10 @@ public class EmailService : IEmailService
         finally
         {
             await client.DisconnectAsync(true);
-            client.Dispose();
         }
     }
 
-    private string GetHtmlBody(Message message)
+    private string GetHtmlBody(Message message, string buttonText)
     {
         return $@"
         <html>
@@ -98,7 +97,7 @@ public class EmailService : IEmailService
                                         <p style='font-size: 16px; color: #555; line-height: 1.5;'>We received a request to reset your password for your Banking System account. If you didn't make this request, you can safely ignore this email.</p>
                                         <p style='font-size: 16px; color: #555; line-height: 1.5;'>click the button below:</p>
                                         <div style='text-align: center; margin: 30px 0;'>
-                                            <a href='{message.Content}' style='background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-size: 18px; font-weight: bold; display: inline-block;'>Reset Password</a>
+                                            <a href='{message.Content}' style='background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-size: 18px; font-weight: bold; display: inline-block;'>{buttonText}</a>
                                         </div>
                                         <p style='font-size: 16px; color: #555; line-height: 1.5;'>If the button doesn't work, you can copy and paste this link into your browser:</p>
                                         <p style='font-size: 14px; color: #666; word-break: break-all; line-height: 1.5;'>{message.Content}</p>

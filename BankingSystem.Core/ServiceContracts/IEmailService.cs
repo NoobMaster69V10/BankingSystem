@@ -4,5 +4,5 @@ namespace BankingSystem.Core.ServiceContracts;
 
 public interface IEmailService
 {
-    Task SendEmailAsync(Message message);
+    Task SendEmailAsync(Message message, string buttonText);
 }
