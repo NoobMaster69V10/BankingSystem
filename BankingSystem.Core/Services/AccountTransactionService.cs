@@ -25,8 +25,6 @@ public class AccountTransactionService : IAccountTransactionService
     {
         try
         {
-
-            await _unitOfWork.BeginTransactionAsync(cancellationToken);
             var fromAccount = await _unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.FromAccountId, cancellationToken);
             if (fromAccount is null)
             {
@@ -61,19 +59,14 @@ public class AccountTransactionService : IAccountTransactionService
                 TransactionFee = transactionFee
             };
 
-            fromAccount.Balance -= (transactionDto.Amount + transactionFee);
+            var convertedAmount = await _exchangeService.ConvertCurrencyAsync(transactionDto.Amount, fromAccount.Currency, toAccount.Currency);
 
-            toAccount.Balance += await _exchangeService.ConvertCurrencyAsync(transactionDto.Amount, fromAccount.Currency, toAccount.Currency);
-            await _unitOfWork.BankAccountRepository.UpdateBalanceAsync(fromAccount, cancellationToken);
-            await _unitOfWork.BankAccountRepository.UpdateBalanceAsync(toAccount, cancellationToken);
-            await _unitOfWork.BankTransactionRepository.AddAccountTransferAsync(transaction, cancellationToken);
-            await _unitOfWork.CommitAsync(cancellationToken);
+            await _unitOfWork.BankTransactionRepository.TransferBetweenAccountsAsync(transaction, convertedAmount, cancellationToken);
 
             return Result<AccountTransfer>.Success(transaction);
         }
         catch (Exception ex)
         {
-            await _unitOfWork.RollbackAsync();
             _loggerService.LogError($"Transaction failed: {ex.Message}, StackTrace: {ex.StackTrace}, Transaction Data: {transactionDto}");
 
             return Result<AccountTransfer>.Failure(CustomError.Failure("An error occurred during the transaction."));

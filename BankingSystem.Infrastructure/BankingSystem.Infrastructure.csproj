@@ -24,4 +24,8 @@
     <ProjectReference Include="..\BankingSystem.Core\BankingSystem.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

@@ -10,16 +10,19 @@ public class BankTransactionRepository : RepositoryBase, IBankTransactionReposit
 {
     public BankTransactionRepository(IDbConnection connection) : base(connection) { }
 
-    public async Task AddAccountTransferAsync(AccountTransfer transferObj, CancellationToken cancellationToken = default)
+    public async Task TransferBetweenAccountsAsync(AccountTransfer accountTransfer, decimal convertedAmount, CancellationToken cancellationToken = default)
     {
-        const string query =
-            "INSERT INTO AccountTransactions(Amount, TransactionDate, FromAccountId, ToAccountId, TransactionFee, TransactionType) VALUES (@Amount, @TransactionDate, @FromAccountId, @ToAccountId, @TransactionFee, @TransactionType)";
 
-        var parameters = new CommandDefinition(query, transferObj, cancellationToken: cancellationToken,
-            transaction: Transaction);
+        var parameters = new DynamicParameters();
+        parameters.Add("@FromAccountId", accountTransfer.FromAccountId, DbType.Int32);
+        parameters.Add("@ToAccountId", accountTransfer.ToAccountId, DbType.Int32);
+        parameters.Add("@Amount", accountTransfer.Amount, DbType.Decimal);
+        parameters.Add("@TransactionFee", accountTransfer.TransactionFee, DbType.Decimal);
+        parameters.Add("@ConvertedAmount", convertedAmount, DbType.Decimal);
 
+        var command = new CommandDefinition("TransferBetweenAccounts", parameters, commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken);
 
-        await Connection.ExecuteAsync(parameters);
+        await Connection.ExecuteAsync(command);
     }
 
     public async Task<decimal> GetTotalWithdrawnTodayAsync(int accountId, CancellationToken cancellationToken = default)

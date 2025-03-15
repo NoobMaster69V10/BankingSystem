@@ -57,12 +57,14 @@
   <ItemGroup>
     <Folder Include="Properties" />
     <Folder Include="Tables\" />
+    <Folder Include="StoredProcedures" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\AccountTransactions.sql" />
     <Build Include="Tables\BankAccounts.sql" />
     <Build Include="Tables\AspNetUsers.sql" />
     <Build Include="Tables\RefreshToken.sql" />
+    <Build Include="StoredProcedures\TransferBetweenAccounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\BankCards.sql" />

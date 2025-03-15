@@ -31,7 +31,6 @@ namespace BankingSystem.API.Controllers
         /// <summary>
         /// Retrieves personal information for the authenticated user.
         /// </summary>
-        /// <param name="personService">The service for retrieving person information.</param>
         /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
         /// <returns>The personal information of the authenticated user.</returns>
         /// <response code="200">Returns the user's personal information.</response>
@@ -114,11 +113,7 @@ namespace BankingSystem.API.Controllers
         /// </summary>
         /// <param name="resetPassword">The password reset details including token, email, and new password.</param>
         /// <returns>Confirmation of password reset success.</returns>
-        /// <response code="200">Returns confirmation of password reset.</response>
-        /// <response code="400">If the reset token is invalid or expired.</response>
         [HttpPost("reset-password")]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<bool>> ResetPassword(ResetPasswordDto resetPassword)
         {
             var result = await _personAuthService.ResetPasswordAsync(resetPassword);
@@ -147,11 +142,8 @@ namespace BankingSystem.API.Controllers
         /// </summary>
         /// <param name="refreshToken">The refresh token from a previous authentication.</param>
         /// <returns>New authentication tokens.</returns>
-        /// <response code="201">Returns new authentication tokens.</response>
-        /// <response code="400">If the refresh token is invalid or expired.</response>
         [HttpPost("refresh-token")]
         [ProducesResponseType(typeof(AuthenticatedResponse), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<AuthenticatedResponse>> RefreshToken(RefreshTokenDto refreshToken)
         {
             var result = await _personAuthService.RefreshTokenAsync(refreshToken);

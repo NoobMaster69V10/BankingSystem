@@ -1,9 +1,9 @@
-﻿using BankingSystem.Core.ServiceContracts;
-using BankingSystem.Infrastructure.Data.DatabaseContext;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Dapper;
 using System.Data;
-using Dapper;
 using Microsoft.EntityFrameworkCore;
+using BankingSystem.Core.ServiceContracts;
+using Microsoft.Extensions.DependencyInjection;
+using BankingSystem.Infrastructure.Data.DatabaseContext;
 
 namespace BankingSystem.Infrastructure.Data.DatabaseConfiguration;
 
@@ -49,11 +49,14 @@ public class DatabaseConfiguration : IDatabaseConfiguration
                 @"..\BankingSystem.SQL\Tables\AccountTransactions.sql"));
             var createRefreshTokenTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
                 @"..\BankingSystem.SQL\Tables\RefreshToken.sql"));
+            var createTransferBetweenAccountsProcedure = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
+                @"..\BankingSystem.SQL\StoredProcedures\TransferBetweenAccounts.sql"));
 
             await connection.ExecuteAsync(createBankAccountTable);
             await connection.ExecuteAsync(createBankCardTable);
             await connection.ExecuteAsync(createAccountTransactionTable);
             await connection.ExecuteAsync(createRefreshTokenTable);
+            await connection.ExecuteAsync(createTransferBetweenAccountsProcedure);
 
             _loggerService.LogSuccess("Database migration completed successfully!");
         }
