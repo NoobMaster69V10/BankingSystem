@@ -21,7 +21,7 @@ public class BankAccountRepository : RepositoryBase, IBankAccountRepository
 
     public async Task<BankAccount?> GetAccountByIdAsync(int accountId, CancellationToken cancellationToken = default)
     {
-        const string query = "SELECT * FROM BankAccounts WHERE BankAccountId = @BankAccountId";
+        const string query = "SELECT * FROM BankAccounts WHERE BankAccountId = @BankAccountId AND IsActive = 1";
 
         var parameters = new CommandDefinition(query, new { BankAccountId = accountId }, cancellationToken: cancellationToken, transaction: Transaction);
 
@@ -39,7 +39,7 @@ public class BankAccountRepository : RepositoryBase, IBankAccountRepository
 
     public async Task<BankAccount?> GetAccountByIbanAsync(string iban, CancellationToken cancellationToken = default)
     {
-        const string query = "SELECT * FROM BankAccounts WHERE IBAN = @IBAN";
+        const string query = "SELECT * FROM BankAccounts WHERE IBAN = @IBAN And IsActive = 1";
         var parameters = new CommandDefinition(query, new { IBAN = iban }, cancellationToken: cancellationToken, transaction: Transaction);
 
         return await Connection.QueryFirstOrDefaultAsync<BankAccount?>(parameters);
@@ -55,7 +55,7 @@ public class BankAccountRepository : RepositoryBase, IBankAccountRepository
 
     public async Task RemoveBankAccountAsync(string iban, CancellationToken cancellationToken = default)
     {
-        const string query = "DELETE FROM BankAccounts WHERE IBAN = @IBAN";
+        const string query = "UPDATE BankAccounts SET IsActive = 0 WHERE IBAN = @IBAN";
         var parameters = new CommandDefinition(query, new { IBAN = iban }, cancellationToken: cancellationToken, transaction: Transaction);
         await Connection.ExecuteAsync(parameters);
     }

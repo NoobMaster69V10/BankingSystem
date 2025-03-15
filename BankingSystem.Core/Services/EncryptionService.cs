@@ -15,22 +15,18 @@ public class EncryptionService : IEncryptionService
     }
     public string Encrypt(string plainText)
     {
-        using (var aes = Aes.Create())
-        {
-            aes.Key = Encoding.UTF8.GetBytes(EncryptionKey.PadRight(32));
-            aes.IV = new byte[16];
+        using var aes = Aes.Create();
+        aes.Key = Encoding.UTF8.GetBytes(EncryptionKey.PadRight(32));
+        aes.IV = new byte[16];
 
-            using (var encryptor = aes.CreateEncryptor(aes.Key, aes.IV))
-            using (var ms = new MemoryStream())
-            {
-                using (var cryptoStream = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
-                using (var writer = new StreamWriter(cryptoStream))
-                {
-                    writer.Write(plainText);
-                }
-                return Convert.ToBase64String(ms.ToArray());
-            }
+        using var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+        using var ms = new MemoryStream();
+        using (var cryptoStream = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+        using (var writer = new StreamWriter(cryptoStream))
+        {
+            writer.Write(plainText);
         }
+        return Convert.ToBase64String(ms.ToArray());
     }
 
     public string Decrypt(string cipherText)

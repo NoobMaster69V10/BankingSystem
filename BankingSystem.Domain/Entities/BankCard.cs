@@ -11,4 +11,5 @@ public class BankCard
     public string Cvv { get; set; } = string.Empty;
     public string PinCode { get; set; } = string.Empty;
     public int AccountId { get; set; }
+    public bool IsActive { get; set; } = true;
 }

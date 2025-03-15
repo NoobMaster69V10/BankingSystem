@@ -85,7 +85,7 @@ public class BankController : ControllerBase
     /// <response code="400">If the transfer could not be completed due to insufficient funds or other errors.</response>
     /// <response code="401">If the user is not authenticated.</response>
     /// <response code="403">If the user is not a Person or trying to access another user's account.</response>
-    [Authorize(Roles = "Person")]
+    [Authorize]
     [HttpPost("transfer-money")]
     [ProducesResponseType(typeof(AccountTransfer), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -100,6 +100,14 @@ public class BankController : ControllerBase
         var result = await accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, userId, cancellationToken);
 
         return result.IsFailure ? result.ToProblemDetails() : Created("transfer-money", result.Value);
+    }
+    [HttpPatch("card-deactivate")]
+    [Authorize]
+    public async Task<ActionResult<string>> DeactivateBankCard(string cardNumber,CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst("personId")!.Value;
+        var result = await _cardService.DeactivateBankCardAsync(cardNumber,userId,cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
     [HttpDelete("card-delete")]
     [Authorize]

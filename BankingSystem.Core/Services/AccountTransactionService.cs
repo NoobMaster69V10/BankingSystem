@@ -28,7 +28,7 @@ public class AccountTransactionService : IAccountTransactionService
             var fromAccount = await _unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.FromAccountId, cancellationToken);
             if (fromAccount is null)
             {
-                return Result<AccountTransfer>.Failure(CustomError.Validation($"Bank account with  '{transactionDto.FromAccountId}' not found!"));
+                return Result<AccountTransfer>.Failure(CustomError.Validation($"Bank account not found!"));
             }
             if (fromAccount.PersonId != userId)
             {
@@ -37,7 +37,7 @@ public class AccountTransactionService : IAccountTransactionService
             var toAccount = await _unitOfWork.BankAccountRepository.GetAccountByIdAsync(transactionDto.ToAccountId, cancellationToken);
             if (toAccount is null)
             {
-                return Result<AccountTransfer>.Failure(CustomError.Validation($"Bank account with id '{transactionDto.ToAccountId}' not found!"));
+                return Result<AccountTransfer>.Failure(CustomError.Validation($"Bank account You want to transfer not found!"));
             }
             var transactionFee = 0m;
             if (fromAccount.PersonId != toAccount.PersonId)

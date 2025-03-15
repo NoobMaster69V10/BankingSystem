@@ -66,7 +66,6 @@ public class BankAccountService : IBankAccountService
         {
             return Result<AccountRemovalResponse>.Failure(CustomError.Failure("Account Doesn't Exist."));
         }
-
         if (account.PersonId != userId)
         {
             return Result<AccountRemovalResponse>.Failure(CustomError.Failure("You don't have permission to remove this account."));

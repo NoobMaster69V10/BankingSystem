@@ -7,7 +7,6 @@ namespace BankingSystem.Domain.Entities;
 
 public class BankAccount
 {
-    [JsonIgnore]
     public int BankAccountId { get; set; }
 
     [StringLength(34, MinimumLength = 15)]
@@ -20,4 +19,5 @@ public class BankAccount
     public Currency Currency { get; set; }
 
     public string PersonId { get; set; } = string.Empty;
+    public bool IsActive { get; set; } = true;
 }

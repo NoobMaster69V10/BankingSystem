@@ -65,6 +65,7 @@
     <Build Include="Tables\AspNetUsers.sql" />
     <Build Include="Tables\RefreshToken.sql" />
     <Build Include="StoredProcedures\TransferBetweenAccounts.sql" />
+    <Build Include="Triggers\trg_UpdateCardStatusOnAccountStatusChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\BankCards.sql" />

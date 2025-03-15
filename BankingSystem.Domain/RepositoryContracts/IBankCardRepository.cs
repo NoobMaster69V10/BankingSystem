@@ -9,6 +9,9 @@ public interface IBankCardRepository : IRepositoryBase
     Task<decimal> GetBalanceAsync(string cardNumber, CancellationToken cancellationToken = default);
     Task<BankAccount?> GetAccountByCardAsync(string cardNumber, CancellationToken cancellationToken = default);
     Task<BankCard?> GetCardAsync(string cardNumber, CancellationToken cancellationToken = default);
-    Task<(string PinCode,DateTime ExpiryDate, string Cvv)?> GetCardDetailsAsync(string cardNumber, CancellationToken cancellationToken = default);
-    Task RemoveCardAsync(string cardNumber, CancellationToken cancellationToken = default);
+    Task<(string PinCode,DateTime ExpiryDate, string Cvv)?> GetCardSecurityDetailsAsync(string cardNumber, CancellationToken cancellationToken = default);
+    Task RemoveBankCardAsync(string cardNumber, CancellationToken cancellationToken = default);
+    Task<string?> GetCardIdAsync(string cardNumber, CancellationToken cancellationToken = default);
+    Task<bool> DoesCardExistAsync(string cardNumber, CancellationToken cancellationToken = default);
+    Task DeactivateCardAsync(string cardNumber, CancellationToken cancellationToken = default);
 }

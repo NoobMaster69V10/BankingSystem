@@ -15,7 +15,8 @@ public class BankCardService : IBankCardService
     private readonly IHasherService _hasherService;
     private readonly ILoggerService _loggerService;
 
-    public BankCardService(IUnitOfWork unitOfWork, IHasherService hasherService, IEncryptionService encryptionService, ILoggerService loggerService)
+    public BankCardService(IUnitOfWork unitOfWork, IHasherService hasherService, IEncryptionService encryptionService,
+        ILoggerService loggerService)
     {
         _unitOfWork = unitOfWork;
         _hasherService = hasherService;
@@ -23,31 +24,38 @@ public class BankCardService : IBankCardService
         _loggerService = loggerService;
     }
 
-    public async Task<Result<BankCard>> CreateBankCardAsync(BankCardRegisterDto bankCardRegisterDto, CancellationToken cancellationToken = default)
+    public async Task<Result<BankCard>> CreateBankCardAsync(BankCardRegisterDto bankCardRegisterDto,
+        CancellationToken cancellationToken = default)
     {
         try
         {
             await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
-            if (await _unitOfWork.BankCardRepository.GetCardAsync(bankCardRegisterDto.CardNumber, cancellationToken) is not null)
+            if (await _unitOfWork.BankCardRepository.GetCardAsync(bankCardRegisterDto.CardNumber, cancellationToken) is
+                not null)
             {
                 return Result<BankCard>.Failure(
                     CustomError.Validation(
                         "A card with this number already exists. Please use a different card number."));
             }
 
-            var person = await _unitOfWork.PersonRepository.GetByUsernameAsync(bankCardRegisterDto.Username, cancellationToken);
+            var person =
+                await _unitOfWork.PersonRepository.GetByUsernameAsync(bankCardRegisterDto.Username, cancellationToken);
             if (person is null)
             {
                 return Result<BankCard>.Failure(
                     CustomError.NotFound("User not found. Please check the username and try again."));
             }
-            var bankAccount = await _unitOfWork.BankAccountRepository.GetAccountByIdAsync(bankCardRegisterDto.BankAccountId, cancellationToken);
+
+            var bankAccount =
+                await _unitOfWork.BankAccountRepository.GetAccountByIdAsync(bankCardRegisterDto.BankAccountId,
+                    cancellationToken);
             if (bankAccount is null)
             {
                 return Result<BankCard>.Failure(
                     CustomError.NotFound("The provided bank account does not exist. Please verify your details."));
             }
+
             if (!person.BankAccounts.Any())
             {
                 return Result<BankCard>.Failure(
@@ -88,7 +96,7 @@ public class BankCardService : IBankCardService
         }
     }
 
-    public async Task<Result<CardRemovalResponse>> RemoveBankCardAsync(string cardNumber,string userId,
+    public async Task<Result<CardRemovalResponse>> RemoveBankCardAsync(string cardNumber, string userId,
         CancellationToken cancellationToken = default)
     {
         var bankAccount = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(cardNumber, cancellationToken);
@@ -96,13 +104,16 @@ public class BankCardService : IBankCardService
         {
             return Result<CardRemovalResponse>.Failure(CustomError.NotFound("Card number not found"));
         }
+
         if (userId != bankAccount.PersonId)
         {
-            return Result<CardRemovalResponse>.Failure(CustomError.AccessForbidden("You do not have permission to remove this card"));
+            return Result<CardRemovalResponse>.Failure(
+                CustomError.AccessForbidden("You do not have permission to remove this card"));
         }
+
         try
         {
-            await _unitOfWork.BankCardRepository.RemoveCardAsync(cardNumber, cancellationToken);
+            await _unitOfWork.BankCardRepository.RemoveBankCardAsync(cardNumber, cancellationToken);
             var cardRemovalResponse = new CardRemovalResponse
             {
                 CardNumber = cardNumber,
@@ -113,17 +124,49 @@ public class BankCardService : IBankCardService
         catch (Exception e)
         {
             _loggerService.LogError($"[RemoveBankCardAsync] An error occurred: {e.Message}");
-            return Result<CardRemovalResponse>.Failure(CustomError.Failure("An error occurred while removing the card"));
+            return Result<CardRemovalResponse>.Failure(
+                CustomError.Failure("An error occurred while removing the card"));
         }
     }
 
-
-    public async Task<Result<bool>> ValidateCardAsync(string cardNumber, string pinCode, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> DeactivateBankCardAsync(string cardNumber, string userId,
+        CancellationToken cancellationToken)
     {
         try
         {
-            var card = await _unitOfWork.BankCardRepository.GetCardDetailsAsync(cardNumber, cancellationToken);
+            if (!await _unitOfWork.BankCardRepository.DoesCardExistAsync(cardNumber, cancellationToken))
+            {
+                return Result<string>.Failure(CustomError.NotFound("Card not found"));
+            }
 
+            var account = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(cardNumber, cancellationToken);
+            if (account is null)
+            {
+                return Result<string>.Failure(CustomError.NotFound("Account not found"));
+            }
+
+            if (account.PersonId != userId)
+            {
+                return Result<string>.Failure(
+                    CustomError.NotFound("You do not have permission to deactivate this card"));
+            }
+
+            await _unitOfWork.BankCardRepository.DeactivateCardAsync(cardNumber, cancellationToken);
+            return Result<string>.Success("Card deactivated successfully");
+        }
+        catch (Exception ex)
+        {
+            _loggerService.LogError(ex.Message);
+            return Result<string>.Failure(CustomError.Failure("Error occurred while validating card"));
+        }
+    }
+
+    public async Task<Result<bool>> ValidateCardAsync(string cardNumber, string pinCode,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var card = await _unitOfWork.BankCardRepository.GetCardSecurityDetailsAsync(cardNumber, cancellationToken);
             if (card == null)
             {
                 return Result<bool>.Failure(CustomError.NotFound("Card number not found"));

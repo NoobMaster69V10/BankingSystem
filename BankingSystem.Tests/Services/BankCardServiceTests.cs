@@ -29,7 +29,7 @@ public class BankCardServiceTests
     [Fact]
     public async Task ValidateCardAsync_ShouldReturnFailure_WhenCardNotFound()
     {
-        _unitOfWorkMock.Setup(u => u.BankCardRepository.GetCardDetailsAsync("1234567890123456", default)).ReturnsAsync(((string PinCode, DateTime ExpiryDate, string Cvv)?)null);
+        _unitOfWorkMock.Setup(u => u.BankCardRepository.GetCardSecurityDetailsAsync("1234567890123456", default)).ReturnsAsync(((string PinCode, DateTime ExpiryDate, string Cvv)?)null);
 
         var result = await _bankCardService.ValidateCardAsync("1234567890123456", "1234");
 
@@ -40,7 +40,7 @@ public class BankCardServiceTests
     [Fact]
     public async Task ValidateCardAsync_ShouldReturnFailure_WhenPinCodeIsNotValid()
     {
-        _unitOfWorkMock.Setup(u => u.BankCardRepository.GetCardDetailsAsync("1234567890123456", default)).ReturnsAsync((("1234", DateTime.Now, "123")));
+        _unitOfWorkMock.Setup(u => u.BankCardRepository.GetCardSecurityDetailsAsync("1234567890123456", default)).ReturnsAsync((("1234", DateTime.Now, "123")));
 
         _hasherService.Setup(h => h.Verify("1234", "3214")).Returns(false);
 
@@ -53,7 +53,7 @@ public class BankCardServiceTests
     [Fact]
     public async Task ValidateCardAsync_ShouldReturnFailure_WhenCardIsExpired()
     {
-        _unitOfWorkMock.Setup(u => u.BankCardRepository.GetCardDetailsAsync("1234567890123456", default)).ReturnsAsync((("1234", DateTime.Now.AddDays(-30), "123")));
+        _unitOfWorkMock.Setup(u => u.BankCardRepository.GetCardSecurityDetailsAsync("1234567890123456", default)).ReturnsAsync((("1234", DateTime.Now.AddDays(-30), "123")));
 
         _hasherService.Setup(h => h.Verify("1234", "1234")).Returns(true);
 
@@ -66,7 +66,7 @@ public class BankCardServiceTests
     [Fact]
     public async Task ValidateCardAsync_ShouldReturnFailure_WhenIsValid()
     {
-        _unitOfWorkMock.Setup(u => u.BankCardRepository.GetCardDetailsAsync("1234567890123456", default)).ReturnsAsync((("1234", DateTime.Now.AddDays(30), "123")));
+        _unitOfWorkMock.Setup(u => u.BankCardRepository.GetCardSecurityDetailsAsync("1234567890123456", default)).ReturnsAsync((("1234", DateTime.Now.AddDays(30), "123")));
 
         _hasherService.Setup(h => h.Verify("1234", "1234")).Returns(true);
 
