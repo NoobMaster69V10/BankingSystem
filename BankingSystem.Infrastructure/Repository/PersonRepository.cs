@@ -10,15 +10,8 @@ public class PersonRepository : RepositoryBase, IPersonRepository
     public PersonRepository(IDbConnection connection) : base(connection) { }
     public async Task<Person?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        const string query = @"
-        SELECT u.Id as PersonID, u.FirstName, u.LastName, u.Email, u.IdNumber, u.BirthDate,
-               b.BankAccountId, b.IBAN, b.Balance, b.Currency, b.PersonId,
-               bc.BankCardId, bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.AccountId
-        FROM AspNetUsers u
-        LEFT JOIN BankAccounts b ON u.Id = b.PersonId
-        LEFT JOIN BankCards bc ON b.BankAccountId = bc.AccountId
-        WHERE u.Id = @ID";
-        
+        const string query = "SELECT * FROM vw_PersonInfo WHERE PersonID = @ID";
+
         var parameters = new CommandDefinition(query, new { ID = id }, transaction: Transaction,
             cancellationToken: cancellationToken);
 
@@ -57,14 +50,7 @@ public class PersonRepository : RepositoryBase, IPersonRepository
 
     public async Task<Person?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
-        const string query = @"
-                         SELECT u.Id as PersonID, u.FirstName, u.LastName, u.Email, u.IdNumber, u.BirthDate,
-                            b.BankAccountId, b.IBAN, b.Balance, b.Currency, b.PersonId,
-                            bc.BankCardId,bc.CardNumber, bc.ExpirationDate, bc.PinCode, bc.CVV, bc.AccountId
-                            FROM AspNetUsers u
-                            LEFT JOIN BankAccounts b ON u.Id = b.PersonId
-                            LEFT JOIN BankCards bc ON b.BankAccountId = bc.AccountId
-                         WHERE u.Username = @Username";
+        const string query = "SELECT * FROM vw_PersonInfo WHERE Username = @Username";
 
         var parameters = new CommandDefinition(query, new { Username = username }, transaction: Transaction,
             cancellationToken: cancellationToken);

@@ -53,13 +53,16 @@ public class DatabaseConfiguration : IDatabaseConfiguration
                 @"..\BankingSystem.SQL\StoredProcedures\TransferBetweenAccounts.sql"));
             var createUpdateCardTrigger = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
                 @"..\BankingSystem.SQL\Triggers\trg_UpdateCardStatusOnAccountStatusChange.sql"));
-            
+            var createPersonInfoView = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
+                @"..\BankingSystem.SQL\Views\vw_PersonInfo.sql"));
+
             await connection.ExecuteAsync(createBankAccountTable);
             await connection.ExecuteAsync(createBankCardTable);
             await connection.ExecuteAsync(createAccountTransactionTable);
             await connection.ExecuteAsync(createRefreshTokenTable);
             await connection.ExecuteAsync(createTransferBetweenAccountsProcedure);
             await connection.ExecuteAsync(createUpdateCardTrigger);
+            await connection.ExecuteAsync(createPersonInfoView);
 
             _loggerService.LogSuccess("Database migration completed successfully!");
         }

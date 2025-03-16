@@ -18,6 +18,7 @@ public class BankAccount
     [StringLength(3, MinimumLength = 3)]
     public Currency Currency { get; set; }
 
+    [JsonIgnore]
     public string PersonId { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
 }

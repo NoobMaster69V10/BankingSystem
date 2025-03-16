@@ -34,12 +34,6 @@ public class PersonService : IPersonService
             
             var person = await _unitOfWork.PersonRepository.GetByIdAsync(personId, cancellationToken);
 
-            if (cancellationToken.IsCancellationRequested)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Cancellation requested");
-            }
-
             if (string.IsNullOrEmpty(personId) || person is null)
             {
                 return Result<Person>.Failure(CustomError.NotFound("User not found"));

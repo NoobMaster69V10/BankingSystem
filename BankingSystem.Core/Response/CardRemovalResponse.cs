@@ -1,4 +1,3 @@
-
 namespace BankingSystem.Core.Response;
 
 public record CardRemovalResponse : ResponseMessage
