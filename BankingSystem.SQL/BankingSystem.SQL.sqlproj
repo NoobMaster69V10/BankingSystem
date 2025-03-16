@@ -58,7 +58,6 @@
     <Folder Include="Properties" />
     <Folder Include="Tables\" />
     <Folder Include="StoredProcedures" />
-    <Folder Include="Triggers\" />
     <Folder Include="Views" />
   </ItemGroup>
   <ItemGroup>
@@ -68,6 +67,7 @@
     <Build Include="Tables\RefreshToken.sql" />
     <Build Include="StoredProcedures\TransferBetweenAccounts.sql" />
     <Build Include="Triggers\trg_UpdateCardStatusOnAccountStatusChange.sql" />
+    <Build Include="Triggers\trg_UpdateIsActiveOnExpiration.sql" />
     <Build Include="Views\vw_PersonInfo.sql" />
   </ItemGroup>
   <ItemGroup>

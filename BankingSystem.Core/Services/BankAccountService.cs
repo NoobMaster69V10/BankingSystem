@@ -59,23 +59,19 @@ public class BankAccountService : IBankAccountService
         }
     }
 
-    public async Task<Result<AccountRemovalResponse>> RemoveBankAccountAsync(string iban,string userId,CancellationToken cancellationToken)
+    public async Task<Result<AccountRemovalResponse>> RemoveBankAccountAsync(BankAccountRemovalDto bankAccountRemovalDto,CancellationToken cancellationToken)
     {
-        var account = await _unitOfWork.BankAccountRepository.GetAccountByIbanAsync(iban, cancellationToken);
-        if (account == null)
+        var account = await _unitOfWork.BankAccountRepository.GetAccountByIbanAsync(bankAccountRemovalDto.Iban, cancellationToken);
+        if (account is null || account.PersonId != bankAccountRemovalDto.PersonId)
         {
-            return Result<AccountRemovalResponse>.Failure(CustomError.Failure("Account Doesn't Exist."));
-        }
-        if (account.PersonId != userId)
-        {
-            return Result<AccountRemovalResponse>.Failure(CustomError.Failure("You don't have permission to remove this account."));
+            return Result<AccountRemovalResponse>.Failure(CustomError.Failure("Account not found."));
         }
         try
         {
-            await _unitOfWork.BankAccountRepository.RemoveBankAccountAsync(iban, cancellationToken);
+            await _unitOfWork.BankAccountRepository.RemoveBankAccountAsync(bankAccountRemovalDto.Iban, cancellationToken);
             var response = new AccountRemovalResponse
             {
-                Iban = iban,
+                Iban = bankAccountRemovalDto.Iban,
                 Message = "Account removed successfully."
             };
             return Result<AccountRemovalResponse>.Success(response);

@@ -1,4 +1,5 @@
-﻿using BankingSystem.Core.DTO.AccountTransaction;
+﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.DTO.AccountTransaction;
 using BankingSystem.Core.DTO.BankAccount;
 using BankingSystem.Core.DTO.BankCard;
 using BankingSystem.Core.Extensions;
@@ -87,51 +88,57 @@ public class BankController : ControllerBase
     /// <summary>
     /// Deactivates a bank card to prevent further use.
     /// </summary>
-    /// <param name="cardNumber">Bank card number.</param>
+    /// <param name="bankCardActiveDto"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>Bank card information.</returns>
     /// <response code="200">Returns a message about deactivation.</response>
     [HttpPatch("card-deactivate")]
     [Authorize]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-    public async Task<ActionResult<string>> DeactivateBankCard(string cardNumber, CancellationToken cancellationToken)
+    public async Task<ActionResult<string>> DeactivateBankCard(BankCardActiveDto bankCardActiveDto, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst("personId")!.Value;
-        var result = await _cardService.DeactivateBankCardAsync(cardNumber,userId,cancellationToken);
+        var result = await _cardService.DeactivateBankCardAsync(bankCardActiveDto,userId,cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
     /// <summary>
     /// Deletes a bank card to prevent further use.
     /// </summary>
-    /// <param name="cardNumber">Bank card number.</param>
+    /// <param name="bankCardActiveDto"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>Bank card information.</returns>
     /// <response code="200">Returns a message about bank card.</response>
     [HttpDelete("card-delete")]
-    [Authorize]
+    [Authorize(Roles = "Operator")]
     [ProducesResponseType(typeof(CardRemovalResponse), StatusCodes.Status200OK)]
-    public async Task<ActionResult<CardRemovalResponse>> RemoveBankCard(string cardNumber, CancellationToken cancellationToken)
+    public async Task<ActionResult<CardRemovalResponse>> RemoveBankCard(BankCardActiveDto bankCardActiveDto,CancellationToken cancellationToken)
+    {
+        var result = await _cardService.RemoveBankCardAsync(bankCardActiveDto,cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
+    }
+    [HttpPatch("activate-card")]
+    [Authorize]
+    public async Task<ActionResult<string>> ActivateBankCard(BankCardActiveDto bankCardActiveDto, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst("personId")!.Value;
-        var result = await _cardService.RemoveBankCardAsync(cardNumber,userId,cancellationToken);
+        var result = await _cardService.ActivateBankCardAsync(bankCardActiveDto, userId, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
     /// <summary>
-    /// Deactivates a bank account to prevent further use.
+    /// Deletes a bank account to prevent further use.
     /// </summary>
-    /// <param name="iban">Bank account IBAN.</param>
+    /// <param name="bankAccountRemovalDto"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>Bank account information.</returns>
     /// <response code="200">Returns a message about bank account.</response>
     [HttpDelete("account-delete")]
-    [Authorize]
+    [Authorize(Roles = "Operator")]
     [ProducesResponseType(typeof(AccountRemovalResponse), StatusCodes.Status200OK)]
-    public async Task<ActionResult<AccountRemovalResponse>> RemoveBankAccount(string iban, CancellationToken cancellationToken)
-    {
-        var userId = User.FindFirst("personId")!.Value;
-        var result = await _accountService.RemoveBankAccountAsync(iban,userId,cancellationToken);
+    public async Task<ActionResult<AccountRemovalResponse>> RemoveBankAccount(BankAccountRemovalDto bankAccountRemovalDto,CancellationToken cancellationToken)
+    { 
+        var result = await _accountService.RemoveBankAccountAsync(bankAccountRemovalDto,cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 }

@@ -84,6 +84,11 @@ public class AtmService : IAtmService
     {
         try
         {
+            var authResult = await AuthorizeCardAsync(withdrawMoneyDto.CardNumber, withdrawMoneyDto.PinCode);
+            if (!authResult.IsSuccess)
+            {
+                if (authResult.Error != null) return Result<AtmTransactionResponse>.Failure(authResult.Error);
+            }
             var bankAccount = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(withdrawMoneyDto.CardNumber);
             if (bankAccount == null)
             {
@@ -155,6 +160,11 @@ public class AtmService : IAtmService
     {
         try
         {
+            var authResult = await AuthorizeCardAsync(cardDto.CardNumber, cardDto.PinCode);
+            if (!authResult.IsSuccess)
+            {
+                if (authResult.Error != null) return Result<BalanceResponse>.Failure(authResult.Error);
+            }
             var bankAccount = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(cardDto.CardNumber);
             if (bankAccount == null)
             {

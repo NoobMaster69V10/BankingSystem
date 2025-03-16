@@ -11,13 +11,19 @@ public class  BankCardRepository : RepositoryBase, IBankCardRepository
 
     public async Task<BankCard?> GetCardAsync(string cardNumber, CancellationToken cancellationToken = default)
     {
-        const string query = "SELECT * FROM BankCards WHERE CardNumber = @CardNumber AND IsActive = 1";
+        const string query = "SELECT * FROM BankCards WHERE CardNumber = @CardNumber";
 
         var parameters = new CommandDefinition(query, new { CardNumber = cardNumber }, cancellationToken: cancellationToken, transaction: Transaction);
 
         return await Connection.QueryFirstOrDefaultAsync<BankCard>(parameters);
     }
 
+    public async Task ActivateBankCardAsync(string cardNumber, CancellationToken cancellationToken = default)
+    {
+        const string query = "UPDATE BankCards SET IsActive = 1 WHERE CardNumber = @CardNumber";
+        var parameters = new CommandDefinition(query, new { CardNumber = cardNumber }, cancellationToken: cancellationToken, transaction: Transaction);
+        await Connection.ExecuteAsync(parameters);
+    } 
     public async Task<string?> GetCardIdAsync(string cardNumber,CancellationToken cancellationToken = default)
     {
         const string query = "SELECT BankCardId FROM BankCards Where @CardNumber = CardNumber and IsActive = 1";
@@ -43,16 +49,16 @@ public class  BankCardRepository : RepositoryBase, IBankCardRepository
         return await Connection.ExecuteScalarAsync<bool>(parameters);
     }
 
-    public async Task<(string PinCode,DateTime ExpiryDate, string Cvv)?> GetCardSecurityDetailsAsync(string cardNumber, CancellationToken cancellationToken = default)
+    public async Task<(string PinCode,DateTime ExpiryDate, string Cvv,bool IsActive)?> GetCardSecurityDetailsAsync(string cardNumber, CancellationToken cancellationToken = default)
     {
         const string query = @"
-        SELECT PinCode,ExpirationDate, CVV
+        SELECT PinCode,ExpirationDate, CVV,IsActive
         FROM BankCards
-        WHERE CardNumber = @CardNumber AND IsActive = 1";
+        WHERE CardNumber = @CardNumber";
 
         var parameters = new CommandDefinition(query, new { CardNumber = cardNumber }, cancellationToken: cancellationToken, transaction: Transaction);
 
-        return await Connection.QuerySingleOrDefaultAsync<(string, DateTime, string)>(parameters);
+        return await Connection.QuerySingleOrDefaultAsync<(string, DateTime, string,bool)>(parameters);
     }
 
     public async Task AddCardAsync(BankCard card, CancellationToken cancellationToken = default)
@@ -94,7 +100,7 @@ public class  BankCardRepository : RepositoryBase, IBankCardRepository
     {
         const string query = @"SELECT b.BankAccountId, Currency, IBAN, Balance,PersonId 
                  FROM BankCards bc INNER JOIN BankAccounts b ON bc.AccountId = b.BankAccountId 
-                 WHERE bc.CardNumber = @CardNumber AND bc.IsActive = 1";
+                 WHERE bc.CardNumber = @CardNumber";
 
         var parameters = new CommandDefinition(query, new { CardNumber = cardNumber }, cancellationToken: cancellationToken, transaction: Transaction);
 
@@ -115,5 +121,14 @@ public class  BankCardRepository : RepositoryBase, IBankCardRepository
         var parameters = new CommandDefinition(query, new { CardNumber = cardNumber }, cancellationToken: cancellationToken, transaction: Transaction);
 
         await Connection.ExecuteAsync(parameters);
+    }
+
+    public async Task<bool> GetCardStatusAsync(string cardNumber, CancellationToken cancellationToken = default)
+    {
+        const string query = "SELECT IsActive FROM BankCards WHERE CardNumber = @CardNumber";
+        
+        var parameters = new CommandDefinition(query, new { CardNumber = cardNumber }, cancellationToken: cancellationToken, transaction: Transaction);
+
+        return await Connection.QuerySingleOrDefaultAsync<bool>(parameters);
     }
 }
