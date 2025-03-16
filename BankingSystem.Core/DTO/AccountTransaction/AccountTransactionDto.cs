@@ -8,7 +8,7 @@ public record AccountTransactionDto
     public int ToAccountId { get; init; }
 }
 
-public sealed class AccountTransactionDtoValidator : AbstractValidator<AccountTransactionDto>
+internal sealed class AccountTransactionDtoValidator : AbstractValidator<AccountTransactionDto>
 {
     public AccountTransactionDtoValidator()
     {

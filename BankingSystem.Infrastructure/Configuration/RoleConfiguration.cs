@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BankingSystem.Infrastructure.Configure;
+namespace BankingSystem.Infrastructure.Configuration;
 
 public class RoleConfiguration : IEntityTypeConfiguration<IdentityRole>
 {

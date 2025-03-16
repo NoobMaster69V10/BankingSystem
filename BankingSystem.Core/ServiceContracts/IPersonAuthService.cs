@@ -1,5 +1,6 @@
 ﻿using BankingSystem.Core.DTO;
 using BankingSystem.Core.DTO.Person;
+using BankingSystem.Core.DTO.RefreshToken;
 using BankingSystem.Core.Response;
 using BankingSystem.Core.Result;
 

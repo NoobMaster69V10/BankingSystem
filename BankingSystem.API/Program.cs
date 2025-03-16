@@ -2,7 +2,7 @@ using BankingSystem.API.Configuration;
 using DotNetEnv;
 using BankingSystem.API.Middlewares;
 using BankingSystem.Core.Configuration;
-using BankingSystem.Infrastructure.Configure;
+using BankingSystem.Infrastructure.Configuration;
 using Serilog;
 
 Env.Load();

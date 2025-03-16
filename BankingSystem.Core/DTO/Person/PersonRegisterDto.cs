@@ -1,8 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Data;
-using System.Text.Json.Serialization;
-using BankingSystem.Domain.Enums;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace BankingSystem.Core.DTO.Person;
 
@@ -14,9 +10,7 @@ public record PersonRegisterDto
     public DateTime BirthDate { get; init; }
     public string Email { get; init; } = string.Empty;
     public string Password { get; init; } = string.Empty;
-    public string ConfirmPassword { get; set; } =string.Empty;
-
-    [AllowedValues("Operator", "Person","Manager",ErrorMessage = "Role must be either 'Operator' or 'Person'.")]
+    public string ConfirmPassword { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
     public string? ClientUri { get; set; }
 }
@@ -47,6 +41,5 @@ internal sealed class PersonRegisterDtoValidator : AbstractValidator<PersonRegis
             .NotEmpty().WithMessage("Role is required.")
             .Must(role => role == "Operator" || role == "Person" || role == "Manager")
             .WithMessage("Role must be either 'Operator', 'Person', or 'Manager'.");
-        
     }
 }

@@ -12,7 +12,7 @@ public record BankAccountRegisterDto
     public Currency Currency { get; init; }
 }
 
-public class BankAccountRegisterDtoValidator : AbstractValidator<BankAccountRegisterDto>
+internal sealed class BankAccountRegisterDtoValidator : AbstractValidator<BankAccountRegisterDto>
 {
     private const string IbanPattern = @"^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$";
 

@@ -1,20 +1,19 @@
 ﻿using System.Data;
+using BankingSystem.Domain.ExternalApiContracts;
+using BankingSystem.Domain.RepositoryContracts;
+using BankingSystem.Domain.UnitOfWorkContracts;
+using BankingSystem.Infrastructure.Data.DatabaseConfiguration;
+using BankingSystem.Infrastructure.Data.DatabaseContext;
+using BankingSystem.Infrastructure.Data.DataSeeder;
+using BankingSystem.Infrastructure.ExternalApis;
+using BankingSystem.Infrastructure.Repository;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using BankingSystem.Infrastructure.Repository;
-using BankingSystem.Domain.UnitOfWorkContracts;
 using Microsoft.Extensions.DependencyInjection;
-using BankingSystem.Domain.RepositoryContracts;
-using BankingSystem.Domain.ExternalApiContracts;
-using BankingSystem.Infrastructure.Data.DatabaseConfiguration;
-using BankingSystem.Infrastructure.ExternalApis;
-using BankingSystem.Infrastructure.Data.DataSeeder;
-using BankingSystem.Infrastructure.Data.DatabaseContext;
 
-namespace BankingSystem.Infrastructure.Configure;
+namespace BankingSystem.Infrastructure.Configuration;
 
-using UnitOfWork;
 public static class ServiceRegistration
 {
     public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
@@ -28,7 +27,7 @@ public static class ServiceRegistration
             options.UseSqlServer(connectionString));
 
         services.AddScoped<IBankReportRepository, BankReportRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
         services.AddScoped<IPersonRepository, PersonRepository>();
         services.AddScoped<IBankTransactionRepository, BankTransactionRepository>();
         services.AddScoped<IBankCardRepository, BankCardRepository>();

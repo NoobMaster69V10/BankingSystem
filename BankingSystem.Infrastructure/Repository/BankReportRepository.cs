@@ -130,17 +130,17 @@ public class BankReportRepository : IBankReportRepository
     {
         try
         {
-            string query = @"
-            SELECT  
-            CAST(t.TransactionDate AS DATE) AS Date, 
-            COUNT(*) AS Count,
-            ba.Currency,
-            COALESCE(SUM(t.Amount), 0) AS TotalAmount
-            FROM AccountTransactions t
-            JOIN BankAccounts ba ON t.FromAccountId = ba.BankAccountId
-            WHERE t.TransactionDate >= DATEADD(DAY, @Days * -1, GETDATE())
-            GROUP BY CAST(t.TransactionDate AS DATE), ba.Currency
-            ORDER BY CAST(t.TransactionDate AS DATE)";
+            const string query = @"
+                SELECT  
+                CAST(t.TransactionDate AS DATE) AS Date, 
+                COUNT(*) AS Count,
+                ba.Currency,
+                COALESCE(SUM(t.Amount), 0) AS TotalAmount
+                FROM AccountTransactions t
+                JOIN BankAccounts ba ON t.FromAccountId = ba.BankAccountId
+                WHERE t.TransactionDate >= DATEADD(DAY, @Days * -1, GETDATE())
+                GROUP BY CAST(t.TransactionDate AS DATE), ba.Currency
+                ORDER BY CAST(t.TransactionDate AS DATE)";
 
             var results =
                 await _connection.QueryAsync<(DateTime Date, int Count, string Currency, decimal TotalAmount)>(

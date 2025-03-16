@@ -1,5 +1,3 @@
-
-using BankingSystem.Domain.RepositoryContracts;
 using FluentValidation;
 
 namespace BankingSystem.Core.DTO.AtmTransaction;
@@ -12,7 +10,7 @@ public record CardAuthorizationDto
 
 internal sealed class CardAuthorizationDtoValidator : AbstractValidator<CardAuthorizationDto>
 {
-    public CardAuthorizationDtoValidator(IBankAccountRepository bankAccountRepository) 
+    public CardAuthorizationDtoValidator() 
     {
         RuleFor(x => x.CardNumber)
             .NotEmpty().WithMessage("Card number is required.")

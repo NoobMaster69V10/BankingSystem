@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using BankingSystem.Core.DTO.Person;
 using FluentValidation;
 
 namespace BankingSystem.Core.DTO.Person;

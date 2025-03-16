@@ -1,28 +1,44 @@
-﻿using System.ComponentModel.DataAnnotations;
-using BankingSystem.Domain.CustomValidationAttributes;
+﻿using FluentValidation;
 
 namespace BankingSystem.Core.DTO.BankCard;
 
 public record BankCardRegisterDto
 {
-    [Required(ErrorMessage = "Username is required.")]
-    public string Username { get; init; } = string.Empty;
-
-    [Required(ErrorMessage = "Card number is required.")]
-    [Length(13, 19)]
-    public string CardNumber { get; init; } = string.Empty;
-    
-    [Required(ErrorMessage = "Expiration date is required.")]
-    [CheckExpirationDateValidation]
+    public string? Username { get; init; }
+    public string? CardNumber { get; init; }
     public DateTime ExpirationDate { get; init; }
-
-    [StringLengthFixedValidation(3, ErrorMessage = "CVV must be exactly 3 characters.")]
-    public string Cvv { get; init; } = string.Empty;
-
-    [StringLengthFixedValidation(4, ErrorMessage = "Pin code must be exactly 4 characters.")]
+    public string? Cvv { get; init; }
     public string PinCode { get; init; } = string.Empty;
-
-    [Required(ErrorMessage = "BankAccountId is required.")]
     public int BankAccountId { get; init; }
 }
 
+
+internal sealed class BankCardRegisterDtoValidator : AbstractValidator<BankCardRegisterDto>
+{
+    public BankCardRegisterDtoValidator()
+    {
+        RuleFor(x => x.Username)
+            .NotEmpty().WithMessage("Username is required.");
+
+        RuleFor(x => x.CardNumber)
+            .NotEmpty().WithMessage("Card number is required.")
+            .CreditCard().WithMessage("Invalid card number format.");
+
+        RuleFor(x => x.ExpirationDate)
+            .NotEmpty().WithMessage("Expiration date is required.")
+            .Must(date => date > DateTime.Now).WithMessage("Expiration date must be in the future.");
+
+        RuleFor(x => x.Cvv)
+            .NotEmpty().WithMessage("Cvv is required.")
+            .Length(4).WithMessage("Cvv must be exactly 3 digits.")
+            .Matches(@"^\d{3}$").WithMessage("Cvv must contain only digits.");
+
+        RuleFor(x => x.PinCode)
+            .NotEmpty().WithMessage("PIN code is required.")
+            .Length(4).WithMessage("PIN code must be exactly 4 digits.")
+            .Matches(@"^\d{4}$").WithMessage("PIN code must contain only digits.");
+
+        RuleFor(x => x.BankAccountId)
+            .NotEmpty().WithMessage("BankAccountId is required.");
+    }
+}
