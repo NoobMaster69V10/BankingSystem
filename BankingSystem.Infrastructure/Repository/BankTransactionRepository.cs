@@ -42,7 +42,7 @@ public class BankTransactionRepository : RepositoryBase, IBankTransactionReposit
     public async Task AddAtmTransactionAsync(AtmTransaction atmTransaction, CancellationToken cancellationToken = default)
     {
         const string query =
-            "INSERT INTO AccountTransactions(Amount, TransactionDate, FromAccountId, TransactionFee, TransactionType) VALUES (@Amount, @TransactionDate, @AccountId, @TransactionFee, @TransactionType)";
+            "INSERT INTO AccountTransactions(Amount, TransactionDate, FromAccountId, TransactionFee, TransactionType) VALUES (@Amount, @TransactionDate, @FromAccountId, @TransactionFee, @TransactionType)";
 
         var parameters = new CommandDefinition(query, atmTransaction, cancellationToken: cancellationToken, transaction: Transaction);
 

@@ -30,7 +30,7 @@ internal sealed class BankCardRegisterDtoValidator : AbstractValidator<BankCardR
 
         RuleFor(x => x.Cvv)
             .NotEmpty().WithMessage("Cvv is required.")
-            .Length(4).WithMessage("Cvv must be exactly 3 digits.")
+            .Length(3).WithMessage("Cvv must be exactly 3 digits.")
             .Matches(@"^\d{3}$").WithMessage("Cvv must contain only digits.");
 
         RuleFor(x => x.PinCode)

@@ -183,7 +183,7 @@ public class BankCardService : IBankCardService
                 return Result<bool>.Failure(CustomError.NotFound("Card not found"));
             }
 
-            if (card.Value.IsActive)
+            if (!card.Value.IsActive)
             {
                 return Result<bool>.Failure(CustomError.Validation("Card is not active"));
             }
