@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Data;
-using System.Text.Json.Serialization;
-using BankingSystem.Domain.Enums;
+
 using FluentValidation;
 
 namespace BankingSystem.Core.DTO.Person;

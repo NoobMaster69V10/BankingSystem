@@ -205,7 +205,7 @@ public class PersonAuthService : IPersonAuthService
 
     public async Task<Result<string>> EmailConfirmationAsync(string token, string email)
     {
-        //var decodedToken = System.Web.HttpUtility.UrlDecode(token);
+        var decodedToken = System.Web.HttpUtility.UrlDecode(token);
 
         var user = await _userManager.FindByEmailAsync(email);
         if (user is null)
@@ -213,7 +213,7 @@ public class PersonAuthService : IPersonAuthService
             return Result<string>.Failure(CustomError.NotFound("User Not Found"));
         }
 
-        var confirmResult = await _userManager.ConfirmEmailAsync(user, token);
+        var confirmResult = await _userManager.ConfirmEmailAsync(user, decodedToken);
         if (!confirmResult.Succeeded)
         {
             var errors = string.Join(", ", confirmResult.Errors.Select(e => $"{e.Code}: {e.Description}"));

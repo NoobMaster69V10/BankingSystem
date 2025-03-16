@@ -1,4 +1,4 @@
-namespace BankingSystem.Core.DTO;
+namespace BankingSystem.Core.DTO.BankCard;
 
 public record BankCardActiveDto()
 {
