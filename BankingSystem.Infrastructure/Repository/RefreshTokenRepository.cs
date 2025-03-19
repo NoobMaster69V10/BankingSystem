@@ -40,7 +40,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     public async Task<string?> CheckPersonIdAsync(string personId, CancellationToken cancellationToken = default)
     {
         const string query = "SELECT PersonId FROM RefreshTokens WHERE PersonId = @PersonId";
-        var parameters = new CommandDefinition(query, new {PersonId = personId}, cancellationToken: cancellationToken);
+        var parameters = new CommandDefinition(query, new { PersonId = personId }, cancellationToken: cancellationToken);
         return await _connection.QueryFirstOrDefaultAsync<string>(parameters);
     }
 }

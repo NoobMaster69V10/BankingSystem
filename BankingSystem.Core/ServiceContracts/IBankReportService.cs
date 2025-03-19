@@ -6,10 +6,10 @@ namespace BankingSystem.Core.ServiceContracts;
 
 public interface IBankReportService
 {
-    Task<Result<BankManagerReport>> GetBankManagerReportAsync();
-    Task<Result<UserStatistics>> GetUserStatisticsAsync();
-    Task<Result<TransactionStatistics>> GetTransactionStatisticsAsync();
-    Task<Result<IEnumerable<DailyTransactionReport>>> GetDailyTransactionsAsync(int days = 30);
-    Task<Result<AtmTransactionsStatistics>> GetAtmTransactionsStatisticsAsync();
+    Task<Result<BankManagerReport>> GetBankManagerReportAsync(CancellationToken cancellationToken = default);
+    Task<Result<UserStatistics>> GetUserStatisticsAsync(CancellationToken cancellationToken = default);
+    Task<Result<TransactionStatistics>> GetTransactionStatisticsAsync(CancellationToken cancellationToken = default);
+    Task<Result<IEnumerable<DailyTransactionReport>>> GetDailyTransactionsAsync(int days = 30, CancellationToken cancellationToken = default);
+    Task<Result<AtmTransactionsStatistics>> GetAtmTransactionsStatisticsAsync(CancellationToken cancellationToken = default);
     
 }

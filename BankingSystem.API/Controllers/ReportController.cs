@@ -32,9 +32,9 @@ public class ReportController : ControllerBase
     /// <response code="200">Returns the user statistics data.</response>
     [HttpGet("users-count")]
     [ProducesResponseType(typeof(UserStatistics), StatusCodes.Status200OK)]
-    public async Task<ActionResult<UserStatistics>> GetUserStatistics()
+    public async Task<ActionResult<UserStatistics>> GetUserStatistics(CancellationToken cancellationToken)
     {
-        var result = await _bankReportService.GetUserStatisticsAsync();
+        var result = await _bankReportService.GetUserStatisticsAsync(cancellationToken);
         return result.IsSuccess ? Ok(result) : result.ToProblemDetails();
     }
 
@@ -45,9 +45,9 @@ public class ReportController : ControllerBase
     /// <response code="200">Returns the manager dashboard data.</response>
     [HttpGet("manager-dashboard")]
     [ProducesResponseType(typeof(BankManagerReport), StatusCodes.Status200OK)]
-    public async Task<ActionResult<BankManagerReport>> GetManagerDashboard()
+    public async Task<ActionResult<BankManagerReport>> GetManagerDashboard(CancellationToken cancellationToken)
     {
-        var result = await _bankReportService.GetBankManagerReportAsync();
+        var result = await _bankReportService.GetBankManagerReportAsync(cancellationToken);
         return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { RegisteredCount = result.Value});
     }
     
@@ -58,23 +58,24 @@ public class ReportController : ControllerBase
     /// <response code="200">Returns the transaction statistics.</response>
     [HttpGet("transactions-count")]
     [ProducesResponseType(typeof(TransactionStatistics), StatusCodes.Status200OK)]
-    public async Task<ActionResult<TransactionStatistics>> GetTransactionsCount()
+    public async Task<ActionResult<TransactionStatistics>> GetTransactionsCount(CancellationToken cancellationToken)
     {
-        var result = await _bankReportService.GetTransactionStatisticsAsync();
+        var result = await _bankReportService.GetTransactionStatisticsAsync(cancellationToken);
         return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsCount = result.Value });
     }
-    
+
     /// <summary>
     /// Retrieves daily transaction data for charting over the specified period.
     /// </summary>
+    /// <param name="cancellationToken"></param>
     /// <param name="days">The number of past days to include in the report (default: 30).</param>
     /// <returns>A collection of daily transaction reports.</returns>
     /// <response code="200">Returns the daily transaction chart data.</response>
     [HttpGet("transactions-chart")]
     [ProducesResponseType(typeof(IEnumerable<DailyTransactionReport>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<DailyTransactionReport>>> GetTransactionsChartForLastMonth([FromQuery]int days = 30)
+    public async Task<ActionResult<IEnumerable<DailyTransactionReport>>> GetTransactionsChartForLastMonth(CancellationToken cancellationToken, [FromQuery]int days = 30)
     {
-        var result = await _bankReportService.GetDailyTransactionsAsync(days);
+        var result = await _bankReportService.GetDailyTransactionsAsync(days, cancellationToken);
         return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsChart = result.Value });
     }
     
@@ -85,9 +86,9 @@ public class ReportController : ControllerBase
     /// <response code="200">Returns the ATM transaction statistics.</response>
     [HttpGet("atm-transactions")]
     [ProducesResponseType(typeof(AtmTransactionsStatistics), StatusCodes.Status200OK)]
-    public async Task<ActionResult<AtmTransactionsStatistics>> GetAtmTransactionsChart()
+    public async Task<ActionResult<AtmTransactionsStatistics>> GetAtmTransactionsChart(CancellationToken cancellationToken)
     {
-        var result = await _bankReportService.GetAtmTransactionsStatisticsAsync();
+        var result = await _bankReportService.GetAtmTransactionsStatisticsAsync(cancellationToken);
         return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsChart = result.Value });
     }
 }

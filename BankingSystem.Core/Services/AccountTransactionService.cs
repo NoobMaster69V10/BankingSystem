@@ -21,7 +21,7 @@ public class AccountTransactionService : IAccountTransactionService
     }
 
 
-   public async Task<Result<AccountTransfer>> TransactionBetweenAccountsAsync(AccountTransactionDto transactionDto, string userId, CancellationToken cancellationToken)
+   public async Task<Result<AccountTransfer>> TransactionBetweenAccountsAsync(AccountTransactionDto transactionDto, string userId, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -59,7 +59,7 @@ public class AccountTransactionService : IAccountTransactionService
                 TransactionFee = transactionFee
             };
 
-            var convertedAmount = await _exchangeService.ConvertCurrencyAsync(transactionDto.Amount, fromAccount.Currency, toAccount.Currency);
+            var convertedAmount = await _exchangeService.ConvertCurrencyAsync(transactionDto.Amount, fromAccount.Currency, toAccount.Currency, cancellationToken);
 
             await _unitOfWork.BankTransactionRepository.TransferBetweenAccountsAsync(transaction, convertedAmount, cancellationToken);
 

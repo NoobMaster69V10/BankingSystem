@@ -4,5 +4,5 @@ namespace BankingSystem.Core.ServiceContracts;
 
 public interface IExchangeService
 { 
-    Task<decimal> ConvertCurrencyAsync(decimal amount, Currency fromCurrency, Currency toCurrency);
+    Task<decimal> ConvertCurrencyAsync(decimal amount, Currency fromCurrency, Currency toCurrency, CancellationToken cancellationToken = default);
 }

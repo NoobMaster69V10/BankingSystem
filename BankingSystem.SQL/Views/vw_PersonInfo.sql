@@ -1,7 +1,7 @@
 CREATE VIEW vw_PersonInfo AS
 SELECT 
     u.Id AS PersonID, 
-    u.FirstName, 
+    u.FirstName,
     u.LastName, 
     u.Email, 
     u.IdNumber,
@@ -10,10 +10,12 @@ SELECT
     b.BankAccountId, 
     b.IBAN, 
     b.Balance, 
-    b.Currency, 
+    b.Currency,
+    b.IsActive AS BankAccountStatus,
     bc.BankCardId, 
     bc.CardNumber, 
     bc.ExpirationDate, 
+    bc.IsActive AS BankCardStatus,
     bc.PinCode, 
     bc.CVV, 
     bc.AccountId

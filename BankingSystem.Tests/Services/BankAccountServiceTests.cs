@@ -24,14 +24,16 @@ public class BankAccountServiceTests
         );
     }
 
+    #region CreateBankAccountAsync Tests
+
     [Fact]
     public async Task CreateBankAccountAsync_ShouldReturnFailure_WhenBankAccountIsNotNull()
     {
         _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIbanAsync("GE00AS002313213211", default)).ReturnsAsync(new BankAccount());
-        var bankAccountRegisterDto = new BankAccountRegisterDto{Username = "test@gmail.com", Balance = 2000, Currency = Currency.USD, Iban = "GE00AS002313213211"};
+        var bankAccountRegisterDto = new BankAccountRegisterDto { Username = "test@gmail.com", Balance = 2000, Currency = Currency.USD, Iban = "GE00AS002313213211" };
 
         var result = await _bankAccountService.CreateBankAccountAsync(bankAccountRegisterDto);
-        
+
         Assert.False(result.IsSuccess);
         Assert.Equal("Bank account already exists.", result.Error!.Message);
     }
@@ -40,7 +42,7 @@ public class BankAccountServiceTests
     {
         _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIbanAsync("GE00AS002313213211", default)).ReturnsAsync((BankAccount)null!);
         _unitOfWorkMock.Setup(u => u.PersonRepository.GetByUsernameAsync("test@gmail.com", default)).ReturnsAsync((Person)null!);
-        
+
         var bankAccountRegisterDto = new BankAccountRegisterDto { Username = "test@gmail.com", Balance = 2000, Currency = Currency.USD, Iban = "GE00AS002313213211" };
         var result = await _bankAccountService.CreateBankAccountAsync(bankAccountRegisterDto);
         Assert.False(result.IsSuccess);
@@ -57,4 +59,38 @@ public class BankAccountServiceTests
         var result = await _bankAccountService.CreateBankAccountAsync(bankAccountRegisterDto);
         Assert.True(result.IsSuccess);
     }
+    #endregion
+
+    #region RemoveBankAccountAsync Tests
+
+    [Fact]
+    public async Task RemoveBankAccountAsync_ShouldReturnFailure_WhenAccountIsNull()
+    {
+        var bankAccountRemovalDto = new BankAccountRemovalDto { Iban = "12345", PersonId = "user1" };
+
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIbanAsync(bankAccountRemovalDto.Iban, default))
+            .ReturnsAsync((BankAccount)null!);
+
+        var result = await _bankAccountService.RemoveBankAccountAsync(bankAccountRemovalDto);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Account not found.", result.Error!.Message);
+    }
+
+
+    [Fact]
+    public async Task RemoveBankAccountAsync_ShouldReturnSuccess_WhenAccountDeleted()
+    {
+        var bankAccountRemovalDto = new BankAccountRemovalDto { Iban = "12345", PersonId = "user" };
+
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIbanAsync(bankAccountRemovalDto.Iban, default))
+            .ReturnsAsync(new BankAccount{ PersonId = "user"});
+
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.RemoveBankAccountAsync(bankAccountRemovalDto.Iban, default))
+            .Returns(Task.CompletedTask);
+
+        var result = await _bankAccountService.RemoveBankAccountAsync(bankAccountRemovalDto);
+        Assert.True(result.IsSuccess);
+    }
+    #endregion
+
 }

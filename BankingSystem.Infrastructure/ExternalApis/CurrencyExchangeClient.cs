@@ -11,22 +11,22 @@ public class CurrencyExchangeClient : ICurrencyExchangeClient
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task<decimal> GetExchangeRate(Domain.Enums.Currency currency)
+    public async Task<decimal> GetExchangeRateAsync(Domain.Enums.Currency currency, CancellationToken cancellationToken = default)
     {
         var httpRequestMessage = new HttpRequestMessage(
             HttpMethod.Get,
             $"https://nbg.gov.ge/gw/api/ct/monetarypolicy/currencies/ka/json/?currencies={currency.ToString()}");
 
         var client = _httpClientFactory.CreateClient();
-        var httpResponseMessage = await client.SendAsync(httpRequestMessage);
+        var httpResponseMessage = await client.SendAsync(httpRequestMessage, cancellationToken);
 
         IEnumerable<CurrencyResponse>? currencyResponses = new List<CurrencyResponse>();
 
         if (httpResponseMessage.IsSuccessStatusCode)
         {
-            await using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
+            await using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken);
 
-            currencyResponses = await JsonSerializer.DeserializeAsync<IEnumerable<CurrencyResponse>>(contentStream);
+            currencyResponses = await JsonSerializer.DeserializeAsync<IEnumerable<CurrencyResponse>>(contentStream, cancellationToken: cancellationToken);
         }
 
         return currencyResponses!.First().Currencies!.First().Rate;

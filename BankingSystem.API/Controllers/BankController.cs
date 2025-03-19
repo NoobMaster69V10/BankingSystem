@@ -1,5 +1,4 @@
-﻿using BankingSystem.Core.DTO;
-using BankingSystem.Core.DTO.AccountTransaction;
+﻿using BankingSystem.Core.DTO.AccountTransaction;
 using BankingSystem.Core.DTO.BankAccount;
 using BankingSystem.Core.DTO.BankCard;
 using BankingSystem.Core.Extensions;
@@ -71,7 +70,7 @@ public class BankController : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns>The completed account transfer information.</returns>
     /// <response code="201">Returns the completed transfer details.</response>
-    [Authorize]
+    [Authorize(Roles = "Person")]
     [HttpPost("transfer-money")]
     [ProducesResponseType(typeof(AccountTransfer), StatusCodes.Status201Created)]
     public async Task<ActionResult<AccountTransfer>> TransferMoney(
@@ -88,17 +87,17 @@ public class BankController : ControllerBase
     /// <summary>
     /// Deactivates a bank card to prevent further use.
     /// </summary>
-    /// <param name="bankCardActiveDto"></param>
+    /// <param name="cardNumber"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>Bank card information.</returns>
     /// <response code="200">Returns a message about deactivation.</response>
     [HttpPatch("card-deactivate")]
-    [Authorize]
+    [Authorize(Roles = "Person")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-    public async Task<ActionResult<string>> DeactivateBankCard(BankCardActiveDto bankCardActiveDto, CancellationToken cancellationToken)
+    public async Task<ActionResult<string>> DeactivateBankCard(string cardNumber, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst("personId")!.Value;
-        var result = await _cardService.DeactivateBankCardAsync(bankCardActiveDto,userId,cancellationToken);
+        var result = await _cardService.DeactivateBankCardAsync(cardNumber, userId, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
@@ -119,10 +118,10 @@ public class BankController : ControllerBase
     }
     [HttpPatch("activate-card")]
     [Authorize]
-    public async Task<ActionResult<string>> ActivateBankCard(BankCardActiveDto bankCardActiveDto, CancellationToken cancellationToken)
+    public async Task<ActionResult<string>> ActivateBankCard(string cardNumber, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst("personId")!.Value;
-        var result = await _cardService.ActivateBankCardAsync(bankCardActiveDto, userId, cancellationToken);
+        var result = await _cardService.ActivateBankCardAsync(cardNumber, userId, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 

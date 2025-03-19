@@ -17,10 +17,10 @@ public class EmailService : IEmailService
         _loggerService = loggerService;
     }
 
-    public async Task SendEmailAsync(Message message, string buttonText)
+    public async Task SendEmailAsync(Message message, string buttonText, CancellationToken cancellationToken = default)
     {
         var emailMessage = CreateEmailMessage(message, buttonText);
-        await SendAsync(emailMessage);
+        await SendAsync(emailMessage, cancellationToken);
     }
 
     private MimeMessage CreateEmailMessage(Message message, string buttonText)
@@ -53,16 +53,16 @@ public class EmailService : IEmailService
         return emailMessage;
     }
 
-    private async Task SendAsync(MimeMessage mailMessage)
+    private async Task SendAsync(MimeMessage mailMessage, CancellationToken cancellationToken = default)
     {
         using var client = new SmtpClient();
         try
         {
-            await client.ConnectAsync(_emailConfig.SmtpServer, _emailConfig.Port, true);
+            await client.ConnectAsync(_emailConfig.SmtpServer, _emailConfig.Port, true, cancellationToken);
             client.AuthenticationMechanisms.Remove("XOAUTH2");
-            await client.AuthenticateAsync(_emailConfig.UserName, _emailConfig.Password);
+            await client.AuthenticateAsync(_emailConfig.UserName, _emailConfig.Password, cancellationToken);
 
-            await client.SendAsync(mailMessage);
+            await client.SendAsync(mailMessage, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -70,7 +70,7 @@ public class EmailService : IEmailService
         }
         finally
         {
-            await client.DisconnectAsync(true);
+            await client.DisconnectAsync(true, cancellationToken);
         }
     }
 

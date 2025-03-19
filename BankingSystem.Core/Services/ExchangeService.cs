@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.ExternalApiContracts;
@@ -10,26 +9,23 @@ public class ExchangeService : IExchangeService
 {
     private readonly ICurrencyExchangeClient _currencyExchangeClient;
     private readonly IMemoryCache _cache;
-    private readonly ILogger<ExchangeService> _logger;
+    private readonly ILoggerService _logger;
     private readonly SemaphoreSlim _cacheLock = new(1, 1);
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(1);
     
-    public ExchangeService(
-        ICurrencyExchangeClient currencyExchangeClient,
-        IMemoryCache cache,
-        ILogger<ExchangeService> logger)
+    public ExchangeService(ICurrencyExchangeClient currencyExchangeClient, IMemoryCache cache, ILoggerService logger)
     {
         _currencyExchangeClient = currencyExchangeClient;
         _cache = cache;
         _logger = logger;
     }
     
-    public async Task<decimal> ConvertCurrencyAsync(decimal amount, Currency fromCurrency, Currency toCurrency)
+    public async Task<decimal> ConvertCurrencyAsync(decimal amount, Currency fromCurrency, Currency toCurrency, CancellationToken cancellationToken = default)
     {
         if (fromCurrency == toCurrency)
             return amount;
 
-        var rates = await GetCachedRatesAsync();
+        var rates = await GetCachedRatesAsync(cancellationToken);
 
         return fromCurrency switch
         {
@@ -42,37 +38,37 @@ public class ExchangeService : IExchangeService
         };
     }
     
-    private async Task<Dictionary<Currency, decimal>> GetCachedRatesAsync()
+    private async Task<Dictionary<Currency, decimal>> GetCachedRatesAsync(CancellationToken cancellationToken = default)
     {
         const string cacheKey = "ExchangeRates";
         
-        if (_cache.TryGetValue(cacheKey, out Dictionary<Currency, decimal> cachedRates))
+        if (_cache.TryGetValue(cacheKey, out Dictionary<Currency, decimal>? cachedRates))
         {
-            return cachedRates;
+            return cachedRates!;
         }
         
-        await _cacheLock.WaitAsync();
+        await _cacheLock.WaitAsync(cancellationToken);
         try
         {
-            if (_cache.TryGetValue(cacheKey, out Dictionary<Currency, decimal> ratesAfterLock))
+            if (_cache.TryGetValue(cacheKey, out Dictionary<Currency, decimal>? ratesAfterLock))
             {
-                return ratesAfterLock;
+                return ratesAfterLock!;
             }
             
-            var usdTask = _currencyExchangeClient.GetExchangeRate(Currency.USD);
-            var eurTask = _currencyExchangeClient.GetExchangeRate(Currency.EUR);
+            var usdTask = _currencyExchangeClient.GetExchangeRateAsync(Currency.USD, cancellationToken);
+            var eurTask = _currencyExchangeClient.GetExchangeRateAsync(Currency.EUR, cancellationToken);
             
             await Task.WhenAll(usdTask, eurTask);
             
             var rates = new Dictionary<Currency, decimal>
             {
-                { Currency.USD, await usdTask },
-                { Currency.EUR, await eurTask }
+                { Currency.USD, usdTask.Result },
+                { Currency.EUR, eurTask.Result }
             };
             
             _cache.Set(cacheKey, rates, _cacheExpiration);
             
-            _logger.LogInformation("Exchange rates refreshed and cached for {Duration}", _cacheExpiration);
+            _logger.LogSuccess("Exchange rates refreshed and cached for {Duration} " + _cacheExpiration);
             
             return rates;
         }

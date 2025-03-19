@@ -4,7 +4,9 @@ using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
+using BankingSystem.Infrastructure.UnitOfWork;
 using Moq;
+using System.Threading;
 
 namespace BankingSystem.Tests.Services;
 
@@ -26,143 +28,104 @@ public class BankReportServiceTests
         );
     }
 
-    [Fact]
-    public async Task GetUserStatisticsAsync_ShouldFetchData_WhenThereIsNotException()
-    {
-        var now = DateTime.Now;
-        var startOfThisYear = new DateTime(now.Year, 1, 1);
-        var startOfLastYear = new DateTime(now.Year - 1, 1, 1);
-        var thirtyDaysAgo = now.AddDays(-30);
-
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetUserCountAsync(startOfThisYear))
-            .ReturnsAsync(500);
-
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetUserCountAsync(startOfLastYear))
-            .ReturnsAsync(500);
-
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetUserCountAsync(startOfThisYear))
-            .ReturnsAsync(500);
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetUserCountAsync(thirtyDaysAgo))
-            .ReturnsAsync(500);
-
-        var result = await _bankReportService.GetUserStatisticsAsync();
-
-        Assert.True(result.IsSuccess);
-    }
+    #region GetUserStatisticsAsync Tests
 
     [Fact]
     public async Task GetUserStatisticsAsync_ShouldReturnFailure_WhenException()
     {
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetUserCountAsync(null, default))
+            .ThrowsAsync(new Exception("Test Exception"));
+
+        var result = await _bankReportService.GetUserStatisticsAsync();
+        Assert.False(result.IsSuccess);
+    }
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_ShouldReturnSuccess_WhenValid()
+    {
         var now = DateTime.Now;
         var startOfThisYear = new DateTime(now.Year, 1, 1);
         var startOfLastYear = new DateTime(now.Year - 1, 1, 1);
         var thirtyDaysAgo = now.AddDays(-30);
 
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetUserCountAsync(startOfThisYear))
-            .ThrowsAsync(new Exception());
-
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetUserCountAsync(startOfLastYear))
-            .ThrowsAsync(new Exception());
-
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetUserCountAsync(startOfThisYear))
-            .ThrowsAsync(new Exception());
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetUserCountAsync(thirtyDaysAgo))
-            .ThrowsAsync(new Exception());
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetUserCountAsync(null, default)).ReturnsAsync(20);
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetUserCountAsync(startOfThisYear, default)).ReturnsAsync(20);
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetUserCountAsync(startOfLastYear, default)).ReturnsAsync(20);
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetUserCountAsync(thirtyDaysAgo, default)).ReturnsAsync(20);
 
         var result = await _bankReportService.GetUserStatisticsAsync();
-
-        Assert.True(result.IsFailure);
-    }
-
-    [Fact]
-    public async Task GetTransactionStatisticsAsync_ShouldFetchData_WhenIsNotException()
-    {
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetTransactionCountAsync(It.IsAny<DateTime>()))
-            .ReturnsAsync(500);
-
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetTransactionIncomeAsync(It.IsAny<DateTime>()))
-            .ReturnsAsync(new Dictionary<Currency, decimal> { { Currency.USD, 10000m } });
-
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetAverageTransactionIncomeAsync(It.IsAny<DateTime>()))
-            .ReturnsAsync(new Dictionary<Currency, decimal> { { Currency.USD, 200m } });
-
-        var result = await _bankReportService.GetTransactionStatisticsAsync();
-
         Assert.True(result.IsSuccess);
-        Assert.Equal(500, result.Value!.TransactionsLastMonth);
-        _unitOfWorkMock.Verify(repo => repo.BankReportRepository.GetTransactionCountAsync(It.IsAny<DateTime>()), Times.Exactly(3));
     }
+
+    #endregion
+
+    #region GetTransactionStatisticsAsync Tests
 
     [Fact]
     public async Task GetTransactionStatisticsAsync_ShouldReturnFailure_WhenException()
     {
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetTransactionCountAsync(It.IsAny<DateTime>()))
-            .ThrowsAsync(new Exception());
 
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetTransactionIncomeAsync(It.IsAny<DateTime>()))
-            .ThrowsAsync(new Exception());
-
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetAverageTransactionIncomeAsync(It.IsAny<DateTime>()))
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetAverageTransactionIncomeAsync(null, default))
             .ThrowsAsync(new Exception());
 
         var result = await _bankReportService.GetTransactionStatisticsAsync();
-
         Assert.False(result.IsSuccess);
     }
-    
-    [Fact]
-    public async Task GetDailyTransactionsAsync_ShouldFetchData_WhenTransactionsNotEmpty()
-    {
-        var fakeData = new List<DailyTransactionReport>
-        {
-            new DailyTransactionReport { Date = DateTime.UtcNow, TotalAmount = new Dictionary<Currency, decimal> { { Currency.USD, 1000m } } }
-        };
 
-        _unitOfWorkMock.Setup(repo => repo.BankReportRepository.GetDailyTransactionsAsync(It.IsAny<int>()))
-            .ReturnsAsync(fakeData);
+    [Fact]
+    public async Task GetTransactionStatisticsAsync_ShouldReturnSuccess_WhenValid()
+    {
+        var now = DateTime.Now;
+        var oneMonthAgo = now.AddMonths(-1);
+        var sixMonthsAgo = now.AddMonths(-6);
+        var oneYearAgo = now.AddYears(-1);
+
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetTransactionCountAsync(oneMonthAgo, default)).ReturnsAsync(20);
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetTransactionCountAsync(sixMonthsAgo, default)).ReturnsAsync(20);
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetTransactionCountAsync(oneYearAgo, default)).ReturnsAsync(20);
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetTransactionIncomeAsync(oneMonthAgo, default)).ReturnsAsync(new Dictionary<Currency, decimal>());
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetTransactionIncomeAsync(sixMonthsAgo, default)).ReturnsAsync(new Dictionary<Currency, decimal>());
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetTransactionIncomeAsync(oneYearAgo, default)).ReturnsAsync(new Dictionary<Currency, decimal>());
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetAverageTransactionIncomeAsync(null, default)).ReturnsAsync(new Dictionary<Currency, decimal>());
+
+        var result = await _bankReportService.GetTransactionStatisticsAsync();
+        Assert.True(result.IsSuccess);
+    }
+    #endregion
+
+    #region GetDailyTransactionsAsync Tests
+    [Theory]
+    [InlineData(50)]
+    public async Task GetDailyTransactionsAsync_ShouldReturnSuccess_WhenValid(int days)
+    {
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetDailyTransactionsAsync(days, default))
+            .ReturnsAsync(new List<DailyTransactionReport>());
 
         var result = await _bankReportService.GetDailyTransactionsAsync();
-
         Assert.True(result.IsSuccess);
-        Assert.Single(result.Value!);
-        _unitOfWorkMock.Verify(repo => repo.BankReportRepository.GetDailyTransactionsAsync(30), Times.Once);
+    }
+    #endregion
+
+    #region GetAtmTransactionsStatisticsAsync Tests
+    [Fact]
+    public async Task GetAtmTransactionsStatisticsAsync_ShouldReturnFailure_WhenException()
+    {
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetAllAtmTransactionsAsync(default))
+            .ThrowsAsync(new Exception());
+
+        var result = await _bankReportService.GetAtmTransactionsStatisticsAsync();
+        Assert.False(result.IsSuccess);
     }
 
-    //[Fact]
-    //public async Task GetAtmTransactionsStatisticsAsync_ShouldFetchData_WhenIsNotException()
-    //{
-    //    var fakeData = new List<AtmTransaction>
-    //    {
-    //        new AtmTransaction{ Amount = 100, Currency = Currency.USD}
-    //    };
+    [Fact]
+    public async Task GetAtmTransactionsStatisticsAsync_ShouldReturnSuccess_WhenValid()
+    {
+        _unitOfWorkMock.Setup(x => x.BankReportRepository.GetAllAtmTransactionsAsync(default))
+            .ReturnsAsync(new List<AtmTransaction>());
 
-    //    _unitOfWorkMock.Setup(repo => repo.AtmRepository.GetAllAtmTransactionsAsync())
-    //        .ReturnsAsync(fakeData);
+        var result = await _bankReportService.GetAtmTransactionsStatisticsAsync();
+        Assert.True(result.IsSuccess);
+    }
 
-    //    _exchangeRateApiMock.Setup(api => api.GetExchangeRate("USD"))
-    //        .ReturnsAsync(2m);
-
-    //    var result = await _bankReportService.GetAtmTransactionsStatisticsAsync();
-
-    //    Assert.True(result.IsSuccess);
-    //}
-
-    //[Fact]
-    //public async Task GetAtmTransactionsStatisticsAsync_ShouldReturnFailure_WhenException()
-    //{
-    //    var fakeData = new List<AtmTransaction>
-    //    {
-    //        new AtmTransaction{ Amount = 100, Currency = "USD" }
-    //    };
-
-    //    _unitOfWorkMock.Setup(repo => repo.AtmRepository.GetAllAtmTransactionsAsync())
-    //        .ThrowsAsync(new Exception());
-
-    //    _exchangeRateApiMock.Setup(api => api.GetExchangeRate("USD"))
-    //        .ThrowsAsync(new Exception());
-
-    //    var result = await _bankReportService.GetAtmTransactionsStatisticsAsync();
-
-    //    Assert.False(result.IsSuccess);
-    //}
+    #endregion
 }

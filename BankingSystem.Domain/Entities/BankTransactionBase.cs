@@ -11,6 +11,7 @@ public abstract class BankTransactionBase
     public DateTime TransactionDate { get; set; }
     public decimal TransactionFee { get; set; }
     public abstract TransactionType TransactionType { get; } 
-    public int FromAccountId { get; set; } 
+    public int FromAccountId { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public Currency Currency { get; set; }
 }

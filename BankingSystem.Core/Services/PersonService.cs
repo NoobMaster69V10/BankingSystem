@@ -29,7 +29,8 @@ public class PersonService : IPersonService
             var cacheKey = "GetPersonInfo";
             if (_cache.TryGetValue(cacheKey, out Person? cachedReport))
             {
-                return Result<Person>.Success(cachedReport!);
+                if(cachedReport!.PersonId == personId)
+                    return Result<Person>.Success(cachedReport);
             }
             
             var person = await _unitOfWork.PersonRepository.GetByIdAsync(personId, cancellationToken);

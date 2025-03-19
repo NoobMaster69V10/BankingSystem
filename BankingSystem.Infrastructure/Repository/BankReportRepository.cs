@@ -16,23 +16,24 @@ public class BankReportRepository : IBankReportRepository
         IDbConnection connection,
         ILogger<BankReportRepository> logger)
     {
-        _connection = connection ?? throw new ArgumentNullException(nameof(connection));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _connection = connection;
+        _logger = logger;
     }
 
-    public async Task<int> GetUserCountAsync(DateTime? since = null)
+    public async Task<int> GetUserCountAsync(DateTime? since = null, CancellationToken cancellationToken = default)
     {
         try
         {
-            string query = "SELECT COUNT(*) FROM AspNetUsers";
+            var query = "SELECT COUNT(*) FROM AspNetUsers";
 
             if (since.HasValue)
             {
                 query += " WHERE RegistrationDate >= @Since";
-                return await _connection.QuerySingleAsync<int>(query, new { Since = since.Value });
             }
 
-            return await _connection.QuerySingleAsync<int>(query);
+            var command = new CommandDefinition(query, new { Since = since }, cancellationToken: cancellationToken);
+
+            return await _connection.QuerySingleAsync<int>(command);
         }
         catch (Exception ex)
         {
@@ -41,7 +42,7 @@ public class BankReportRepository : IBankReportRepository
         }
     }
 
-    public async Task<int> GetTransactionCountAsync(DateTime? since = null)
+    public async Task<int> GetTransactionCountAsync(DateTime? since = null, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -50,10 +51,11 @@ public class BankReportRepository : IBankReportRepository
             if (since.HasValue)
             {
                 query += " WHERE TransactionDate >= @Since";
-                return await _connection.QuerySingleAsync<int>(query, new { Since = since.Value });
             }
 
-            return await _connection.QuerySingleAsync<int>(query);
+            var command = new CommandDefinition(query, parameters: new { Since = since }, cancellationToken:cancellationToken);
+
+            return await _connection.QuerySingleAsync<int>(command);
         }
         catch (Exception ex)
         {
@@ -62,11 +64,11 @@ public class BankReportRepository : IBankReportRepository
         }
     }
 
-    public async Task<Dictionary<Currency, decimal>> GetTransactionIncomeAsync(DateTime? since = null)
+    public async Task<Dictionary<Currency, decimal>> GetTransactionIncomeAsync(DateTime? since = null, CancellationToken cancellationToken = default)
     {
         try
         {
-            string query = @"
+            var query = @"
                 SELECT ba.Currency, COALESCE(SUM(t.TransactionFee), 0) AS Income
                 FROM AccountTransactions t
                 JOIN BankAccounts ba ON t.FromAccountId = ba.BankAccountId";
@@ -78,9 +80,9 @@ public class BankReportRepository : IBankReportRepository
 
             query += " GROUP BY ba.Currency";
 
-            var results = await _connection.QueryAsync<(string Currency, decimal Income)>(
-                query,
-                new { Since = since });
+            var command = new CommandDefinition(query, parameters: new { Since = since }, cancellationToken: cancellationToken);
+
+            var results = await _connection.QueryAsync<(string Currency, decimal Income)>(command);
 
             return results
                 .ToDictionary(
@@ -94,11 +96,11 @@ public class BankReportRepository : IBankReportRepository
         }
     }
 
-    public async Task<Dictionary<Currency, decimal>> GetAverageTransactionIncomeAsync(DateTime? since = null)
+    public async Task<Dictionary<Currency, decimal>> GetAverageTransactionIncomeAsync(DateTime? since = null, CancellationToken cancellationToken = default)
     {
         try
         {
-            string query = @"
+            var query = @"
                 SELECT ba.Currency, COALESCE(AVG(t.TransactionFee), 0) AS AvgIncome
                 FROM AccountTransactions t
                 JOIN BankAccounts ba ON t.FromAccountId = ba.BankAccountId";
@@ -110,9 +112,9 @@ public class BankReportRepository : IBankReportRepository
 
             query += " GROUP BY ba.Currency";
 
-            var results = await _connection.QueryAsync<(string Currency, decimal AvgIncome)>(
-                query,
-                new { Since = since });
+            var command = new CommandDefinition(query, parameters: new { Since = since }, cancellationToken: cancellationToken);
+
+            var results = await _connection.QueryAsync<(string Currency, decimal AvgIncome)>(command);
 
             return results
                 .ToDictionary(
@@ -126,7 +128,7 @@ public class BankReportRepository : IBankReportRepository
         }
     }
 
-    public async Task<IEnumerable<DailyTransactionReport>> GetDailyTransactionsAsync(int days = 30)
+    public async Task<IEnumerable<DailyTransactionReport>> GetDailyTransactionsAsync(int days = 30, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -142,10 +144,9 @@ public class BankReportRepository : IBankReportRepository
                 GROUP BY CAST(t.TransactionDate AS DATE), ba.Currency
                 ORDER BY CAST(t.TransactionDate AS DATE)";
 
-            var results =
-                await _connection.QueryAsync<(DateTime Date, int Count, string Currency, decimal TotalAmount)>(
-                    query,
-                    new { Days = days });
+            var command = new CommandDefinition(query, parameters: new { Days = days }, cancellationToken: cancellationToken);
+
+            var results = await _connection.QueryAsync<(DateTime Date, int Count, string Currency, decimal TotalAmount)>(command);
 
             return results
                 .GroupBy(r => r.Date)
@@ -167,14 +168,16 @@ public class BankReportRepository : IBankReportRepository
         }
     }
 
-    public async Task<IEnumerable<AtmTransaction>> GetAllAtmTransactionsAsync()
+    public async Task<IEnumerable<AtmTransaction>> GetAllAtmTransactionsAsync(CancellationToken cancellationToken = default)
     {
         const string query = @"
-        SELECT at.Amount, ba.Currency 
-        FROM AccountTransactions at
-        JOIN BankAccounts ba ON at.FromAccountId = ba.BankAccountId
-        Where TransactionType = 0";
+            SELECT at.Amount, ba.Currency 
+            FROM AccountTransactions at
+            JOIN BankAccounts ba ON at.FromAccountId = ba.BankAccountId
+            Where TransactionType = 0";
 
-        return await _connection.QueryAsync<AtmTransaction>(query);
+        var command = new CommandDefinition(query, cancellationToken: cancellationToken);
+
+        return await _connection.QueryAsync<AtmTransaction>(command);
     }
 }

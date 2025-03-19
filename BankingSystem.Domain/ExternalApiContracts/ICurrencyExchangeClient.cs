@@ -4,5 +4,5 @@ namespace BankingSystem.Domain.ExternalApiContracts;
 
 public interface ICurrencyExchangeClient
 {
-    Task<decimal> GetExchangeRate(Currency currency);
+    Task<decimal> GetExchangeRateAsync(Currency currency, CancellationToken cancellationToken = default);
 }

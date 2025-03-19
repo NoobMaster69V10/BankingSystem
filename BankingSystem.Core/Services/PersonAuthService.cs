@@ -1,5 +1,4 @@
-﻿using BankingSystem.Core.DTO;
-using BankingSystem.Core.Identity;
+﻿using BankingSystem.Core.Identity;
 using Microsoft.AspNetCore.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Errors;
@@ -37,7 +36,7 @@ public class PersonAuthService : IPersonAuthService
     }
 
 
-    public async Task<Result<AuthenticatedResponse>> AuthenticationPersonAsync(PersonLoginDto loginDto)
+    public async Task<Result<AuthenticatedResponse>> AuthenticationPersonAsync(PersonLoginDto loginDto, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -52,13 +51,11 @@ public class PersonAuthService : IPersonAuthService
                 await _userManager.AccessFailedAsync(user);
                 if (await _userManager.IsLockedOutAsync(user))
                 {
-                    var content = $"Your account has been locked. Please check your email and password." +
-                                  "you can use the forgot password link";
+                    var content = $"Your account has been locked. Please check your email and password. you can use the forgot password link";
                     var message = new Message([loginDto.Email], "Locked out account information", content, null!);
-                    await _emailService.SendEmailAsync(message, "Reset Password");
+                    await _emailService.SendEmailAsync(message, "Reset Password", cancellationToken);
 
-                    return Result<AuthenticatedResponse>.Failure(
-                        CustomError.AccessUnAuthorized("The account has been locked."));
+                    return Result<AuthenticatedResponse>.Failure(CustomError.AccessUnAuthorized("The account has been locked."));
                 }
 
                 return Result<AuthenticatedResponse>.Failure(CustomError.NotFound("Invalid password"));
@@ -70,14 +67,14 @@ public class PersonAuthService : IPersonAuthService
                 ExpiresOnUtc = DateTime.UtcNow.AddDays(7),
                 PersonId = user.Id
             };
-            var existedPerson = await _unitOfWork.RefreshTokenRepository.CheckPersonIdAsync(user.Id);
+            var existedPerson = await _unitOfWork.RefreshTokenRepository.CheckPersonIdAsync(user.Id, cancellationToken);
             if (existedPerson == null)
             {
-                await _unitOfWork.RefreshTokenRepository.AddRefreshTokenAsync(refreshToken);
+                await _unitOfWork.RefreshTokenRepository.AddRefreshTokenAsync(refreshToken, cancellationToken);
             }
             else
             {
-                await _unitOfWork.RefreshTokenRepository.UpdateRefreshTokenAsync(refreshToken);
+                await _unitOfWork.RefreshTokenRepository.UpdateRefreshTokenAsync(refreshToken, cancellationToken);
             } 
             var response = new AuthenticatedResponse
             {
@@ -90,13 +87,12 @@ public class PersonAuthService : IPersonAuthService
         catch (Exception ex)
         {
             _loggerService.LogError(ex.Message);
-            return Result<AuthenticatedResponse>.Failure(
-                CustomError.Failure("Error occurred while authenticating person"));
+            return Result<AuthenticatedResponse>.Failure(CustomError.Failure("Error occurred while authenticating person"));
         }
     }
 
 
-    public async Task<Result<RegisterResponse>> RegisterPersonAsync(PersonRegisterDto registerDto)
+    public async Task<Result<RegisterResponse>> RegisterPersonAsync(PersonRegisterDto registerDto, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -131,8 +127,8 @@ public class PersonAuthService : IPersonAuthService
 
             _ = Task.Run(async () =>
             {
-                await _emailService.SendEmailAsync(message, "Confirm Account");
-            });
+                await _emailService.SendEmailAsync(message, "Confirm Account", cancellationToken);
+            }, cancellationToken);
 
             var role = string.IsNullOrEmpty(registerDto.Role) ? "Person" : registerDto.Role;
 
@@ -164,7 +160,7 @@ public class PersonAuthService : IPersonAuthService
         }
     }
 
-    public async Task<Result<string>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
+    public async Task<Result<string>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto, CancellationToken cancellationToken = default)
     {
         var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);
         if (user == null)
@@ -180,11 +176,11 @@ public class PersonAuthService : IPersonAuthService
         };
         var callback = QueryHelpers.AddQueryString(forgotPasswordDto.ClientUri, param!);
         var message = new Message([user.Email!], "EmailConfirmation", callback, null!);
-        await _emailService.SendEmailAsync(message, "Reset Password");
+        await _emailService.SendEmailAsync(message, "Reset Password", cancellationToken);
         return Result<string>.Success("Email sent successfully.");
     }
 
-    public async Task<Result<bool>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
+    public async Task<Result<bool>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto, CancellationToken cancellationToken = default)
     {
         var decodedToken = System.Web.HttpUtility.UrlDecode(resetPasswordDto.Token);
         var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
@@ -204,7 +200,7 @@ public class PersonAuthService : IPersonAuthService
         return Result<bool>.Success(true);
     }
 
-    public async Task<Result<string>> EmailConfirmationAsync(string token, string email)
+    public async Task<Result<string>> EmailConfirmationAsync(string token, string email, CancellationToken cancellationToken = default)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user is null)
@@ -222,60 +218,63 @@ public class PersonAuthService : IPersonAuthService
 
         return Result<string>.Success("Email Confirmed successfully.");
     }
-    public async Task<Result<AuthenticatedResponse>> RefreshTokenAsync(RefreshTokenDto refreshTokenDto)
-{
-    try
+    public async Task<Result<AuthenticatedResponse>> RefreshTokenAsync(RefreshTokenDto refreshTokenDto, CancellationToken cancellationToken = default)
     {
-        var principal = _tokenGenerator.GetPrincipalFromExpiredToken(refreshTokenDto.Token);
-        var personId = principal.FindFirst("personId")?.Value;
-        
-        if (string.IsNullOrEmpty(personId))
+        try
         {
-            return Result<AuthenticatedResponse>.Failure(
-                CustomError.AccessUnAuthorized("Invalid Request"));
-        }
+            var principal = _tokenGenerator.GetPrincipalFromExpiredToken(refreshTokenDto.Token);
+            var personId = principal.FindFirst("personId")?.Value;
+            
+            if (string.IsNullOrEmpty(personId))
+            {
+                return Result<AuthenticatedResponse>.Failure(
+                    CustomError.AccessUnAuthorized("Invalid Request"));
+            }
 
-        var storedRefreshToken = await _unitOfWork.RefreshTokenRepository
-            .GetDataByToken(refreshTokenDto.RefreshToken);
-        
-        if (storedRefreshToken == null || 
-            storedRefreshToken.PersonId != personId || 
-            storedRefreshToken.ExpiresOnUtc <= DateTime.UtcNow)
-        {
-            _loggerService.LogError("Invalid refresh token");
-            return Result<AuthenticatedResponse>.Failure(
-                CustomError.AccessUnAuthorized("Invalid Request"));
-        }
-        var user = await _userManager.FindByIdAsync(personId);
-        if (user == null)
-        {
-            return Result<AuthenticatedResponse>.Failure(
-                CustomError.NotFound("User not found"));
-        }
+            var storedRefreshToken = await _unitOfWork.RefreshTokenRepository
+                .GetDataByToken(refreshTokenDto.RefreshToken, cancellationToken);
+            
+            if (storedRefreshToken == null || 
+                storedRefreshToken.PersonId != personId || 
+                storedRefreshToken.ExpiresOnUtc <= DateTime.UtcNow)
+            {
+                _loggerService.LogError("Invalid refresh token");
+                return Result<AuthenticatedResponse>.Failure(
+                    CustomError.AccessUnAuthorized("Invalid Request"));
+            }
+            var user = await _userManager.FindByIdAsync(personId);
+            if (user == null)
+            {
+                return Result<AuthenticatedResponse>.Failure(
+                    CustomError.NotFound("User not found"));
+            }
 
-        var newAccessToken = await _tokenGenerator.GenerateAccessTokenAsync(user);
-        var newRefreshToken = new RefreshToken
+            var newAccessToken = await _tokenGenerator.GenerateAccessTokenAsync(user);
+
+            var newRefreshToken = new RefreshToken
+            {
+                Token = _tokenGenerator.GenerateRefreshToken(),
+                ExpiresOnUtc = DateTime.UtcNow.AddDays(7),
+                PersonId = user.Id
+            };
+
+            storedRefreshToken.Token = newRefreshToken.Token;
+            storedRefreshToken.ExpiresOnUtc = newRefreshToken.ExpiresOnUtc;
+
+            await _unitOfWork.RefreshTokenRepository.UpdateRefreshTokenAsync(storedRefreshToken, cancellationToken);
+            var response = new AuthenticatedResponse
+            {
+                Token = newAccessToken,
+                RefreshToken = newRefreshToken.Token
+            };
+            
+            return Result<AuthenticatedResponse>.Success(response);
+        }
+        catch (Exception ex)
         {
-            Token = _tokenGenerator.GenerateRefreshToken(),
-            ExpiresOnUtc = DateTime.UtcNow.AddDays(7),
-            PersonId = user.Id
-        };
-        storedRefreshToken.Token = newRefreshToken.Token;
-        storedRefreshToken.ExpiresOnUtc = newRefreshToken.ExpiresOnUtc;
-        await _unitOfWork.RefreshTokenRepository.UpdateRefreshTokenAsync(storedRefreshToken);
-        var response = new AuthenticatedResponse
-        {
-            Token = newAccessToken,
-            RefreshToken = newRefreshToken.Token
-        };
-        
-        return Result<AuthenticatedResponse>.Success(response);
+            _loggerService.LogError(ex.Message);
+            return Result<AuthenticatedResponse>.Failure(
+                CustomError.Failure("Error occurred while refreshing token"));
+        }
     }
-    catch (Exception ex)
-    {
-        _loggerService.LogError(ex.Message);
-        return Result<AuthenticatedResponse>.Failure(
-            CustomError.Failure("Error occurred while refreshing token"));
-    }
-}
 }

@@ -1,5 +1,5 @@
-﻿using System.Reflection;
-using System.Text;
+﻿using System.Text;
+using System.Reflection;
 using Microsoft.OpenApi.Models;
 using BankingSystem.Core.Identity;
 using Microsoft.AspNetCore.Identity;

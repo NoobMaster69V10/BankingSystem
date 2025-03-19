@@ -29,17 +29,17 @@ public class AtmService : IAtmService
     }
 
 
-    public async Task<Result<BalanceResponse>> ShowBalanceAsync(CardAuthorizationDto cardDto)
+    public async Task<Result<BalanceResponse>> ShowBalanceAsync(CardAuthorizationDto cardDto, CancellationToken cancellationToken = default)
     {
         try
         {
-            var authResult = await AuthorizeCardAsync(cardDto.CardNumber, cardDto.PinCode);
+            var authResult = await AuthorizeCardAsync(cardDto.CardNumber, cardDto.PinCode, cancellationToken);
             if (authResult.IsFailure)
             {
                 if (authResult.Error != null) return Result<BalanceResponse>.Failure(authResult.Error);
             }
 
-            var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardDto.CardNumber);
+            var balance = await _unitOfWork.BankCardRepository.GetBalanceAsync(cardDto.CardNumber, cancellationToken);
             var response = new BalanceResponse
             {
                 CardNumber = cardDto.CardNumber,
@@ -56,11 +56,11 @@ public class AtmService : IAtmService
         }
     }
 
-    public async Task<Result<string>> ChangePinAsync(ChangePinDto changePinDto)
+    public async Task<Result<string>> ChangePinAsync(ChangePinDto changePinDto, CancellationToken cancellationToken = default)
     {
         try
         {
-            var authResult = await AuthorizeCardAsync(changePinDto.CardNumber, changePinDto.PinCode);
+            var authResult = await AuthorizeCardAsync(changePinDto.CardNumber, changePinDto.PinCode, cancellationToken);
             if (!authResult.IsSuccess)
             {
                 if (authResult.Error != null) return Result<string>.Failure(authResult.Error);
@@ -68,7 +68,7 @@ public class AtmService : IAtmService
 
             var pinHash = _hasherService.Hash(changePinDto.NewPin);
 
-            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, pinHash);
+            await _unitOfWork.BankCardRepository.UpdatePinAsync(changePinDto.CardNumber, pinHash, cancellationToken);
             return Result<string>.Success("Pin changed Successfully");
         }
         catch (Exception ex)
@@ -80,26 +80,26 @@ public class AtmService : IAtmService
         }
     }
 
-    public async Task<Result<AtmTransactionResponse>> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto)
+    public async Task<Result<AtmTransactionResponse>> WithdrawMoneyAsync(WithdrawMoneyDto withdrawMoneyDto, CancellationToken cancellationToken = default)
     {
         try
         {
-            var authResult = await AuthorizeCardAsync(withdrawMoneyDto.CardNumber, withdrawMoneyDto.PinCode);
+            var authResult = await AuthorizeCardAsync(withdrawMoneyDto.CardNumber, withdrawMoneyDto.PinCode, cancellationToken);
             if (!authResult.IsSuccess)
             {
                 if (authResult.Error != null) return Result<AtmTransactionResponse>.Failure(authResult.Error);
             }
-            var bankAccount = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(withdrawMoneyDto.CardNumber);
+            var bankAccount = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(withdrawMoneyDto.CardNumber, cancellationToken);
             if (bankAccount == null)
             {
                 return Result<AtmTransactionResponse>.Failure(CustomError.NotFound("Bank account not found."));
             }
 
-            var totalWithdrawnTodayInGel = await GetTotalWithdrawnTodayInGelAsync(bankAccount);
+            var totalWithdrawnTodayInGel = await GetTotalWithdrawnTodayInGelAsync(bankAccount, cancellationToken);
             decimal withdrawAmountInGel = withdrawMoneyDto.Amount;
             if (bankAccount.Currency != Currency.GEL)
             {
-                var exchangeRate = await _currencyExchangeClient.GetExchangeRate(bankAccount.Currency);
+                var exchangeRate = await _currencyExchangeClient.GetExchangeRateAsync(bankAccount.Currency, cancellationToken);
                 if (exchangeRate <= 0)
                 {
                     return Result<AtmTransactionResponse>.Failure(new CustomError("ExchangeRateError",
@@ -125,10 +125,10 @@ public class AtmService : IAtmService
                     "Not enough balance including the transaction fee."));
             }
 
-            await _unitOfWork.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
             bankAccount.Balance -= totalDeduction;
-            await _unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount);
+            await _unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, cancellationToken);
 
             var atmTransaction = new AtmTransaction
             {
@@ -137,8 +137,8 @@ public class AtmService : IAtmService
                 TransactionDate = DateTime.UtcNow,
                 TransactionFee = fee
             };
-            await _unitOfWork.BankTransactionRepository.AddAtmTransactionAsync(atmTransaction);
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.BankTransactionRepository.AddAtmTransactionAsync(atmTransaction, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
 
             var response = new AtmTransactionResponse
             {
@@ -156,22 +156,22 @@ public class AtmService : IAtmService
         }
     }
 
-    public async Task<Result<BalanceResponse>> DepositMoneyAsync(DepositMoneyDto cardDto)
+    public async Task<Result<BalanceResponse>> DepositMoneyAsync(DepositMoneyDto cardDto, CancellationToken cancellationToken = default)
     {
         try
         {
-            var authResult = await AuthorizeCardAsync(cardDto.CardNumber, cardDto.PinCode);
+            var authResult = await AuthorizeCardAsync(cardDto.CardNumber, cardDto.PinCode, cancellationToken);
             if (!authResult.IsSuccess)
             {
                 if (authResult.Error != null) return Result<BalanceResponse>.Failure(authResult.Error);
             }
-            var bankAccount = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(cardDto.CardNumber);
+            var bankAccount = await _unitOfWork.BankCardRepository.GetAccountByCardAsync(cardDto.CardNumber, cancellationToken);
             if (bankAccount == null)
             {
                 return Result<BalanceResponse>.Failure(CustomError.NotFound("Bank account not found."));
             }
             bankAccount.Balance += cardDto.Amount;
-            await _unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount);
+            await _unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, cancellationToken);
             var response = new BalanceResponse
             {
                 CardNumber = cardDto.CardNumber,
@@ -187,11 +187,11 @@ public class AtmService : IAtmService
         }
     }
 
-    private async Task<Result<bool>> AuthorizeCardAsync(string cardNumber, string pin)
+    private async Task<Result<bool>> AuthorizeCardAsync(string cardNumber, string pin, CancellationToken cancellationToken = default)
     {
         try
         {
-            var validationResult = await _bankCardService.ValidateCardAsync(cardNumber, pin);
+            var validationResult = await _bankCardService.ValidateCardAsync(cardNumber, pin, cancellationToken);
             if (!validationResult.IsSuccess)
             {
                 if (validationResult.Error != null) return Result<bool>.Failure(validationResult.Error);
@@ -206,16 +206,16 @@ public class AtmService : IAtmService
         }
     }
 
-    private async Task<Result<decimal>> GetTotalWithdrawnTodayInGelAsync(BankAccount bankAccount)
+    private async Task<Result<decimal>> GetTotalWithdrawnTodayInGelAsync(BankAccount bankAccount, CancellationToken cancellationToken = default)
     {
         try
         {
             var totalWithdrawnToday =
-                await _unitOfWork.BankTransactionRepository.GetTotalWithdrawnTodayAsync(bankAccount.BankAccountId);
+                await _unitOfWork.BankTransactionRepository.GetTotalWithdrawnTodayAsync(bankAccount.BankAccountId, cancellationToken);
 
             if (bankAccount.Currency != Currency.GEL)
             {
-                var exchangeRate = await _currencyExchangeClient.GetExchangeRate(bankAccount.Currency);
+                var exchangeRate = await _currencyExchangeClient.GetExchangeRateAsync(bankAccount.Currency, cancellationToken);
                 if (exchangeRate <= 0)
                 {
                     return Result<decimal>.Failure(

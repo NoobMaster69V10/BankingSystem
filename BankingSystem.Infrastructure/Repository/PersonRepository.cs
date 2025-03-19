@@ -32,13 +32,19 @@ public class PersonRepository : RepositoryBase, IPersonRepository
                 if (bankAccount != null! &&
                     currentUser.BankAccounts.All(a => a.BankAccountId != bankAccount.BankAccountId))
                 {
-                    currentUser.BankAccounts.Add(bankAccount);
+                    if (bankAccount.BankAccountStatus)
+                    {
+                        currentUser.BankAccounts.Add(bankAccount);
+                    }
                 }
 
                 if (bankCard != null! &&
                     currentUser.Cards.All(c => c.BankCardId != bankCard.BankCardId))
                 {
-                    currentUser.Cards.Add(bankCard);
+                    if (bankCard.BankCardStatus)
+                    {
+                        currentUser.Cards.Add(bankCard);
+                    }
                 }
 
                 return currentUser;
@@ -70,10 +76,20 @@ public class PersonRepository : RepositoryBase, IPersonRepository
                 }
 
                 if (bankAccount != null! && currentUser.BankAccounts.All(a => a.BankAccountId != bankAccount.BankAccountId))
-                    currentUser.BankAccounts.Add(bankAccount);
+                {
+                    if (bankAccount.BankAccountStatus)
+                    {
+                        currentUser.BankAccounts.Add(bankAccount);
+                    }
+                }
 
                 if (bankCard != null! && currentUser.Cards.All(c => c.BankCardId != bankCard.BankCardId))
-                    currentUser.Cards.Add(bankCard);
+                {
+                    if (bankCard.BankCardStatus)
+                    {
+                        currentUser.Cards.Add(bankCard);
+                    }
+                }
 
                 return currentUser;
             },

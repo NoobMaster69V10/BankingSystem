@@ -11,59 +11,122 @@ namespace BankingSystem.Tests.Services;
 public class AccountTransactionServiceTests
 {
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<IExchangeService> _exchangeServiceMock;
     private readonly IAccountTransactionService _accountTransactionService;
 
     public AccountTransactionServiceTests()
     {
         _unitOfWorkMock = new Mock<IUnitOfWork>();
-        Mock<IExchangeService> exchangeServiceMock = new();
+        _exchangeServiceMock = new Mock<IExchangeService>();
         Mock<ILoggerService> loggerServiceMock = new();
         
         _accountTransactionService = new AccountTransactionService(
             _unitOfWorkMock.Object,
-            exchangeServiceMock.Object,
+            _exchangeServiceMock.Object,
             loggerServiceMock.Object
         );
     }
 
     [Fact]
-    public async Task TransactionBetweenAccountsAsync_ShouldReturnFailure_WhenSameAccount()
+    public async Task TransactionBetweenAccountsAsync_ShouldReturnFailure_FromAccountNotFound()
     {
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123, default)).ReturnsAsync((BankAccount)null!);
+
         var transactionDto = new AccountTransactionDto { FromAccountId = 123, ToAccountId = 123, Amount = 100 };
 
         var result = await _accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, "user1");
 
         Assert.False(result.IsSuccess);
-        Assert.Equal("It is not possible to make a transaction between the same accounts.", result.Error!.Message);
+        Assert.Equal("Bank account not found!", result.Error!.Message);
     }
 
     [Fact]
-    public async Task TransactionBetweenAccountsAsync_ShouldReturnFailure_WhenFromAccountNotFound()
+    public async Task TransactionBetweenAccountsAsync_ShouldReturnFailure_WhenPersonIdIsIncorrect()
     {
-        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123, default)).ReturnsAsync((BankAccount)null!);
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123, default)).ReturnsAsync(new BankAccount());
 
         var transactionDto = new AccountTransactionDto { FromAccountId = 123, ToAccountId = 456, Amount = 100 };
 
         var result = await _accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, "user1");
 
         Assert.False(result.IsSuccess);
-        Assert.Equal("Bank account with id '123' not found!", result.Error!.Message);
+        Assert.Equal("You don't have permission to make transactions from this account.", result.Error!.Message);
     }
 
     [Fact]
-    public async Task TransactionBetweenAccountsAsync_ShouldReturnFailure_WhenInsufficientBalance()
+    public async Task TransactionBetweenAccountsAsync_ShouldReturnFailure_WhenToAccountNotFound()
     {
-        var fromAccount = new BankAccount { BankAccountId = 123, Balance = 50, Currency = Currency.USD, PersonId = "user1" };
-        var toAccount = new BankAccount { BankAccountId = 456, Balance = 200, Currency = Currency.USD, PersonId = "user2" };
-
-        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123, default)).ReturnsAsync(fromAccount);
-        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(456, default)).ReturnsAsync(toAccount);
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123, default)).ReturnsAsync(new BankAccount{PersonId = "user1"});
 
         var transactionDto = new AccountTransactionDto { FromAccountId = 123, ToAccountId = 456, Amount = 100 };
+
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(456, default)).ReturnsAsync((BankAccount)null!);
+
+        var result = await _accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, "user1");
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Bank account You want to transfer not found!", result.Error!.Message);
+    }
+
+    [Fact]
+    public async Task TransactionBetweenAccountsAsync_ShouldReturnFailure_WhenBalanceIsNotEnough()
+    {
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123, default)).ReturnsAsync(new BankAccount { PersonId = "user1", Balance = 100});
+
+        var transactionDto = new AccountTransactionDto { FromAccountId = 123, ToAccountId = 456, Amount = 500 };
+
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(456, default)).ReturnsAsync(new BankAccount { PersonId = "user2", Balance = 100});
 
         var result = await _accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, "user1");
 
         Assert.False(result.IsSuccess);
         Assert.Equal("Insufficient balance for this transaction.", result.Error!.Message);
+    }
+
+    [Fact]
+    public async Task TransactionBetweenAccountsAsync_ShouldReturnFailure_WhenUnexpectedError()
+    {
+        var fromAccount = new BankAccount { PersonId = "user1", Balance = 1000, Currency = Currency.GEL };
+        var toAccount = new BankAccount { PersonId = "user2", Balance = 100, Currency = Currency.GEL };
+
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123, default)).ReturnsAsync(fromAccount);
+
+        var transactionDto = new AccountTransactionDto { FromAccountId = 123, ToAccountId = 456, Amount = 500 };
+
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(456, default)).ReturnsAsync(toAccount);
+
+
+        _exchangeServiceMock
+            .Setup(es => es.ConvertCurrencyAsync(transactionDto.Amount, fromAccount.Currency, toAccount.Currency, default))
+            .ReturnsAsync(20m);
+
+        var result = await _accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, "user1");
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal("An error occurred during the transaction.", result.Error!.Message);
+    }
+
+    [Fact]
+    public async Task TransactionBetweenAccountsAsync_ShouldReturnSuccess_WhenIsCorrect()
+    {
+        var fromAccount = new BankAccount { PersonId = "user1", Balance = 1000, Currency = Currency.GEL };
+        var toAccount = new BankAccount { PersonId = "user2", Balance = 100, Currency = Currency.GEL };
+
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123, default)).ReturnsAsync(fromAccount);
+
+        var transactionDto = new AccountTransactionDto { FromAccountId = 123, ToAccountId = 456, Amount = 500 };
+
+        _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(456, default)).ReturnsAsync(toAccount);
+
+
+        _exchangeServiceMock
+            .Setup(es => es.ConvertCurrencyAsync(transactionDto.Amount, fromAccount.Currency, toAccount.Currency, default))
+            .ReturnsAsync(20m);
+
+        _unitOfWorkMock.Setup(u => u.BankTransactionRepository.TransferBetweenAccountsAsync(It.IsAny<AccountTransfer>(), 20m, default));
+
+        var result = await _accountTransactionService.TransactionBetweenAccountsAsync(transactionDto, "user1");
+
+        Assert.True(result.IsSuccess);
     }
 }

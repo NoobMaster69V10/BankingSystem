@@ -1,11 +1,12 @@
-using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using BankingSystem.Domain.Enums;
 
 namespace BankingSystem.Core.Response;
 
 public class AtmTransactionResponse
 {
-    [Required] public int Amount { get; init; }
-    [Required] public Currency Currency { get; init; }
-    [Required] public string Iban { get; init; } = string.Empty;
+    public int Amount { get; init; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Currency Currency { get; init; }
+    public string Iban { get; init; } = string.Empty;
 }

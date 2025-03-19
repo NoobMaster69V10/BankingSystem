@@ -11,6 +11,5 @@ public class TransactionStatistics
     public Dictionary<Currency, decimal> IncomeLastMonth { get; set; } = new();
     public Dictionary<Currency, decimal> IncomeLastSixMonths { get; set; } = new();
     public Dictionary<Currency, decimal> IncomeLastYear { get; set; } = new();
-    
     public Dictionary<Currency, decimal> AverageIncomePerTransaction { get; set; } = new();
 }
