@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BankingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(BankingSystemDbContext))]
-    [Migration("20250315125451_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20250320205353_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -148,8 +148,8 @@ namespace BankingSystem.Infrastructure.Migrations
                         new
                         {
                             Id = "e2c8d6e5-41f8-4d92-bd1a-89d7c3264913",
-                            Name = "Person",
-                            NormalizedName = "PERSON"
+                            Name = "User",
+                            NormalizedName = "USER"
                         },
                         new
                         {

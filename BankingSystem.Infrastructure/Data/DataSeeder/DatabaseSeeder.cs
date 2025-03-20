@@ -55,8 +55,8 @@ public class DatabaseSeeder : IDatabaseSeeder
         {
             (SeederSettings.OperatorEmail, "Operator"),
             (SeederSettings.ManagerEmail, "Manager"),
-            (SeederSettings.PersonEmail1, "Person"),
-            (SeederSettings.PersonEmail2, "Person")
+            (SeederSettings.PersonEmail1, "User"),
+            (SeederSettings.PersonEmail2, "User")
         };
 
 
@@ -84,17 +84,17 @@ public class DatabaseSeeder : IDatabaseSeeder
                     await _userManager.AddToRoleAsync(user, role);
                     user.Lastname = "Manager";
                     break;
-                case "Person":
+                case "User":
                     await _userManager.CreateAsync(user, personPassword);
                     await _userManager.AddToRoleAsync(user, role);
-                    user.Lastname = "Person";
+                    user.Lastname = "User";
                     break;
             }
 
             await _userManager.ConfirmEmailAsync(user, await _userManager.GenerateEmailConfirmationTokenAsync(user));
 
 
-            if (role == "Person")
+            if (role == "User")
             {
                 var person = await _personRepository.GetByUsernameAsync(email);
 

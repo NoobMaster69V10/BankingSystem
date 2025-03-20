@@ -92,7 +92,7 @@ public class BankController : ControllerBase
     /// <returns>Bank card information.</returns>
     /// <response code="200">Returns a message about deactivation.</response>
     [HttpPatch("card-deactivate")]
-    [Authorize(Roles = "Person")]
+    [Authorize(Roles = "User")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     public async Task<ActionResult<string>> DeactivateBankCard(string cardNumber, CancellationToken cancellationToken)
     {

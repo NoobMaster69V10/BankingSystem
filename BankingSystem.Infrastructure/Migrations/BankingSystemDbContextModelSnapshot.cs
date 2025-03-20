@@ -145,8 +145,8 @@ namespace BankingSystem.Infrastructure.Migrations
                         new
                         {
                             Id = "e2c8d6e5-41f8-4d92-bd1a-89d7c3264913",
-                            Name = "Person",
-                            NormalizedName = "PERSON"
+                            Name = "User",
+                            NormalizedName = "USER"
                         },
                         new
                         {

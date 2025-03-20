@@ -34,7 +34,7 @@ namespace BankingSystem.API.Controllers
         /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
         /// <returns>The personal information of the authenticated user.</returns>
         /// <response code="200">Returns the user's personal information.</response>
-        [Authorize(Roles = "Person")]
+        [Authorize(Roles = "User")]
         [HttpGet("info")]
         [ProducesResponseType(typeof(Person), StatusCodes.Status200OK)]
         public async Task<ActionResult<Person>> GetPersonInfo(

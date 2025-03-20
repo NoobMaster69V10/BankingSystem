@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BankingSystem.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -169,7 +169,7 @@ namespace BankingSystem.Infrastructure.Migrations
                 values: new object[,]
                 {
                     { "d6a5bfb9-3f5a-4aa2-a0a1-3d3f5a8a6311", null, "Operator", "OPERATOR" },
-                    { "e2c8d6e5-41f8-4d92-bd1a-89d7c3264913", null, "Person", "PERSON" },
+                    { "e2c8d6e5-41f8-4d92-bd1a-89d7c3264913", null, "User", "USER" },
                     { "f9e0a56d-8a10-4cf6-9f9b-26b2c0ef7897", null, "Manager", "MANAGER" }
                 });
 
