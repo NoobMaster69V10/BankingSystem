@@ -15,5 +15,5 @@ public record RegisterResponse
     public string? Email { get; init; }
 
     [JsonIgnore]
-    public string Role { get; set; } = "Person";
+    public string Role { get; set; }
 }

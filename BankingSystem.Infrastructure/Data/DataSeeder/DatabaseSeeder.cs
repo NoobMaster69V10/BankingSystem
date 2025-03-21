@@ -69,7 +69,7 @@ public class DatabaseSeeder : IDatabaseSeeder
                 FirstName = email.Split("@")[0],
                 Lastname = email.Split("@")[1],
                 BirthDate = DateTime.UtcNow.AddYears(-30),
-                IdNumber = "01010034023"
+                IdNumber = GenerateIdNumber()
             };
 
             switch (role)
@@ -139,4 +139,5 @@ public class DatabaseSeeder : IDatabaseSeeder
     private string GenerateIban() => $"GE{new Random().Next(100000000, 999999999)}{new Random().Next(100000000, 999999999)}";
     private string GenerateCardNumber() => $"{new Random().Next(100000000, 999999999)}{new Random().Next(10000, 99999)}";
     private string GenerateCvv() => new Random().Next(100, 999).ToString();
+    private string GenerateIdNumber() => $"{new Random().Next(100000000, 999999999)}{new Random().Next(10, 99)}";
 }

@@ -11,7 +11,7 @@ public class ExchangeService : IExchangeService
     private readonly IMemoryCache _cache;
     private readonly ILoggerService _logger;
     private readonly SemaphoreSlim _cacheLock = new(1, 1);
-    private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(1);
+    private readonly TimeSpan _cacheExpiration = TimeSpan.FromDays(1);
     
     public ExchangeService(ICurrencyExchangeClient currencyExchangeClient, IMemoryCache cache, ILoggerService logger)
     {

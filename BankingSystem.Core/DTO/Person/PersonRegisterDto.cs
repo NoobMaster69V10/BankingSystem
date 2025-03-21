@@ -39,7 +39,7 @@ internal sealed class PersonRegisterDtoValidator : AbstractValidator<PersonRegis
             .Equal(x => x.Password).WithMessage("The password and confirmation password do not match.");
         RuleFor(x => x.Role)
             .NotEmpty().WithMessage("Role is required.")
-            .Must(role => role == "Operator" || role == "Person" || role == "Manager")
-            .WithMessage("Role must be either 'Operator', 'Person', or 'Manager'.");
+            .Must(role => role == "Operator" || role == "User" || role == "Manager")
+            .WithMessage("Role must be either 'Operator', 'User', or 'Manager'.");
     }
 }
