@@ -98,6 +98,9 @@ namespace BankingSystem.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("IdNumber")
+                        .IsUnique();
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 

@@ -77,11 +77,13 @@ public class DatabaseSeeder : IDatabaseSeeder
                 case "Operator":
                     await _userManager.CreateAsync(user, operatorPassword);
                     await _userManager.AddToRoleAsync(user, role);
+                    await _userManager.AddToRoleAsync(user, "User");
                     user.Lastname = "Operator";
                     break;
                 case "Manager":
                     await _userManager.CreateAsync(user, managerPassword);
                     await _userManager.AddToRoleAsync(user, role);
+                    await _userManager.AddToRoleAsync(user, "User");
                     user.Lastname = "Manager";
                     break;
                 case "User":
@@ -94,8 +96,6 @@ public class DatabaseSeeder : IDatabaseSeeder
             await _userManager.ConfirmEmailAsync(user, await _userManager.GenerateEmailConfirmationTokenAsync(user));
 
 
-            if (role == "User")
-            {
                 var person = await _personRepository.GetByUsernameAsync(email);
 
                 var bankAccount = new BankAccount
@@ -129,7 +129,6 @@ public class DatabaseSeeder : IDatabaseSeeder
                 };
 
                 await _bankCardRepository.AddCardAsync(card, cancellationToken);
-            }
         }
 
         

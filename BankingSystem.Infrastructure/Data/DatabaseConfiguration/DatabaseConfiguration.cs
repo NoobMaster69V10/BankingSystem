@@ -57,8 +57,7 @@ public class DatabaseConfiguration : IDatabaseConfiguration
                 @"..\BankingSystem.SQL\Views\vw_PersonInfo.sql"));
             var createUpdateIsActiveTrigger = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
                 @"..\BankingSystem.SQL\Triggers\trg_UpdateIsActiveOnExpiration.sql"));
-            var createInsertAccountCheckTrigger = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                @"..\BankingSystem.SQL\Triggers\trg_InsertAccountForManagersAndOperators.sql"));
+            
 
             await connection.ExecuteAsync(createBankAccountTable);
             await connection.ExecuteAsync(createBankCardTable);
@@ -68,7 +67,6 @@ public class DatabaseConfiguration : IDatabaseConfiguration
             await connection.ExecuteAsync(createUpdateCardTrigger);
             await connection.ExecuteAsync(createPersonInfoView);
             await connection.ExecuteAsync(createUpdateIsActiveTrigger);
-            await connection.ExecuteAsync(createInsertAccountCheckTrigger);
 
             _loggerService.LogSuccess("Database migration completed successfully!");
         }

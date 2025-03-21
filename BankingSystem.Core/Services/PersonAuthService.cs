@@ -140,6 +140,11 @@ public class PersonAuthService : IPersonAuthService
 
             await _userManager.AddToRoleAsync(person, role);
 
+            if (registerDto.Role is "Operator" or "Manager")
+            {
+                await _userManager.AddToRoleAsync(person, "User");
+            }
+
             var response = new RegisterResponse
             {
                 FirstName = person.FirstName,

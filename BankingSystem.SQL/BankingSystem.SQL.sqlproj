@@ -70,7 +70,6 @@
     <Build Include="Triggers\trg_UpdateCardStatusOnAccountStatusChange.sql" />
     <Build Include="Triggers\trg_UpdateIsActiveOnExpiration.sql" />
     <Build Include="Views\vw_PersonInfo.sql" />
-    <Build Include="Triggers\trg_InsertAccountForManagersAndOperators.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\BankCards.sql" />

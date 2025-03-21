@@ -15,5 +15,9 @@ public class BankingSystemDbContext : IdentityDbContext<IdentityPerson>
     {
         base.OnModelCreating(builder);
         builder.ApplyConfiguration(new RoleConfiguration());
+
+        builder.Entity<IdentityPerson>()
+            .HasIndex(u => u.IdNumber)
+            .IsUnique();
     }
 }

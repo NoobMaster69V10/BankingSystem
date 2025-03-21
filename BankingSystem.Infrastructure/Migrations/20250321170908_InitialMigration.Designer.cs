@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BankingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(BankingSystemDbContext))]
-    [Migration("20250321163548_InitialMigration")]
+    [Migration("20250321170908_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -100,6 +100,9 @@ namespace BankingSystem.Infrastructure.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IdNumber")
+                        .IsUnique();
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
