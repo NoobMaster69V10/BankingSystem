@@ -1,4 +1,4 @@
-﻿
+
 namespace BankingSystem.Domain.Entities;
 
 public class Person

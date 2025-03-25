@@ -18,11 +18,9 @@ public class BankCardServiceTests
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         Mock<ILoggerService> loggerServiceMock = new();
         _hasherService = new Mock<IHasherService>();
-        Mock<IEncryptionService> encryptionService = new();
         _bankCardService = new BankCardService(
             _unitOfWorkMock.Object,
             _hasherService.Object,
-            encryptionService.Object,
             loggerServiceMock.Object
         );
     }

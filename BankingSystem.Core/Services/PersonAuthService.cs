@@ -11,6 +11,7 @@ using BankingSystem.Core.Result;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.UnitOfWorkContracts;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace BankingSystem.Core.Services;
 
@@ -106,6 +107,13 @@ public class PersonAuthService : IPersonAuthService
                 IdNumber = registerDto.IdNumber
             };
 
+            var testIdNumber = await _userManager.Users.FirstOrDefaultAsync(u => u.IdNumber == registerDto.IdNumber, cancellationToken);
+
+            if (testIdNumber != null)
+            {
+                return Result<RegisterResponse>.Failure(CustomError.Validation($"The idNumber '{registerDto.IdNumber}' already exits."));
+            }
+
             var result = await _userManager.CreateAsync(person, registerDto.Password);
 
             if (!result.Succeeded)
@@ -115,6 +123,7 @@ public class PersonAuthService : IPersonAuthService
             }
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(person);
+            
             var param = new Dictionary<string, string?>
             {
                 { "token", token },

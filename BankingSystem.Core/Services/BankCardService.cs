@@ -4,6 +4,7 @@ using BankingSystem.Core.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Errors;
+using BankingSystem.Domain.Helpers;
 using BankingSystem.Domain.UnitOfWorkContracts;
 
 namespace BankingSystem.Core.Services;
@@ -11,16 +12,13 @@ namespace BankingSystem.Core.Services;
 public class BankCardService : IBankCardService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IEncryptionService _encryptionService;
     private readonly IHasherService _hasherService;
     private readonly ILoggerService _loggerService;
 
-    public BankCardService(IUnitOfWork unitOfWork, IHasherService hasherService, IEncryptionService encryptionService,
-        ILoggerService loggerService)
+    public BankCardService(IUnitOfWork unitOfWork, IHasherService hasherService, ILoggerService loggerService)
     {
         _unitOfWork = unitOfWork;
         _hasherService = hasherService;
-        _encryptionService = encryptionService;
         _loggerService = loggerService;
     }
 
@@ -65,7 +63,7 @@ public class BankCardService : IBankCardService
 
             var pinHash = _hasherService.Hash(bankCardRegisterDto.PinCode);
 
-            var encryptedCvv = _encryptionService.Encrypt(bankCardRegisterDto.Cvv!);
+            var encryptedCvv = EncryptionHelper.Encrypt(bankCardRegisterDto.Cvv!);
 
             var newCard = new BankCard
             {
