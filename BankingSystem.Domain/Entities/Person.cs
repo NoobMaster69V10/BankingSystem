@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace BankingSystem.Domain.Entities;
+﻿namespace BankingSystem.Domain.Entities;
 
 public class Person
 {

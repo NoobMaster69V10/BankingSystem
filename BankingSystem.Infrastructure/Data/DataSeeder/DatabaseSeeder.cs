@@ -3,6 +3,7 @@ using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.ConfigurationSettings.Seeder;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Enums;
+using BankingSystem.Domain.Helpers;
 using BankingSystem.Domain.RepositoryContracts;
 using BankingSystem.Infrastructure.Data.DatabaseContext;
 using Microsoft.AspNetCore.Identity;
@@ -19,10 +20,9 @@ public class DatabaseSeeder : IDatabaseSeeder
     private readonly IBankAccountRepository _bankAccountRepository;
     private readonly IBankCardRepository _bankCardRepository;
     private readonly IHasherService _hasherService;
-    private readonly IEncryptionService _encryptionService;
     private readonly ILoggerService _logger;
 
-    public DatabaseSeeder(IHasherService hasherService, IEncryptionService encryptionService,
+    public DatabaseSeeder(IHasherService hasherService,
         IOptions<SeederSettings> seederSettings, BankingSystemDbContext context,
         UserManager<IdentityPerson> userManager, IBankAccountRepository bankAccountRepository,
         IBankCardRepository bankCardRepository, IPersonRepository personRepository, ILoggerService logger)
@@ -34,7 +34,6 @@ public class DatabaseSeeder : IDatabaseSeeder
         _bankAccountRepository = bankAccountRepository;
         _bankCardRepository = bankCardRepository;
         _hasherService = hasherService;
-        _encryptionService = encryptionService;
         _logger = logger;
     }
 
@@ -117,7 +116,8 @@ public class DatabaseSeeder : IDatabaseSeeder
 
                 var pinHash = _hasherService.Hash("1234");
 
-                var encryptedCvv = _encryptionService.Encrypt(GenerateCvv());
+                //var encryptedCvv = _encryptionService.Encrypt(GenerateCvv());
+                var encryptedCvv = EncryptionHelper.Encrypt(GenerateCvv());
 
                 var card = new BankCard
                 {
