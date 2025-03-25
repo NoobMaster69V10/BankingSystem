@@ -5,6 +5,7 @@ using BankingSystem.Core.Extensions;
 using BankingSystem.Core.Response;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,7 +38,7 @@ public class BankController : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns>The newly created bank account information.</returns>
     /// <response code="201">Returns the newly created bank account.</response>
-    [Authorize(Roles = "Operator")]
+    [Authorize(Roles= nameof(Role.User))]
     [HttpPost("account")]
     [ProducesResponseType(typeof(BankAccount), StatusCodes.Status201Created)]
     public async Task<ActionResult<BankAccount>> CreateBankAccount(BankAccountRegisterDto bankAccountRegisterDto, CancellationToken cancellationToken)
@@ -70,7 +71,7 @@ public class BankController : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns>The completed account transfer information.</returns>
     /// <response code="201">Returns the completed transfer details.</response>
-    [Authorize(Roles = "Person")]
+    [Authorize(Roles = nameof(Role.User))]
     [HttpPost("transfer-money")]
     [ProducesResponseType(typeof(AccountTransfer), StatusCodes.Status201Created)]
     public async Task<ActionResult<AccountTransfer>> TransferMoney(
@@ -92,7 +93,7 @@ public class BankController : ControllerBase
     /// <returns>Bank card information.</returns>
     /// <response code="200">Returns a message about deactivation.</response>
     [HttpPatch("card-deactivate")]
-    [Authorize(Roles = "User")]
+    [Authorize(Roles = nameof(Role.User))]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     public async Task<ActionResult<string>> DeactivateBankCard(string cardNumber, CancellationToken cancellationToken)
     {
@@ -109,7 +110,7 @@ public class BankController : ControllerBase
     /// <returns>Bank card information.</returns>
     /// <response code="200">Returns a message about bank card.</response>
     [HttpDelete("card-delete")]
-    [Authorize(Roles = "Operator")]
+    [Authorize(Roles = nameof(Role.Operator))]
     [ProducesResponseType(typeof(CardRemovalResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<CardRemovalResponse>> RemoveBankCard(BankCardActiveDto bankCardActiveDto,CancellationToken cancellationToken)
     {
@@ -133,7 +134,7 @@ public class BankController : ControllerBase
     /// <returns>Bank account information.</returns>
     /// <response code="200">Returns a message about bank account.</response>
     [HttpDelete("bankaccount-delete")]
-    [Authorize(Roles = "Operator")]
+    [Authorize(Roles = nameof(Role.Operator))]
     [ProducesResponseType(typeof(AccountRemovalResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<AccountRemovalResponse>> RemoveBankAccount(BankAccountRemovalDto bankAccountRemovalDto,CancellationToken cancellationToken)
     { 

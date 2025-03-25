@@ -1,6 +1,7 @@
 ﻿using BankingSystem.Core.Extensions;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.Statistics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +16,7 @@ namespace BankingSystem.API.Controllers;
 /// Access is restricted to users with the Manager role.
 /// </remarks>
 [ApiController]
-[Authorize(Roles = "Manager")]
+[Authorize(Roles = nameof(Role.Manager))]
 [Route("api/[controller]")]
 public class ReportController : ControllerBase
 {

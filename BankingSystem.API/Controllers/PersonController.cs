@@ -4,6 +4,7 @@ using BankingSystem.Core.Extensions;
 using BankingSystem.Core.Response;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
+using BankingSystem.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,7 +35,7 @@ namespace BankingSystem.API.Controllers
         /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
         /// <returns>The personal information of the authenticated user.</returns>
         /// <response code="200">Returns the user's personal information.</response>
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = nameof(Role.User))]
         [HttpGet("info")]
         [ProducesResponseType(typeof(Person), StatusCodes.Status200OK)]
         public async Task<ActionResult<Person>> GetPersonInfo(
@@ -55,7 +56,7 @@ namespace BankingSystem.API.Controllers
         /// Only bank operators can register new customers.
         /// </remarks>
         /// <response code="201">Returns the registration confirmation.</response>
-        [Authorize(Roles = "Operator")]
+        [Authorize(Roles = nameof(Role.Operator))]
         [HttpPost("register")]
         [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status201Created)]
         public async Task<ActionResult<RegisterResponse>> RegisterUser(PersonRegisterDto registerModel)
@@ -77,7 +78,7 @@ namespace BankingSystem.API.Controllers
             var result = await _personAuthService.AuthenticationPersonAsync(loginModel);
             return result.IsFailure ? result.ToProblemDetails() : Created("login", result.Value);
         }
-        
+
         /// <summary>
         /// Initiates the password reset process for a forgotten password.
         /// </summary>
@@ -114,9 +115,9 @@ namespace BankingSystem.API.Controllers
         /// <response code="200">Returns confirmation of email verification.</response>
         [HttpGet("email-confirmation")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        public async Task<ActionResult<string>> EmailConfirmation([FromQuery] string token,[FromQuery] string email)
+        public async Task<ActionResult<string>> EmailConfirmation([FromQuery] string token, [FromQuery] string email)
         {
-            var result = await _personAuthService.EmailConfirmationAsync(token,email);
+            var result = await _personAuthService.EmailConfirmationAsync(token, email);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
         }
 

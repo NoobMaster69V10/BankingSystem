@@ -51,12 +51,12 @@ public class DatabaseSeeder : IDatabaseSeeder
         var managerPassword = SeederSettings.ManagerPassword;
         var personPassword = SeederSettings.PersonPassword;
 
-        var users = new List<(string email, string role)>
+        var users = new List<(string email, Role role)>
         {
-            (SeederSettings.OperatorEmail, "Operator"),
-            (SeederSettings.ManagerEmail, "Manager"),
-            (SeederSettings.PersonEmail1, "User"),
-            (SeederSettings.PersonEmail2, "User")
+            (SeederSettings.OperatorEmail, Role.Operator),
+            (SeederSettings.ManagerEmail, Role.Manager),
+            (SeederSettings.PersonEmail1, Role.User),
+            (SeederSettings.PersonEmail2, Role.User)
         };
 
 
@@ -74,21 +74,21 @@ public class DatabaseSeeder : IDatabaseSeeder
 
             switch (role)
             {
-                case "Operator":
+                case Role.Operator:
                     await _userManager.CreateAsync(user, operatorPassword);
-                    await _userManager.AddToRoleAsync(user, role);
+                    await _userManager.AddToRoleAsync(user, role.ToString());
                     await _userManager.AddToRoleAsync(user, "User");
                     user.Lastname = "Operator";
                     break;
-                case "Manager":
+                case Role.Manager:
                     await _userManager.CreateAsync(user, managerPassword);
-                    await _userManager.AddToRoleAsync(user, role);
+                    await _userManager.AddToRoleAsync(user, role.ToString());
                     await _userManager.AddToRoleAsync(user, "User");
                     user.Lastname = "Manager";
                     break;
-                case "User":
+                case Role.User:
                     await _userManager.CreateAsync(user, personPassword);
-                    await _userManager.AddToRoleAsync(user, role);
+                    await _userManager.AddToRoleAsync(user, role.ToString());
                     user.Lastname = "User";
                     break;
             }

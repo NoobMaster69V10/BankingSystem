@@ -28,7 +28,7 @@ public static class ServiceRegistration
         services.AddSingleton<ILoggerService, LoggerService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IHasherService, HashingService>(); 
-        services.AddScoped<IEmailService, EmailService>();
+        services.AddTransient<IEmailService, EmailService>();
         services.AddScoped<IAuthTokenGeneratorService, AuthTokenGeneratorService>();
         services.Configure<FormOptions>(o => {
             o.ValueLengthLimit = int.MaxValue;

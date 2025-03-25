@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using BankingSystem.Domain.Enums;
 
 namespace BankingSystem.Core.Response;
 
@@ -13,7 +14,6 @@ public record RegisterResponse
     public DateTime BirthDate { get; init; }
 
     public string? Email { get; init; }
-
-    [JsonIgnore]
-    public string Role { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Role Role { get; set; }
 }

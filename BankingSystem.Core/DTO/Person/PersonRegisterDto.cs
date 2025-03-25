@@ -1,4 +1,6 @@
-﻿using FluentValidation;
+﻿using System.Text.Json.Serialization;
+using BankingSystem.Domain.Enums;
+using FluentValidation;
 
 namespace BankingSystem.Core.DTO.Person;
 
@@ -11,8 +13,7 @@ public record PersonRegisterDto
     public string Email { get; init; } = string.Empty;
     public string Password { get; init; } = string.Empty;
     public string ConfirmPassword { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
-    public string? ClientUri { get; set; }
+    public Role Role { get; set; }
 }
 
 internal sealed class PersonRegisterDtoValidator : AbstractValidator<PersonRegisterDto>
@@ -39,7 +40,7 @@ internal sealed class PersonRegisterDtoValidator : AbstractValidator<PersonRegis
             .Equal(x => x.Password).WithMessage("The password and confirmation password do not match.");
         RuleFor(x => x.Role)
             .NotEmpty().WithMessage("Role is required.")
-            .Must(role => role == "Operator" || role == "User" || role == "Manager")
+            .Must(role => role == Role.User || role == Role.Manager || role == Role.Operator)
             .WithMessage("Role must be either 'Operator', 'User', or 'Manager'.");
     }
 }

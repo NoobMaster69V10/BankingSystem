@@ -129,22 +129,15 @@ public class PersonAuthService : IPersonAuthService
             {
                 await _emailService.SendEmailAsync(message, "Confirm Account", cancellationToken);
             }, cancellationToken);
-
-            var role = string.IsNullOrEmpty(registerDto.Role) ? "Person" : registerDto.Role;
-
-            if (!await _roleManager.RoleExistsAsync(role))
+            
+            if (!await _roleManager.RoleExistsAsync(registerDto.Role.ToString()))
             {
                 return Result<RegisterResponse>.Failure(
-                    CustomError.NotFound($"The role '{role}' does not exist."));
+                    CustomError.NotFound($"The role  does not exist."));
             }
 
-            await _userManager.AddToRoleAsync(person, role);
-
-            if (registerDto.Role is "Operator" or "Manager")
-            {
-                await _userManager.AddToRoleAsync(person, "User");
-            }
-
+            await _userManager.AddToRoleAsync(person, registerDto.Role.ToString());
+            
             var response = new RegisterResponse
             {
                 FirstName = person.FirstName,
@@ -152,7 +145,7 @@ public class PersonAuthService : IPersonAuthService
                 IdNumber = person.IdNumber,
                 BirthDate = person.BirthDate,
                 Email = person.Email,
-                Role = role
+                Role = registerDto.Role,
             };
 
             return Result<RegisterResponse>.Success(response);
