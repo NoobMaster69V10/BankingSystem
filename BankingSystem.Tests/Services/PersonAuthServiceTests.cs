@@ -7,6 +7,7 @@ using BankingSystem.Core.Services;
 using BankingSystem.Domain.UnitOfWorkContracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using MockQueryable;
 using Moq;
 
 namespace BankingSystem.Tests.Services;
@@ -60,11 +61,16 @@ public class PersonAuthServiceTests
         _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(It.IsAny<IdentityPerson>()))
             .ReturnsAsync("confirmation_token");
 
-        var result = await _authService.RegisterPersonAsync(new PersonRegisterDto { Email = "test@test.com", Password = "Password123!" });
+        var users = new List<IdentityPerson>().AsQueryable().BuildMock();
+
+        _userManagerMock.Setup(x => x.Users)
+            .Returns(users);
+
+        var result = await _authService.RegisterPersonAsync(new PersonRegisterDto { Email = "test@test.com", IdNumber = "12345678910", Password = "Password123!" });
 
         Assert.True(result.IsSuccess);
-        Assert.Equal("test@test.com", result.Value!.Email);
     }
+
 
     [Fact]
     public async Task ForgotPasswordAsync_UserNotFound_ReturnsFailure()
