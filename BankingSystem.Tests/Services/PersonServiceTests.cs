@@ -41,7 +41,7 @@ public class PersonServiceTests
         _unitOfWorkMock.Setup(x => x.PersonRepository.GetByIdAsync(personId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Person)null!);
         
-        var result = await _personService.GetPersonById(personId, CancellationToken.None);
+        var result = await _personService.GetPersonByIdAsync(personId, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(CustomError.NotFound("User not found").Code, result.Error.Code);
@@ -57,7 +57,7 @@ public class PersonServiceTests
         _unitOfWorkMock.Setup(x => x.PersonRepository.GetByIdAsync(personId, It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Database error"));
 
-        var result = await _personService.GetPersonById(personId, CancellationToken.None);
+        var result = await _personService.GetPersonByIdAsync(personId, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(CustomError.Failure("Error occurred while getting person").Code, result.Error!.Code);
@@ -72,7 +72,7 @@ public class PersonServiceTests
 
         _memoryCacheMock.Setup(x => x.TryGetValue(It.IsAny<object>(), out cachedPerson)).Returns(true);
 
-        var result = await _personService.GetPersonById(personId, CancellationToken.None);
+        var result = await _personService.GetPersonByIdAsync(personId, CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(expectedPerson, result.Value);

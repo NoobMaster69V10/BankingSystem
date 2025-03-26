@@ -5,5 +5,5 @@ namespace BankingSystem.Core.ServiceContracts;
 
 public interface IPersonService
 {
-    Task<Result<Person>> GetPersonById(string id, CancellationToken cancellationToken = default);
+    Task<Result<Person>> GetPersonByIdAsync(string id, CancellationToken cancellationToken = default);
 }

@@ -43,7 +43,7 @@ namespace BankingSystem.API.Controllers
         {
             var personId = User.FindFirst("personId")!.Value;
 
-            var result = await _personService.GetPersonById(personId, cancellationToken);
+            var result = await _personService.GetPersonByIdAsync(personId, cancellationToken);
             return result.IsFailure ? result.ToProblemDetails() : Ok(result.Value);
         }
 

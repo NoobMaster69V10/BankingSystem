@@ -13,7 +13,7 @@ public record PersonRegisterDto
     public string Email { get; init; } = string.Empty;
     public string Password { get; init; } = string.Empty;
     public string ConfirmPassword { get; set; } = string.Empty;
-    public Role Role { get; set; }
+    public Role Role { get; set; } 
 }
 
 internal sealed class PersonRegisterDtoValidator : AbstractValidator<PersonRegisterDto>

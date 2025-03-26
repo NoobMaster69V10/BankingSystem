@@ -22,7 +22,7 @@ public class PersonService : IPersonService
         _loggerService = loggerService;
     }
 
-    public async Task<Result<Person>> GetPersonById(string personId, CancellationToken cancellationToken = default)
+    public async Task<Result<Person>> GetPersonByIdAsync(string personId, CancellationToken cancellationToken = default)
     {
         try
         {

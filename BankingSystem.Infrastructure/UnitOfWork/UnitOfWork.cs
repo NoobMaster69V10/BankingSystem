@@ -21,12 +21,12 @@ public class UnitOfWork : IUnitOfWork
         IBankTransactionRepository transactionRepository, IBankCardRepository bankCardRepository,
         IBankAccountRepository bankAccountRepository, IBankReportRepository bankReportRepository, IRefreshTokenRepository refreshTokenRepository)
     {
-        _connection = connection ?? throw new ArgumentNullException(nameof(connection));
-        PersonRepository = personRepository ?? throw new ArgumentNullException(nameof(personRepository));
-        BankTransactionRepository = transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
-        BankCardRepository = bankCardRepository ?? throw new ArgumentNullException(nameof(bankCardRepository));
-        BankAccountRepository = bankAccountRepository ?? throw new ArgumentNullException(nameof(bankAccountRepository));
-        BankReportRepository = bankReportRepository ?? throw new ArgumentNullException(nameof(bankReportRepository));
+        _connection = connection;
+        PersonRepository = personRepository;
+        BankTransactionRepository = transactionRepository;
+        BankCardRepository = bankCardRepository;
+        BankAccountRepository = bankAccountRepository;
+        BankReportRepository = bankReportRepository;
         RefreshTokenRepository = refreshTokenRepository;
         _connection.Open();
     }

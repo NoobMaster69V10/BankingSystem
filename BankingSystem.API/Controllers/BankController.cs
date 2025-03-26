@@ -118,7 +118,7 @@ public class BankController : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
     [HttpPatch("activate-card")]
-    [Authorize]
+    [Authorize(Roles = nameof(Role.User))]
     public async Task<ActionResult<string>> ActivateBankCard(string cardNumber, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst("personId")!.Value;
