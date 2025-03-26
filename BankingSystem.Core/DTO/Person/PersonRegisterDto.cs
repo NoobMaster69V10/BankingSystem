@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using BankingSystem.Domain.Enums;
+﻿using BankingSystem.Domain.Enums;
 using FluentValidation;
 
 namespace BankingSystem.Core.DTO.Person;
@@ -39,8 +38,7 @@ internal sealed class PersonRegisterDtoValidator : AbstractValidator<PersonRegis
             .NotEmpty().WithMessage("Confirm Password is required.")
             .Equal(x => x.Password).WithMessage("The password and confirmation password do not match.");
         RuleFor(x => x.Role)
-            .NotEmpty().WithMessage("Role is required.")
-            .Must(role => role == Role.User || role == Role.Manager || role == Role.Operator)
-            .WithMessage("Role must be either 'Operator', 'User', or 'Manager'.");
+            .NotNull().WithMessage("Role is required.")
+            .IsInEnum().WithMessage("Role must be either 'Operator', 'User', or 'Manager'.");
     }
 }
