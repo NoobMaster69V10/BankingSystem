@@ -31,7 +31,7 @@ internal sealed class BankAccountRegisterDtoValidator : AbstractValidator<BankAc
             .GreaterThanOrEqualTo(0).WithMessage("Balance cannot be negative.");
 
         RuleFor(x => x.Currency)
-            .NotEmpty().WithMessage("Currency is required.")
+            .NotNull().WithMessage("Currency is required.")
             .IsInEnum().WithMessage("Invalid currency value.");
     }
 

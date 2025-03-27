@@ -117,6 +117,15 @@ public class BankController : ControllerBase
         var result = await _cardService.RemoveBankCardAsync(bankCardActiveDto,cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
+
+
+    /// <summary>
+    /// Activates a bank card.
+    /// </summary>
+    /// <param name="cardNumber">The bank card number.</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>Returns activation result.</returns>
+    /// <response code="201">Returns activation result.</response>
     [HttpPatch("activate-card")]
     [Authorize(Roles = nameof(Role.User))]
     public async Task<ActionResult<string>> ActivateBankCard(string cardNumber, CancellationToken cancellationToken)
@@ -133,7 +142,7 @@ public class BankController : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns>Bank account information.</returns>
     /// <response code="200">Returns a message about bank account.</response>
-    [HttpDelete("bankaccount-delete")]
+    [HttpDelete("bank-account-delete")]
     [Authorize(Roles = nameof(Role.Operator))]
     [ProducesResponseType(typeof(AccountRemovalResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<AccountRemovalResponse>> RemoveBankAccount(BankAccountRemovalDto bankAccountRemovalDto,CancellationToken cancellationToken)
