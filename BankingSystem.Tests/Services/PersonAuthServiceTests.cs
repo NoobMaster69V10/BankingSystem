@@ -77,7 +77,7 @@ public class PersonAuthServiceTests
     {
         _userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync((IdentityPerson)null!);
 
-        var result = await _authService.ForgotPasswordAsync(new ForgotPasswordDto { Email = "test@test.com", ClientUri = "https://example.com" });
+        var result = await _authService.ForgotPasswordAsync(new ForgotPasswordDto { Email = "test@test.com" });
 
         Assert.False(result.IsSuccess);
         Assert.Equal("Invalid email", result.Error!.Message);

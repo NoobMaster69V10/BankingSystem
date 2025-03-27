@@ -36,7 +36,7 @@ public class ReportController : ControllerBase
     public async Task<ActionResult<UserStatistics>> GetUserStatistics(CancellationToken cancellationToken)
     {
         var result = await _bankReportService.GetUserStatisticsAsync(cancellationToken);
-        return result.IsSuccess ? Ok(result) : result.ToProblemDetails();
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
     /// <summary>

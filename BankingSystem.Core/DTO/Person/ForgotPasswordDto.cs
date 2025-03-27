@@ -4,7 +4,6 @@ namespace BankingSystem.Core.DTO.Person;
 public record ForgotPasswordDto
 {
     public string Email { get; init; } = string.Empty;
-    public string ClientUri { get; init; } = string.Empty;
 }
 
 internal sealed class ForgotPasswordDtoValidator : AbstractValidator<ForgotPasswordDto>
@@ -14,8 +13,5 @@ internal sealed class ForgotPasswordDtoValidator : AbstractValidator<ForgotPassw
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required.")
             .EmailAddress().WithMessage("Invalid email format.");
-
-        RuleFor(x => x.ClientUri)
-            .NotEmpty().WithMessage("Client URI is required.");
     }
 }

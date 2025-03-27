@@ -181,7 +181,7 @@ public class PersonAuthService : IPersonAuthService
             { "token", token },
             { "email", forgotPasswordDto.Email }
         };
-        var callback = QueryHelpers.AddQueryString(forgotPasswordDto.ClientUri, param!);
+        var callback = QueryHelpers.AddQueryString("",param!);
         var message = new Message([user.Email!], "EmailConfirmation", callback, null!);
         await _emailService.SendEmailAsync(message, "Reset Password", cancellationToken);
         return Result<string>.Success("Email sent successfully.");
