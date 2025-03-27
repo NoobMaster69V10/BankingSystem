@@ -35,16 +35,16 @@ public class PersonServiceTests
     public async Task GetPersonById_ShouldReturnFailure_WhenPersonDoesNotExist()
     {
         var personId = "123";
-        object cachedPerson = null;
+        object cachedPerson = null!;
 
-        _memoryCacheMock.Setup(x => x.TryGetValue(It.IsAny<object>(), out cachedPerson)).Returns(false);
+        _memoryCacheMock.Setup(x => x.TryGetValue(It.IsAny<object>(), out cachedPerson!)).Returns(false);
         _unitOfWorkMock.Setup(x => x.PersonRepository.GetByIdAsync(personId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Person)null!);
         
         var result = await _personService.GetPersonByIdAsync(personId, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(CustomError.NotFound("User not found").Code, result.Error.Code);
+        Assert.Equal(CustomError.NotFound("User not found").Code, result.Error!.Code);
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class PersonServiceTests
         var expectedPerson = new Person { PersonId = personId, FirstName = "name" };
         object cachedPerson = expectedPerson;
 
-        _memoryCacheMock.Setup(x => x.TryGetValue(It.IsAny<object>(), out cachedPerson)).Returns(true);
+        _memoryCacheMock.Setup(x => x.TryGetValue(It.IsAny<object>(), out cachedPerson!)).Returns(true);
 
         var result = await _personService.GetPersonByIdAsync(personId, CancellationToken.None);
 

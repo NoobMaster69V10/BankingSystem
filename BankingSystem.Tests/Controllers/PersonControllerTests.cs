@@ -226,7 +226,7 @@ namespace BankingSystem.Tests.Controllers
             var result = await _controller.ResetPassword(resetPasswordDto);
         
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            Assert.True((bool)okResult.Value);
+            Assert.True((bool)okResult.Value!);
         }
         
         [Fact]
