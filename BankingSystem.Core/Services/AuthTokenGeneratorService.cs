@@ -1,6 +1,5 @@
 using System.Text;
 using System.Security.Claims;
-using BankingSystem.Core.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;

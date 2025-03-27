@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using BankingSystem.Core.Identity;
 
 namespace BankingSystem.Core.ServiceContracts;
 

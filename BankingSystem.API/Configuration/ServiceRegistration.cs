@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
-using BankingSystem.Core.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -9,7 +8,6 @@ using BankingSystem.Domain.ConfigurationSettings.Jwt;
 using BankingSystem.Domain.ConfigurationSettings.Email;
 using BankingSystem.Domain.ConfigurationSettings.Seeder;
 using BankingSystem.Infrastructure.Data.DatabaseContext;
-using BankingSystem.Domain.ConfigurationSettings.Encryption;
 
 namespace BankingSystem.API.Configuration;
 
@@ -19,7 +17,6 @@ public static class ServiceRegistration
     {
         services.Configure<EmailConfiguration>(configuration.GetSection("EmailConfiguration"));
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
-        services.Configure<EncryptionSettings>(configuration.GetSection("Encryption"));
         services.Configure<SeederSettings>(configuration.GetSection("Seeder"));
 
         services.AddHttpClient();
