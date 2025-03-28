@@ -2,11 +2,13 @@ using BankingSystem.Core.DTO.AtmTransaction;
 using BankingSystem.Core.Response;
 using BankingSystem.Core.Result;
 using BankingSystem.Core.ServiceContracts;
+using BankingSystem.Domain.ConfigurationSettings.AtmTransaction;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
+using Microsoft.Extensions.Options;
 
 namespace BankingSystem.Core.Services;
 
@@ -14,18 +16,20 @@ public class AtmService : IAtmService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IBankCardService _bankCardService;
-    private readonly ILoggerService _loggerService;
     private readonly IHasherService _hasherService;
     private readonly ICurrencyExchangeClient _currencyExchangeClient;
+    private readonly AtmTransactionSettings _atmTransactionSettings;
+    private readonly ILoggerService _loggerService;
 
-    public AtmService(IUnitOfWork unitOfWork, IBankCardService bankCardService, ILoggerService loggerService,
-        IHasherService hasherService, ICurrencyExchangeClient currencyExchangeClient)
+    public AtmService(IUnitOfWork unitOfWork, IBankCardService bankCardService, IOptions<AtmTransactionSettings> atmTransactionSettings,
+        IHasherService hasherService, ICurrencyExchangeClient currencyExchangeClient, ILoggerService loggerService)
     {
         _unitOfWork = unitOfWork;
         _bankCardService = bankCardService;
-        _loggerService = loggerService;
         _hasherService = hasherService;
         _currencyExchangeClient = currencyExchangeClient;
+        _atmTransactionSettings = atmTransactionSettings.Value;
+        _loggerService = loggerService;
     }
 
 
@@ -109,15 +113,15 @@ public class AtmService : IAtmService
                 withdrawAmountInGel = withdrawMoneyDto.Amount * exchangeRate;
             }
 
-            var dailyLimit = 10000;
+            var dailyLimit = _atmTransactionSettings.DailyLimit;
 
             if (totalWithdrawnTodayInGel.Value + withdrawAmountInGel > dailyLimit)
             {
                 return Result<AtmTransactionResponse>.Failure(new CustomError("DailyLimitExceeded",
-                    "You cannot withdraw more than 10,000 GEL per day."));
+                    $"You cannot withdraw more than {dailyLimit} GEL per day."));
             }
 
-            var fee = withdrawMoneyDto.Amount * 0.02m;
+            var fee = withdrawMoneyDto.Amount * _atmTransactionSettings.WithdrawalFee;
             var totalDeduction = withdrawMoneyDto.Amount + fee;
             if (bankAccount.Balance < totalDeduction)
             {
@@ -151,6 +155,7 @@ public class AtmService : IAtmService
         catch (Exception ex)
         {
             _loggerService.LogError($"Error in WithdrawMoneyAsync: {ex}");
+            await _unitOfWork.RollbackAsync();
             return Result<AtmTransactionResponse>.Failure(
                 CustomError.Failure("An error occurred during the transaction."));
         }

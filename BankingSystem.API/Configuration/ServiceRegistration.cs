@@ -4,9 +4,6 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using BankingSystem.Domain.ConfigurationSettings.Jwt;
-using BankingSystem.Domain.ConfigurationSettings.Email;
-using BankingSystem.Domain.ConfigurationSettings.Seeder;
 using BankingSystem.Infrastructure.Data.DatabaseContext;
 
 namespace BankingSystem.API.Configuration;
@@ -15,10 +12,6 @@ public static class ServiceRegistration
 {
     public static void AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<EmailConfiguration>(configuration.GetSection("EmailConfiguration"));
-        services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
-        services.Configure<SeederSettings>(configuration.GetSection("Seeder"));
-
         services.AddHttpClient();
         services.AddLogging();
         services.AddSwaggerGen(options =>

@@ -1,8 +1,13 @@
 ﻿using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
+using BankingSystem.Domain.ConfigurationSettings.AccountTransaction;
+using BankingSystem.Domain.ConfigurationSettings.AtmTransaction;
+using BankingSystem.Domain.ConfigurationSettings.Email;
+using BankingSystem.Domain.ConfigurationSettings.Jwt;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -10,8 +15,13 @@ namespace BankingSystem.Core.Configuration;
 
 public static class ServiceRegistration
 {
-    public static void AddCoreServices(this IServiceCollection services)
+    public static void AddCoreServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<EmailConfiguration>(configuration.GetSection("EmailConfiguration"));
+        services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+        services.Configure<AccountTransactionSettings>(configuration.GetSection("AccountTransaction"));
+        services.Configure<AtmTransactionSettings>(configuration.GetSection("AtmTransaction"));
+
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
             .WriteTo.File("Logs/banking_system.log", rollingInterval: RollingInterval.Infinite)
