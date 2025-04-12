@@ -1,5 +1,4 @@
-﻿using BankingSystem.Core.Identity;
-using BankingSystem.Core.ServiceContracts;
+﻿using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.ConfigurationSettings.Seeder;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Enums;
@@ -116,7 +115,6 @@ public class DatabaseSeeder : IDatabaseSeeder
 
                 var pinHash = _hasherService.Hash("1234");
 
-                //var encryptedCvv = _encryptionService.Encrypt(GenerateCvv());
                 var encryptedCvv = EncryptionHelper.Encrypt(GenerateCvv());
 
                 var card = new BankCard

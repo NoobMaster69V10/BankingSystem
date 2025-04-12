@@ -1,5 +1,4 @@
-﻿using BankingSystem.Core.Identity;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Errors;
 using BankingSystem.Core.DTO.Person;

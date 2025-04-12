@@ -20,8 +20,5 @@ public class DatabaseSeederBackground : IHostedService
         _hostApplicationLifetime.ApplicationStarted.Register(() => { });
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

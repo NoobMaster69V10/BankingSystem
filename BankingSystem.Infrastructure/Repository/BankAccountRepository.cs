@@ -44,14 +44,6 @@ public class BankAccountRepository : RepositoryBase, IBankAccountRepository
 
         return await Connection.QueryFirstOrDefaultAsync<BankAccount?>(parameters);
     }
-    public async Task<Currency> GetAccountCurrencyAsync(int accountId, CancellationToken cancellationToken = default)
-    {
-        const string query = "SELECT Currency FROM BankAccounts WHERE BankAccountId = @BankAccountId";
-
-        var parameters = new CommandDefinition(query, new { BankAccountId = accountId }, cancellationToken: cancellationToken, transaction: Transaction);
-
-        return await Connection.QueryFirstOrDefaultAsync<Currency>(parameters);
-    }
 
     public async Task RemoveBankAccountAsync(string iban, CancellationToken cancellationToken = default)
     {

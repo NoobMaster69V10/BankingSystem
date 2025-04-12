@@ -39,34 +39,23 @@ public class DatabaseConfiguration : IDatabaseConfiguration
 
             var connection = scopedProvider.GetRequiredService<IDbConnection>();
 
-            var createBankAccountTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                @"..\BankingSystem.SQL\Tables\BankAccounts.sql"));
+            var sqlQueryPaths = new List<string>()
+            {
+                $"..{Path.DirectorySeparatorChar}BankingSystem.SQL{Path.DirectorySeparatorChar}Tables{Path.DirectorySeparatorChar}BankAccounts.sql",
+                $"..{Path.DirectorySeparatorChar}BankingSystem.SQL{Path.DirectorySeparatorChar}Tables{Path.DirectorySeparatorChar}BankCards.sql",
+                $"..{Path.DirectorySeparatorChar}BankingSystem.SQL{Path.DirectorySeparatorChar}Tables{Path.DirectorySeparatorChar}AccountTransactions.sql",
+                $"..{Path.DirectorySeparatorChar}BankingSystem.SQL{Path.DirectorySeparatorChar}Tables{Path.DirectorySeparatorChar}RefreshToken.sql",
+                $"..{Path.DirectorySeparatorChar}BankingSystem.SQL{Path.DirectorySeparatorChar}StoredProcedures{Path.DirectorySeparatorChar}TransferBetweenAccounts.sql",
+                $"..{Path.DirectorySeparatorChar}BankingSystem.SQL{Path.DirectorySeparatorChar}Triggers{Path.DirectorySeparatorChar}trg_UpdateCardStatusOnAccountStatusChange.sql",
+                $"..{Path.DirectorySeparatorChar}BankingSystem.SQL{Path.DirectorySeparatorChar}Views{Path.DirectorySeparatorChar}vw_PersonInfo.sql",
+                $"..{Path.DirectorySeparatorChar}BankingSystem.SQL{Path.DirectorySeparatorChar}Triggers{Path.DirectorySeparatorChar}trg_UpdateIsActiveOnExpiration.sql"
+            };
 
-            var createBankCardTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                @"..\BankingSystem.SQL\Tables\BankCards.sql"));
-
-            var createAccountTransactionTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                @"..\BankingSystem.SQL\Tables\AccountTransactions.sql"));
-            var createRefreshTokenTable = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                @"..\BankingSystem.SQL\Tables\RefreshToken.sql"));
-            var createTransferBetweenAccountsProcedure = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                @"..\BankingSystem.SQL\StoredProcedures\TransferBetweenAccounts.sql"));
-            var createUpdateCardTrigger = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                @"..\BankingSystem.SQL\Triggers\trg_UpdateCardStatusOnAccountStatusChange.sql"));
-            var createPersonInfoView = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                @"..\BankingSystem.SQL\Views\vw_PersonInfo.sql"));
-            var createUpdateIsActiveTrigger = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory,
-                @"..\BankingSystem.SQL\Triggers\trg_UpdateIsActiveOnExpiration.sql"));
-            
-
-            await connection.ExecuteAsync(createBankAccountTable);
-            await connection.ExecuteAsync(createBankCardTable);
-            await connection.ExecuteAsync(createAccountTransactionTable);
-            await connection.ExecuteAsync(createRefreshTokenTable);
-            await connection.ExecuteAsync(createTransferBetweenAccountsProcedure);
-            await connection.ExecuteAsync(createUpdateCardTrigger);
-            await connection.ExecuteAsync(createPersonInfoView);
-            await connection.ExecuteAsync(createUpdateIsActiveTrigger);
+            foreach (var path in sqlQueryPaths)
+            {
+                var sqlQuery = await File.ReadAllTextAsync(Path.Combine(Environment.CurrentDirectory, path));
+                await connection.ExecuteAsync(sqlQuery);
+            }
 
             _loggerService.LogSuccess("Database migration completed successfully!");
         }

@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using BankingSystem.Domain.ConfigurationSettings.Seeder;
 using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.RepositoryContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
@@ -19,7 +20,7 @@ public static class ServiceRegistration
     public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-
+        services.Configure<SeederSettings>(configuration.GetSection("Seeder"));
         services.AddScoped<IDbConnection>(_ =>
                 new SqlConnection(connectionString));
 

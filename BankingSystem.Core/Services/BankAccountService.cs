@@ -55,7 +55,10 @@ public class BankAccountService : IBankAccountService
             };
             await _unitOfWork.BankAccountRepository.AddBankAccountAsync(account, cancellationToken);
 
-            return Result<BankAccount>.Success(account);
+            var addedAccount =
+                await _unitOfWork.BankAccountRepository.GetAccountByIbanAsync(bankAccountRegisterDto.Iban,
+                    cancellationToken);
+            return Result<BankAccount>.Success(addedAccount!);
         }
         catch (Exception ex)
         {

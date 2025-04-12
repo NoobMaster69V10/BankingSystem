@@ -4,6 +4,8 @@ using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.UnitOfWorkContracts;
 using BankingSystem.Core.DTO.AccountTransaction;
 using BankingSystem.Core.Result;
+using BankingSystem.Domain.ConfigurationSettings.AccountTransaction;
+using Microsoft.Extensions.Options;
 
 namespace BankingSystem.Core.Services;
 
@@ -11,12 +13,14 @@ public class AccountTransactionService : IAccountTransactionService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IExchangeService _exchangeService;
+    private readonly AccountTransactionSettings _accountTransactionSettings;
     private readonly ILoggerService _loggerService;
 
-    public AccountTransactionService(IUnitOfWork unitOfWork, IExchangeService exchangeService, ILoggerService loggerService)
+    public AccountTransactionService(IUnitOfWork unitOfWork, IExchangeService exchangeService, IOptions<AccountTransactionSettings> bankTransactionSettings,ILoggerService loggerService)
     {
         _unitOfWork = unitOfWork;
         _exchangeService = exchangeService;
+        _accountTransactionSettings = bankTransactionSettings.Value;
         _loggerService = loggerService;
     }
 
@@ -42,7 +46,7 @@ public class AccountTransactionService : IAccountTransactionService
             var transactionFee = 0m;
             if (fromAccount.PersonId != toAccount.PersonId)
             {
-                transactionFee = transactionDto.Amount * 0.01m + 0.5m;
+                transactionFee = transactionDto.Amount * _accountTransactionSettings.TransferFeeToAnotherAccount + _accountTransactionSettings.TransferCommissionToAnotherAccount;
             }
 
             if (transactionDto.Amount + transactionFee > fromAccount.Balance)
