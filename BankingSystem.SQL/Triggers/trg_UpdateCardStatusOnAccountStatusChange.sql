@@ -5,10 +5,9 @@ CREATE TRIGGER trg_UpdateCardStatusOnAccountStatusChange
 BEGIN
     IF UPDATE(IsActive)
 BEGIN
-UPDATE bc
-SET IsActive = 0
-    FROM BankCards bc
+        DELETE bc
+        FROM BankCards bc
         INNER JOIN inserted i ON bc.AccountId = i.BankAccountId
-WHERE i.IsActive = 0;
+        WHERE i.IsActive = 0;
 END
 END;

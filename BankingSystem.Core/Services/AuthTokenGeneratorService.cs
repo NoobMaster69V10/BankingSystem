@@ -20,7 +20,7 @@ public class AuthTokenGeneratorService : IAuthTokenGeneratorService
     {
         _jwtSettings = jwtSettings.Value;
         _userManager = userManager;
-    }
+    } 
 
     public async Task<string> GenerateAccessTokenAsync(IdentityPerson person)
     {
