@@ -1,9 +1,11 @@
 using BankingSystem.Core.DTO.AccountTransaction;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
+using BankingSystem.Domain.ConfigurationSettings.AccountTransaction;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.UnitOfWorkContracts;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace BankingSystem.Tests.Services;
@@ -13,16 +15,24 @@ public class AccountTransactionServiceTests
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IExchangeService> _exchangeServiceMock;
     private readonly IAccountTransactionService _accountTransactionService;
+    private readonly Mock<IOptions<AccountTransactionSettings>> _accountTransactionSettingsMock = new Mock<IOptions<AccountTransactionSettings>>();
 
     public AccountTransactionServiceTests()
     {
+        _accountTransactionSettingsMock.Setup(x => x.Value).Returns(new AccountTransactionSettings
+        {
+            TransferFeeToAnotherAccount = 5.0m,
+            TransferCommissionToAnotherAccount = 0.02m
+        });
+
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _exchangeServiceMock = new Mock<IExchangeService>();
         Mock<ILoggerService> loggerServiceMock = new();
-        
+
         _accountTransactionService = new AccountTransactionService(
             _unitOfWorkMock.Object,
             _exchangeServiceMock.Object,
+            _accountTransactionSettingsMock.Object,
             loggerServiceMock.Object
         );
     }
@@ -86,8 +96,8 @@ public class AccountTransactionServiceTests
     [Fact]
     public async Task TransactionBetweenAccountsAsync_ShouldReturnFailure_WhenUnexpectedError()
     {
-        var fromAccount = new BankAccount { PersonId = "user1", Balance = 1000, Currency = Currency.GEL };
-        var toAccount = new BankAccount { PersonId = "user2", Balance = 100, Currency = Currency.GEL };
+        var fromAccount = new BankAccount { PersonId = "user1", Balance = 100000, Currency = Currency.GEL };
+        var toAccount = new BankAccount { PersonId = "user2", Balance = 10000, Currency = Currency.GEL };
 
         _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123, default)).ReturnsAsync(fromAccount);
 
@@ -109,8 +119,8 @@ public class AccountTransactionServiceTests
     [Fact]
     public async Task TransactionBetweenAccountsAsync_ShouldReturnSuccess_WhenIsCorrect()
     {
-        var fromAccount = new BankAccount { PersonId = "user1", Balance = 1000, Currency = Currency.GEL };
-        var toAccount = new BankAccount { PersonId = "user2", Balance = 100, Currency = Currency.GEL };
+        var fromAccount = new BankAccount { PersonId = "user1", Balance = 100000, Currency = Currency.GEL };
+        var toAccount = new BankAccount { PersonId = "user2", Balance = 100000, Currency = Currency.GEL };
 
         _unitOfWorkMock.Setup(u => u.BankAccountRepository.GetAccountByIdAsync(123, default)).ReturnsAsync(fromAccount);
 

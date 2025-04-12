@@ -4,11 +4,13 @@ using BankingSystem.Core.DTO.AtmTransaction;
 using BankingSystem.Core.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
+using BankingSystem.Domain.ConfigurationSettings.AtmTransaction;
 using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Enums;
+using Microsoft.Extensions.Options;
 
 namespace BankingSystem.Tests.Services
 {
@@ -19,6 +21,7 @@ namespace BankingSystem.Tests.Services
         private readonly ILoggerService _loggerService;
         private readonly AtmService _atmService;
         private readonly IHasherService _hasherService;
+        private readonly IOptions<AtmTransactionSettings> _atmTransactionSettings;
 
         public AtmServiceTests()
         {
@@ -26,8 +29,9 @@ namespace BankingSystem.Tests.Services
             _bankCardService = A.Fake<IBankCardService>();
             _loggerService = A.Fake<ILoggerService>();
             _hasherService = A.Fake<IHasherService>();
+            _atmTransactionSettings = A.Fake<IOptions<AtmTransactionSettings>>();
             var currencyExchangeClient = A.Fake<ICurrencyExchangeClient>();
-            _atmService = new AtmService(_unitOfWork, _bankCardService, _loggerService, _hasherService, currencyExchangeClient);
+            _atmService = new AtmService(_unitOfWork, _bankCardService, _atmTransactionSettings, _hasherService, currencyExchangeClient, _loggerService);
         }
 
         #region ShowBalanceAsync Tests
