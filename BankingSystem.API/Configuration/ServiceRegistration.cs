@@ -65,7 +65,7 @@ public static class ServiceRegistration
             .AddEntityFrameworkStores<BankingSystemDbContext>()
             .AddDefaultTokenProviders();
         services.Configure<DataProtectionTokenProviderOptions>(
-            opt => opt.TokenLifespan = TimeSpan.FromDays(30));
+            opt => opt.TokenLifespan = TimeSpan.FromDays(5));
 
         var jwtKey = configuration["Jwt:Key"];
         var jwtIssuer = configuration["Jwt:Issuer"];

@@ -38,10 +38,4 @@ public class Result<T>
     public static Result<T> Success(T value) => new(value);
 
     public static Result<T> Failure(CustomError error) => new(error);
-
-    public bool TryGetValue(out T? value)
-    {
-        value = _value;
-        return IsSuccess;
-    }
 }
