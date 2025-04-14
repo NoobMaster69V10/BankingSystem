@@ -2,6 +2,7 @@
 using BankingSystem.Core.Services;
 using BankingSystem.Domain.ConfigurationSettings.AccountTransaction;
 using BankingSystem.Domain.ConfigurationSettings.AtmTransaction;
+using BankingSystem.Domain.ConfigurationSettings.CurrencyExchangeClient;
 using BankingSystem.Domain.ConfigurationSettings.Email;
 using BankingSystem.Domain.ConfigurationSettings.Jwt;
 using FluentValidation;
@@ -21,11 +22,13 @@ public static class ServiceRegistration
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         services.Configure<AccountTransactionSettings>(configuration.GetSection("AccountTransaction"));
         services.Configure<AtmTransactionSettings>(configuration.GetSection("AtmTransaction"));
+        services.Configure<CurrencyExchangeClientSettings>(configuration.GetSection("CurrencyExchangeClient"));
 
         Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console()
-            .WriteTo.File("Logs/banking_system.log", rollingInterval: RollingInterval.Infinite)
+            .ReadFrom.Configuration(configuration)
+            .Enrich.FromLogContext()
             .CreateLogger();
+
         services.AddValidatorsFromAssembly(typeof(ServiceRegistration).Assembly,includeInternalTypes:true);
         services.AddFluentValidationAutoValidation();
         services.AddScoped<IBankAccountService, BankAccountService>();

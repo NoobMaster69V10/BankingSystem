@@ -1,21 +1,24 @@
 ﻿using System.Text.Json;
+using BankingSystem.Domain.ConfigurationSettings.CurrencyExchangeClient;
 using BankingSystem.Domain.ExternalApiContracts;
+using Microsoft.Extensions.Options;
 
 namespace BankingSystem.Infrastructure.ExternalApis;
 public class CurrencyExchangeClient : ICurrencyExchangeClient
 {
     private readonly IHttpClientFactory _httpClientFactory;
-
-    public CurrencyExchangeClient(IHttpClientFactory httpClientFactory)
+    private readonly CurrencyExchangeClientSettings _clientOptions;
+    public CurrencyExchangeClient(IHttpClientFactory httpClientFactory, IOptions<CurrencyExchangeClientSettings> clientOptions)
     {
         _httpClientFactory = httpClientFactory;
+        _clientOptions = clientOptions.Value;
     }
 
     public async Task<decimal> GetExchangeRateAsync(Domain.Enums.Currency currency, CancellationToken cancellationToken = default)
     {
         var httpRequestMessage = new HttpRequestMessage(
             HttpMethod.Get,
-            $"https://nbg.gov.ge/gw/api/ct/monetarypolicy/currencies/ka/json/?currencies={currency.ToString()}");
+            $"{_clientOptions.ApiUrl}?currencies={currency.ToString()}");
 
         var client = _httpClientFactory.CreateClient();
         var httpResponseMessage = await client.SendAsync(httpRequestMessage, cancellationToken);
