@@ -100,7 +100,9 @@ ATM-დან თანხის გამოტანის საკომი�
     
 ### მონაცემთა ბაზის სტრუქტურა
 
+![db](https://github.com/user-attachments/assets/56852c2e-8aa5-4b14-8dfa-268d3793f5cc)
 
 
 ### Swagger Endpoints
 
+![screencapture-localhost-7264-swagger-index-html-2025-04-14-14_05_04](https://github.com/user-attachments/assets/c547c708-5199-4499-8031-8564a766ce3b)
