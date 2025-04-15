@@ -27,8 +27,6 @@ public class BankCardService : IBankCardService
     {
         try
         {
-            await _unitOfWork.BeginTransactionAsync(cancellationToken);
-
             if (await _unitOfWork.BankCardRepository.GetCardAsync(bankCardRegisterDto.CardNumber!, cancellationToken) is not null)
             {
                 return Result<BankCard>.Failure(
@@ -75,7 +73,6 @@ public class BankCardService : IBankCardService
             };
 
             await _unitOfWork.BankCardRepository.AddCardAsync(newCard, cancellationToken);
-            await _unitOfWork.CommitAsync(cancellationToken);
 
             return Result<BankCard>.Success(newCard);
         }
