@@ -9,6 +9,7 @@ using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.ExternalApiContracts;
 using BankingSystem.Domain.UnitOfWorkContracts;
 using Microsoft.Extensions.Options;
+using Microsoft.VisualBasic;
 
 namespace BankingSystem.Core.Services;
 
@@ -175,8 +176,17 @@ public class AtmService : IAtmService
             {
                 return Result<BalanceResponse>.Failure(CustomError.NotFound("Bank account not found."));
             }
+            await _unitOfWork.BeginTransactionAsync(cancellationToken);
             bankAccount.Balance += cardDto.Amount;
             await _unitOfWork.BankAccountRepository.UpdateBalanceAsync(bankAccount, cancellationToken);
+            var atmTransaction = new AtmTransaction
+            {
+                FromAccountId = bankAccount.BankAccountId,
+                Amount = cardDto.Amount,
+                TransactionDate = DateTime.UtcNow,
+            };
+            await _unitOfWork.BankTransactionRepository.AddAtmTransactionAsync(atmTransaction, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
             var response = new BalanceResponse
             {
                 CardNumber = cardDto.CardNumber,
@@ -188,6 +198,7 @@ public class AtmService : IAtmService
         catch (Exception e)
         {
             _loggerService.LogError($"Error in WithdrawMoneyAsync:{e}");
+            await _unitOfWork.RollbackAsync();
             return Result<BalanceResponse>.Failure(CustomError.NotFound("Error during transaction."));
         }
     }
