@@ -142,7 +142,7 @@ public class BankController : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns>Bank account information.</returns>
     /// <response code="200">Returns a message about bank account.</response>
-    [HttpDelete("bank-account-delete")]
+    [HttpDelete("bank-account")]
     [Authorize(Roles = nameof(Role.Operator))]
     [ProducesResponseType(typeof(AccountRemovalResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<AccountRemovalResponse>> RemoveBankAccount(BankAccountRemovalDto bankAccountRemovalDto,CancellationToken cancellationToken)
