@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
 using BankingSystem.Core.DTO.Person;
 using BankingSystem.Core.DTO.RefreshToken;
-using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
 using BankingSystem.Domain.UnitOfWorkContracts;
@@ -33,7 +32,6 @@ public class PersonAuthServiceTests
         _authService = new PersonAuthService(
             _unitOfWorkMock.Object,
             _userManagerMock.Object,
-            _roleManagerMock.Object,
             _emailServiceMock.Object,
             _tokenGeneratorMock.Object,
             _contextAccessorMock.Object,

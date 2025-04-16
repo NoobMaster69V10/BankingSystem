@@ -18,17 +18,15 @@ public class PersonAuthService : IPersonAuthService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<IdentityPerson> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IEmailService _emailService;
     private readonly IAuthTokenGeneratorService _tokenGenerator;
     private readonly ILoggerService _loggerService;
     private readonly IHttpContextAccessor _contextAccessor;
 
-    public PersonAuthService(IUnitOfWork unitOfWork, UserManager<IdentityPerson> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService, IAuthTokenGeneratorService tokenGenerator, IHttpContextAccessor contextAccessor, ILoggerService loggerService)
+    public PersonAuthService(IUnitOfWork unitOfWork, UserManager<IdentityPerson> userManager, IEmailService emailService, IAuthTokenGeneratorService tokenGenerator, IHttpContextAccessor contextAccessor, ILoggerService loggerService)
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
-        _roleManager = roleManager;
         _emailService = emailService;
         _tokenGenerator = tokenGenerator;
         _contextAccessor = contextAccessor;
@@ -137,13 +135,6 @@ public class PersonAuthService : IPersonAuthService
             {
                 await _emailService.SendEmailAsync(message, "Confirm Account", cancellationToken);
             }, cancellationToken);
-            
-            if (!await _roleManager.RoleExistsAsync(registerDto.Role.ToString()))
-            {
-                return Result<RegisterResponse>.Failure(
-                    CustomError.NotFound($"The role  does not exist."));
-            }
-
             await _userManager.AddToRoleAsync(person, registerDto.Role.ToString());
             
             var response = new RegisterResponse
