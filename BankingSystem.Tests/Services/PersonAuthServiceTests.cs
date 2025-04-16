@@ -16,7 +16,6 @@ public class PersonAuthServiceTests
 {
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
     private readonly Mock<UserManager<IdentityPerson>> _userManagerMock;
-    private readonly Mock<RoleManager<IdentityRole>> _roleManagerMock;
     private readonly Mock<IEmailService> _emailServiceMock = new();
     private readonly Mock<IAuthTokenGeneratorService> _tokenGeneratorMock = new();
     private readonly Mock<IHttpContextAccessor> _contextAccessorMock = new();
@@ -27,8 +26,6 @@ public class PersonAuthServiceTests
     {
         _userManagerMock = new Mock<UserManager<IdentityPerson>>(
             new Mock<IUserStore<IdentityPerson>>().Object, null!, null!, null!, null!, null!, null!, null!, null!);
-        _roleManagerMock = new Mock<RoleManager<IdentityRole>>(
-            new Mock<IRoleStore<IdentityRole>>().Object, null!, null!, null!, null!);
 
         _authService = new PersonAuthService(
             _unitOfWorkMock.Object,
@@ -55,8 +52,6 @@ public class PersonAuthServiceTests
     {
         _userManagerMock.Setup(x => x.CreateAsync(It.IsAny<IdentityPerson>(), It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Success);
-        _roleManagerMock.Setup(x => x.RoleExistsAsync(It.IsAny<string>()))
-            .ReturnsAsync(true);
         _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(It.IsAny<IdentityPerson>()))
             .ReturnsAsync("confirmation_token");
 
