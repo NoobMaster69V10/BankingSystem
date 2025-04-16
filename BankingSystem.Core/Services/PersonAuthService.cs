@@ -3,6 +3,7 @@ using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Errors;
 using BankingSystem.Core.DTO.Person;
 using BankingSystem.Core.DTO.RefreshToken;
+using BankingSystem.Core.Identity;
 using BankingSystem.Domain.ConfigurationSettings.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using BankingSystem.Core.Response;

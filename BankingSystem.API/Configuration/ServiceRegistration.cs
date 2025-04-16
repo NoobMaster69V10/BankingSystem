@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Reflection;
+using BankingSystem.Core.Identity;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;

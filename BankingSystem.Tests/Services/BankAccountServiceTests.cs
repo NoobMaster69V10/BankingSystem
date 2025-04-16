@@ -1,4 +1,5 @@
 ﻿using BankingSystem.Core.DTO.BankAccount;
+using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
 using BankingSystem.Domain.Entities;

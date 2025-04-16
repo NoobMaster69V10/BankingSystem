@@ -3,6 +3,7 @@ using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Errors;
 using BankingSystem.Domain.UnitOfWorkContracts;
 using BankingSystem.Core.DTO.BankAccount;
+using BankingSystem.Core.Identity;
 using BankingSystem.Core.Response;
 using BankingSystem.Core.Result;
 using BankingSystem.Domain.Enums;

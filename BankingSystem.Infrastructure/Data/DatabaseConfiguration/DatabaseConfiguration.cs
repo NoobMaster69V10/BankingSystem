@@ -23,8 +23,9 @@ public class DatabaseConfiguration : IDatabaseConfiguration
 
         var databaseCheckQuery = $"SELECT CASE WHEN EXISTS (SELECT name FROM sys.databases WHERE name = '{databaseName}') THEN 1 ELSE 0 END";
         using var scope = _serviceProvider.CreateScope();
-        var scopedProvider = scope.ServiceProvider;
-
+        var scopedProvider = scope.ServiceProvider; 
+        
+        
         try
         {
             var connection = scopedProvider.GetRequiredService<IDbConnection>();

@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using BankingSystem.Core.DTO.Person;
 using BankingSystem.Core.DTO.RefreshToken;
+using BankingSystem.Core.Identity;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Core.Services;
 using BankingSystem.Domain.UnitOfWorkContracts;
