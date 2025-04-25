@@ -1,8 +1,10 @@
 ﻿using Dapper;
 using System.Data;
+using BankingSystem.Core.DTO;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Enums;
 using BankingSystem.Domain.RepositoryContracts;
+using BankingSystem.Domain.Statistics;
 using Microsoft.Extensions.Logging;
 
 namespace BankingSystem.Infrastructure.Repository;
@@ -42,7 +44,8 @@ public class BankReportRepository : IBankReportRepository
         }
     }
 
-    public async Task<int> GetTransactionCountAsync(DateTime? since = null, CancellationToken cancellationToken = default)
+    public async Task<int> GetTransactionCountAsync(DateTime? since = null,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -53,7 +56,8 @@ public class BankReportRepository : IBankReportRepository
                 query += " WHERE TransactionDate >= @Since";
             }
 
-            var command = new CommandDefinition(query, parameters: new { Since = since }, cancellationToken:cancellationToken);
+            var command = new CommandDefinition(query, parameters: new { Since = since },
+                cancellationToken: cancellationToken);
 
             return await _connection.QuerySingleAsync<int>(command);
         }
@@ -64,7 +68,8 @@ public class BankReportRepository : IBankReportRepository
         }
     }
 
-    public async Task<Dictionary<Currency, decimal>> GetTransactionIncomeAsync(DateTime? since = null, CancellationToken cancellationToken = default)
+    public async Task<Dictionary<Currency, decimal>> GetTransactionIncomeAsync(DateTime? since = null,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -80,7 +85,8 @@ public class BankReportRepository : IBankReportRepository
 
             query += " GROUP BY ba.Currency";
 
-            var command = new CommandDefinition(query, parameters: new { Since = since }, cancellationToken: cancellationToken);
+            var command = new CommandDefinition(query, parameters: new { Since = since },
+                cancellationToken: cancellationToken);
 
             var results = await _connection.QueryAsync<(string Currency, decimal Income)>(command);
 
@@ -96,7 +102,8 @@ public class BankReportRepository : IBankReportRepository
         }
     }
 
-    public async Task<Dictionary<Currency, decimal>> GetAverageTransactionIncomeAsync(DateTime? since = null, CancellationToken cancellationToken = default)
+    public async Task<Dictionary<Currency, decimal>> GetAverageTransactionIncomeAsync(DateTime? since = null,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -112,7 +119,8 @@ public class BankReportRepository : IBankReportRepository
 
             query += " GROUP BY ba.Currency";
 
-            var command = new CommandDefinition(query, parameters: new { Since = since }, cancellationToken: cancellationToken);
+            var command = new CommandDefinition(query, parameters: new { Since = since },
+                cancellationToken: cancellationToken);
 
             var results = await _connection.QueryAsync<(string Currency, decimal AvgIncome)>(command);
 
@@ -128,7 +136,8 @@ public class BankReportRepository : IBankReportRepository
         }
     }
 
-    public async Task<IEnumerable<DailyTransactionReport>> GetDailyTransactionsAsync(int days = 30, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<DailyTransactionReport>> GetDailyTransactionsAsync(int days = 30,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -144,9 +153,11 @@ public class BankReportRepository : IBankReportRepository
                 GROUP BY CAST(t.TransactionDate AS DATE), ba.Currency
                 ORDER BY CAST(t.TransactionDate AS DATE)";
 
-            var command = new CommandDefinition(query, parameters: new { Days = days }, cancellationToken: cancellationToken);
+            var command = new CommandDefinition(query, parameters: new { Days = days },
+                cancellationToken: cancellationToken);
 
-            var results = await _connection.QueryAsync<(DateTime Date, int Count, string Currency, decimal TotalAmount)>(command);
+            var results =
+                await _connection.QueryAsync<(DateTime Date, int Count, string Currency, decimal TotalAmount)>(command);
 
             return results
                 .GroupBy(r => r.Date)
@@ -168,7 +179,8 @@ public class BankReportRepository : IBankReportRepository
         }
     }
 
-    public async Task<IEnumerable<AtmTransaction>> GetAllAtmTransactionsAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<AtmTransaction>> GetAllAtmTransactionsAsync(
+        CancellationToken cancellationToken = default)
     {
         const string query = @"
             SELECT at.Amount, ba.Currency 
@@ -179,5 +191,27 @@ public class BankReportRepository : IBankReportRepository
         var command = new CommandDefinition(query, cancellationToken: cancellationToken);
 
         return await _connection.QueryAsync<AtmTransaction>(command);
+    }
+
+    public async Task<IEnumerable<TransactionCsvReport>> GetAllTransactionReport(string personId, DateTime startDate,DateTime endDate,
+        CancellationToken cancellationToken = default)
+    {
+        const string query = @"
+                 SELECT u.IdNumber,bc.BankCardId,bc.CardNumber,
+                 ba.IBAN,a.Amount,u.FirstName,u.LastName,a.TransactionType
+                 From AspnetUsers u
+                 join BankAccounts ba on ba.PersonId = u.Id
+                 join BankCards bc on bc.AccountId = ba.BankAccountId
+                 join AccountTransactions a on a.FromAccountId = ba.BankAccountId
+                 Where u.Id = @PersonId OR a.TransactionDate BETWEEN @StartDate AND @EndDate";
+        
+        var command = new CommandDefinition(query, new
+        {
+            PersonId  = personId,
+            StartDate = startDate,
+            EndDate = endDate,
+        }, cancellationToken: cancellationToken);   
+        
+        return await _connection.QueryAsync<TransactionCsvReport>(command);
     }
 }

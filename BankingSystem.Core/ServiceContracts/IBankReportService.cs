@@ -1,4 +1,5 @@
-﻿using BankingSystem.Core.Result;
+﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.Result;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Statistics;
 
@@ -11,5 +12,5 @@ public interface IBankReportService
     Task<Result<TransactionStatistics>> GetTransactionStatisticsAsync(CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<DailyTransactionReport>>> GetDailyTransactionsAsync(int days = 30, CancellationToken cancellationToken = default);
     Task<Result<AtmTransactionsStatistics>> GetAtmTransactionsStatisticsAsync(CancellationToken cancellationToken = default);
-    
+    Task<byte[]>  GetTransactionsCsvAsync(TransactionCsvDto transactionCsvDto, CancellationToken cancellationToken);
 }

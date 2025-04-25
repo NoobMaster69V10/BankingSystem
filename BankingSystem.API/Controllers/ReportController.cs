@@ -1,4 +1,5 @@
-﻿using BankingSystem.Core.Extensions;
+﻿using BankingSystem.Core.DTO;
+using BankingSystem.Core.Extensions;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Enums;
@@ -91,5 +92,14 @@ public class ReportController : ControllerBase
     {
         var result = await _bankReportService.GetAtmTransactionsStatisticsAsync(cancellationToken);
         return !result.IsSuccess ? result.ToProblemDetails() : Ok(new { TransactionsChart = result.Value });
+    }
+    
+    
+    [HttpPost("transactions-csv")]
+    public async Task<IActionResult> GetTransactionsCsv(TransactionCsvDto transactionCsvDto,CancellationToken cancellationToken)
+    {
+        var csvBytes = await _bankReportService.GetTransactionsCsvAsync(transactionCsvDto, cancellationToken);
+        var fileName = $"transactions_{DateTime.UtcNow:yyyyMMddHHmmss}.csv";
+        return File(csvBytes, "text/csv", fileName);
     }
 }

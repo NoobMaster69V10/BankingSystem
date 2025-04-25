@@ -1,4 +1,6 @@
-﻿using BankingSystem.Core.Result;
+﻿using System.Text;
+using BankingSystem.Core.DTO;
+using BankingSystem.Core.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Enums;
@@ -150,8 +152,21 @@ public class BankReportService : IBankReportService
             _logger.LogError("Error generating ATM withdrawal statistics\n" + ex); 
             return Result<AtmTransactionsStatistics>.Failure(CustomError.Failure("Error generating ATM withdrawal statistics"));
         }
-    } 
-        
+    }
+
+    public async Task<byte[]> GetTransactionsCsvAsync(TransactionCsvDto transactionCsvDto,
+        CancellationToken cancellationToken)
+    {
+        var transactions = await _unitOfWork.BankReportRepository.GetAllTransactionReport(transactionCsvDto.PersonId,transactionCsvDto.startDate,transactionCsvDto.endDate, cancellationToken);
+        var csv = new StringBuilder();
+        csv.AppendLine("IdNumber,BankCardId,CardNumber,IBAN,Amount,FirstName,LastName,TransactionType");
+        foreach (var transaction in transactions)
+        {
+            csv.AppendLine($"{transaction.IdNumber},{transaction.BankCardId},{transaction.CardNumber},{transaction.IBAN},{transaction.Amount},{transaction.FirstName},{transaction.LastName},{transaction.TransactionType}");
+        }
+        return Encoding.UTF8.GetBytes(csv.ToString());
+    }
+
     private async Task<decimal> GetTotalWithdrawalsFromAtmInGelAsync(CancellationToken cancellationToken = default)
     {
         var transactions = await _unitOfWork.BankReportRepository.GetAllAtmTransactionsAsync(cancellationToken);

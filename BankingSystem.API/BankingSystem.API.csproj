@@ -40,8 +40,4 @@
     <_ContentIncludedByDefault Remove="bin\Debug\net8.0\BankingSystem.API.runtimeconfig.json" />
     <_ContentIncludedByDefault Remove="bin\Debug\net8.0\BankingSystem.API.staticwebassets.endpoints.json" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Logs\" />
-  </ItemGroup>
 </Project>
