@@ -12,5 +12,5 @@ public interface IBankReportService
     Task<Result<TransactionStatistics>> GetTransactionStatisticsAsync(CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<DailyTransactionReport>>> GetDailyTransactionsAsync(int days = 30, CancellationToken cancellationToken = default);
     Task<Result<AtmTransactionsStatistics>> GetAtmTransactionsStatisticsAsync(CancellationToken cancellationToken = default);
-    Task<byte[]>  GetTransactionsCsvAsync(TransactionCsvDto transactionCsvDto, CancellationToken cancellationToken);
+    Task<byte[]>  GetTransactionsCsvAsync(string personId,DateTime startDate,DateTime endDate,CancellationToken cancellationToken);
 }

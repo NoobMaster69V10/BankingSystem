@@ -1,5 +1,4 @@
-﻿using BankingSystem.Core.DTO;
-using BankingSystem.Core.Extensions;
+﻿using BankingSystem.Core.Extensions;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
 using BankingSystem.Domain.Enums;
@@ -95,10 +94,10 @@ public class ReportController : ControllerBase
     }
     
     
-    [HttpPost("transactions-csv")]
-    public async Task<IActionResult> GetTransactionsCsv(TransactionCsvDto transactionCsvDto,CancellationToken cancellationToken)
+    [HttpGet("transactions-csv")]
+    public async Task<IActionResult> GetTransactionsCsv(string personId,DateTime startDate,DateTime endDate,CancellationToken cancellationToken)
     {
-        var csvBytes = await _bankReportService.GetTransactionsCsvAsync(transactionCsvDto, cancellationToken);
+        var csvBytes = await _bankReportService.GetTransactionsCsvAsync(personId,startDate,endDate,cancellationToken);
         var fileName = $"transactions_{DateTime.UtcNow:yyyyMMddHHmmss}.csv";
         return File(csvBytes, "text/csv", fileName);
     }

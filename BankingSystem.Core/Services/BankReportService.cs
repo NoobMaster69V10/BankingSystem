@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using BankingSystem.Core.DTO;
 using BankingSystem.Core.Result;
 using BankingSystem.Core.ServiceContracts;
 using BankingSystem.Domain.Entities;
@@ -154,10 +153,9 @@ public class BankReportService : IBankReportService
         }
     }
 
-    public async Task<byte[]> GetTransactionsCsvAsync(TransactionCsvDto transactionCsvDto,
-        CancellationToken cancellationToken)
+    public async Task<byte[]>  GetTransactionsCsvAsync(string personId,DateTime startDate,DateTime endDate,CancellationToken cancellationToken)
     {
-        var transactions = await _unitOfWork.BankReportRepository.GetAllTransactionReport(transactionCsvDto.PersonId,transactionCsvDto.startDate,transactionCsvDto.endDate, cancellationToken);
+        var transactions = await _unitOfWork.BankReportRepository.GetAllTransactionReport(personId,startDate,endDate, cancellationToken);
         var csv = new StringBuilder();
         csv.AppendLine("IdNumber,BankCardId,CardNumber,IBAN,Amount,FirstName,LastName,TransactionType");
         foreach (var transaction in transactions)

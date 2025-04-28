@@ -13,7 +13,7 @@ public interface IBankReportRepository
     Task<IEnumerable<DailyTransactionReport>> GetDailyTransactionsAsync(int days = 30, CancellationToken cancellationToken = default);
     Task<IEnumerable<AtmTransaction>> GetAllAtmTransactionsAsync(CancellationToken cancellationToken = default);
 
-    Task<IEnumerable<TransactionCsvReport>> GetAllTransactionReport(string PersonId, DateTime startDate,
+    Task<IEnumerable<TransactionCsvReport>> GetAllTransactionReport(string personId, DateTime startDate,
         DateTime endDate,
         CancellationToken cancellationToken = default);
 }
